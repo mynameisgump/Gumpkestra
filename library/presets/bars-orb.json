@@ -1,0 +1,18 @@
+{
+  "layers": [
+    { "shader": "audio-orb", "params": {} },
+    {
+      "shader": "spectrum-bars",
+      "blend": "screen",
+      "opacity": { "value": 0.7, "mods": [] },
+      "params": {}
+    },
+    {
+      "shader": "color-grade",
+      "params": {
+        "hue": { "value": 0, "mods": [{ "source": "beatStep", "amount": 0.5, "rate": 8, "smooth": 0.2 }] }
+      }
+    },
+    { "shader": "glow", "params": { "intensity": { "value": 0.6, "mods": [] } } }
+  ]
+}

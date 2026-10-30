@@ -1,0 +1,35 @@
+{
+  "layers": [
+    {
+      "shader": "tunnel",
+      "params": {
+        "push": { "value": 0, "mods": [{ "source": "bass", "amount": 0.25, "rate": 0.25, "smooth": 0.05 }] },
+        "twist": { "value": 0.3, "mods": [{ "source": "lfoSine", "amount": 0.2, "rate": 0.03, "smooth": 0 }] }
+      }
+    },
+    {
+      "shader": "waveform-scope",
+      "blend": "add",
+      "params": {}
+    },
+    {
+      "shader": "kaleidoscope",
+      "opacity": { "value": 1, "mods": [] },
+      "params": {
+        "rotation": { "value": 0, "mods": [{ "source": "lfoSaw", "amount": 1, "rate": 0.02, "smooth": 0 }] },
+        "segments": { "value": 6, "mods": [{ "source": "random", "amount": 0.3, "rate": 0.25, "smooth": 0 }] }
+      }
+    },
+    {
+      "shader": "glitch-mosh",
+      "params": {
+        "amount": { "value": 0.05, "mods": [{ "source": "beat", "amount": 0.4, "rate": 0.25, "smooth": 0 }] },
+        "smear": { "value": 0.1, "mods": [{ "source": "high", "amount": 0.4, "rate": 0.25, "smooth": 0.1 }] }
+      }
+    },
+    {
+      "shader": "beat-flash",
+      "params": { "invertEvery": { "value": 4, "mods": [] } }
+    }
+  ]
+}

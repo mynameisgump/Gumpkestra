@@ -1,0 +1,114 @@
+import { toast, type App } from '../app';
+import { fmt, h, slider } from './dom';
+
+const METER_BANDS = ['level', 'bass', 'lowMid', 'mid', 'high', 'beat'] as const;
+
+/** Source selection, analysis tuning and live meters. Returns a per-frame draw function. */
+export function AudioPanel(root: HTMLElement, app: App) {
+  const { audio } = app;
+  const sourceLabel = h('div', { class: 'source-label' }, 'No audio source');
+  const playerSlot = h('div', { class: 'player-slot' });
+  const fileInput = h('input', {
+    type: 'file',
+    accept: 'audio/*,video/*',
+    hidden: true,
+    onchange: () => fileInput.files?.[0] && useFile(fileInput.files[0]),
+  });
+  const deviceSelect = h('select', { class: 'device-select' }, h('option', { value: '' }, 'Default input'));
+
+  const refreshSource = () => {
+    sourceLabel.textContent = audio.sourceLabel === 'none' ? 'No audio source' : `▶ ${audio.sourceLabel}`;
+    playerSlot.replaceChildren();
+    const el = audio.mediaElement;
+    if (el) {
+      el.controls = true;
+      playerSlot.append(el);
+    }
+  };
+
+  const run = (fn: () => Promise<void>) => async () => {
+    try {
+      await fn();
+      refreshSource();
+    } catch (e) {
+      toast((e as Error).message, true);
+    }
+  };
+
+  const useFile = (file: File) => run(() => audio.useFile(file))();
+
+  const listDevices = async () => {
+    const devices = await audio.listInputDevices();
+    deviceSelect.replaceChildren(
+      h('option', { value: '' }, 'Default input'),
+      ...devices.map((d) => h('option', { value: d.deviceId }, d.label || `Input ${d.deviceId.slice(0, 6)}`)),
+    );
+  };
+
+  const settingRow = (label: string, key: keyof typeof audio.settings, min: number, max: number) => {
+    const val = h('span', { class: 'val' }, fmt(audio.settings[key]));
+    return h('label', { class: 'row' },
+      h('span', { class: 'lbl' }, label),
+      slider({ min, max, value: audio.settings[key], oninput: (v) => { audio.settings[key] = v; val.textContent = fmt(v); } }),
+      val);
+  };
+
+  const meter = h('canvas', { class: 'meter', width: 480, height: 150 });
+  const mctx = meter.getContext('2d')!;
+
+  root.append(
+    h('h2', {}, 'Audio'),
+    h('div', { class: 'btn-row' },
+      h('button', { onclick: () => fileInput.click(), title: 'Or drag a file onto the canvas' }, 'Open file…'),
+      h('button', { onclick: run(async () => { await audio.useDisplayCapture(); }), title: 'Capture a browser tab or system audio' }, 'Tab audio'),
+    ),
+    h('div', { class: 'btn-row' },
+      deviceSelect,
+      h('button', { onclick: run(async () => { await audio.useInput(deviceSelect.value || undefined); await listDevices(); }) }, 'Use input'),
+    ),
+    fileInput,
+    sourceLabel,
+    playerSlot,
+    meter,
+    settingRow('Gain', 'gain', 0.1, 8),
+    settingRow('Release', 'release', 0.02, 0.6),
+    settingRow('Beat sens.', 'beatSensitivity', 0.5, 3.5),
+    settingRow('Beat decay', 'beatDecay', 0.03, 0.6),
+  );
+
+  listDevices().catch(() => {});
+  navigator.mediaDevices?.addEventListener?.('devicechange', () => listDevices().catch(() => {}));
+
+  // Drag & drop audio onto the stage.
+  const stage = document.getElementById('stage')!;
+  stage.addEventListener('dragover', (e) => { e.preventDefault(); stage.classList.add('dragging'); });
+  stage.addEventListener('dragleave', () => stage.classList.remove('dragging'));
+  stage.addEventListener('drop', (e) => {
+    e.preventDefault();
+    stage.classList.remove('dragging');
+    const file = e.dataTransfer?.files[0];
+    if (file) useFile(file);
+  });
+
+  return function draw() {
+    const { width: W, height: H } = meter;
+    mctx.clearRect(0, 0, W, H);
+    // Spectrum backdrop
+    const fft = audio.fftTex;
+    mctx.fillStyle = 'rgba(120, 255, 200, 0.18)';
+    for (let x = 0; x < 256; x++) {
+      const v = fft[x * 4] / 255;
+      mctx.fillRect((x / 256) * W, H - v * H, W / 256 + 0.5, v * H);
+    }
+    // Feature bars
+    const bw = W / METER_BANDS.length;
+    METER_BANDS.forEach((b, i) => {
+      const v = audio.features[b];
+      mctx.fillStyle = b === 'beat' ? `rgba(255, 80, 140, ${0.4 + v * 0.6})` : 'rgba(180, 255, 80, 0.85)';
+      mctx.fillRect(i * bw + 6, H - v * (H - 22), bw - 12, v * (H - 22));
+      mctx.fillStyle = 'rgba(255,255,255,0.6)';
+      mctx.font = '18px ui-monospace, monospace';
+      mctx.fillText(b === 'lowMid' ? 'lmid' : b, i * bw + 8, 18);
+    });
+  };
+}
