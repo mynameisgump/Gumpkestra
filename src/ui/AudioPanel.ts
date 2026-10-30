@@ -1,5 +1,6 @@
 import { toast, type App } from '../app';
 import { isModelFile } from '../model/load';
+import { isTextureFile } from '../render/Textures';
 import { fmt, h, slider } from './dom';
 
 const METER_BANDS = ['level', 'bass', 'lowMid', 'mid', 'high', 'beat'] as const;
@@ -80,7 +81,7 @@ export function AudioPanel(root: HTMLElement, app: App) {
   listDevices().catch(() => {});
   navigator.mediaDevices?.addEventListener?.('devicechange', () => listDevices().catch(() => {}));
 
-  // Drag & drop onto the stage: 3D models go to the library, anything else is treated as audio.
+  // Drag & drop onto the stage: 3D models and images/videos go to the library, anything else is treated as audio.
   const stage = document.getElementById('stage')!;
   stage.addEventListener('dragover', (e) => { e.preventDefault(); stage.classList.add('dragging'); });
   stage.addEventListener('dragleave', () => stage.classList.remove('dragging'));
@@ -89,6 +90,7 @@ export function AudioPanel(root: HTMLElement, app: App) {
     stage.classList.remove('dragging');
     for (const file of e.dataTransfer?.files ?? []) {
       if (isModelFile(file.name)) void app.importModel(file);
+      else if (isTextureFile(file.name)) void app.importTexture(file);
       else useFile(file);
     }
   });

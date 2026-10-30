@@ -5,6 +5,7 @@ import {
   type ISFInput, type ISFPass, type ParsedISF,
 } from '../isf/isf';
 import { createTarget, deleteTarget, link, uniformCache, type Target } from './gl';
+import { INPUT_IMAGE, type TextureStore } from './Textures';
 
 export const BLEND_MODES = ['normal', 'add', 'screen', 'multiply', 'difference', 'lighten'] as const;
 export type BlendMode = (typeof BLEND_MODES)[number];
@@ -38,6 +39,7 @@ export interface FrameContext {
   waveTex: WebGLTexture;
   /** The fullscreen-triangle VAO. Layers that bind their own VAO must rebind this before returning. */
   quad: WebGLVertexArrayObject;
+  textures: TextureStore;
   blit(src: WebGLTexture, dst: Target): void;
 }
 
@@ -60,6 +62,8 @@ export function defaultValue(input: ISFInput): unknown {
     case 'color': return input.DEFAULT ?? [1, 1, 1, 1];
     case 'point2D': return input.DEFAULT ?? [0.5, 0.5];
     case 'event': return false;
+    // Extra image inputs hold a texture name; "@input" means the layers below.
+    case 'image': return typeof input.DEFAULT === 'string' ? input.DEFAULT : INPUT_IMAGE;
     default: return null;
   }
 }
@@ -68,6 +72,15 @@ export const floatRange = (input: ISFInput): [number, number] => [
   (input.MIN as number) ?? 0,
   (input.MAX as number) ?? 1,
 ];
+
+/** The stack input of a filter; every other `image` input is a swappable texture. */
+export const isInputImage = (input: ISFInput) => input.TYPE === 'image' && input.NAME === 'inputImage';
+
+/** Texture for an image-input value: the layers below, a library/built-in texture, or black while loading. */
+export function resolveImage(value: unknown, input: WebGLTexture, ctx: FrameContext): WebGLTexture {
+  if (value === INPUT_IMAGE || typeof value !== 'string' || !value) return input;
+  return ctx.textures.get(value) ?? ctx.textures.black;
+}
 
 let nextId = 1;
 
@@ -124,7 +137,7 @@ export class Layer {
     const oldInputs = new Map(this.parsed?.meta.INPUTS.map((i) => [i.NAME, i.TYPE]));
     const params: Record<string, ParamState> = {};
     for (const input of parsed.meta.INPUTS) {
-      if (['image', 'audio', 'audioFFT'].includes(input.TYPE)) continue;
+      if (['audio', 'audioFFT'].includes(input.TYPE) || isInputImage(input)) continue;
       const keep = oldInputs.get(input.NAME) === input.TYPE ? this.params[input.NAME] : undefined;
       params[input.NAME] = keep ?? { value: defaultValue(input), mods: [] };
     }
@@ -214,7 +227,7 @@ export class Layer {
       const p = this.params[inp.NAME];
       const loc = u(inp.NAME);
       switch (inp.TYPE) {
-        case 'image': bindTex(inp.NAME, input); break;
+        case 'image': bindTex(inp.NAME, isInputImage(inp) ? input : resolveImage(p.value, input, ctx)); break;
         case 'audio': bindTex(inp.NAME, ctx.waveTex); break;
         case 'audioFFT': bindTex(inp.NAME, ctx.fftTex); break;
         case 'float': {

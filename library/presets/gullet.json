@@ -1,0 +1,15 @@
+{
+  "layers": [
+    {
+      "shader": "texture-tunnel",
+      "params": {
+        "kick": { "value": 0.3, "mods": [] },
+        "twist": { "value": 0.25, "mods": [{ "source": "lfoSine", "amount": 0.1, "rate": 0.05, "smooth": 0 }] },
+        "tint": { "value": [1.0, 0.85, 0.85, 1.0], "mods": [] }
+      }
+    },
+    { "shader": "displace-map", "params": { "map": { "value": "@meat", "mods": [] }, "amount": { "value": 0.02, "mods": [] } } },
+    { "shader": "blood-drip", "params": { "pour": { "value": 0.4, "mods": [] } } },
+    { "shader": "crt", "params": { "curvature": { "value": 0.25, "mods": [] } } }
+  ]
+}

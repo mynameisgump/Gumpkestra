@@ -29,10 +29,14 @@ async function main() {
   const tickParams = ParamsPanel($('params-panel'), app, editor.open);
   Topbar(app);
 
+  engine.textures.fetchBlob = (name) => library.fetchFile('textures', name);
   library.onChange((kind, name) => {
     if (kind === 'shaders') app.reloadShader(name);
     else if (kind === 'models') app.reloadModel(name);
-    else Topbar.refreshPresets?.();
+    else if (kind === 'textures') {
+      engine.textures.invalidate(name);
+      app.changed();
+    } else Topbar.refreshPresets?.();
   });
 
   if (!app.restoreSession()) {

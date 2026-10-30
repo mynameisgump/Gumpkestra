@@ -8,13 +8,14 @@ import path from 'node:path';
 // hot-reload without a page refresh.
 const LIB = path.resolve(import.meta.dirname, 'library');
 
-// Text kinds are addressed by bare name ("tunnel" → tunnel.fs). Models are
-// binary and keep their extension in the name ("skull.glb"), since the format
-// matters to the loader.
+// Text kinds are addressed by bare name ("tunnel" → tunnel.fs). Models and
+// textures are binary and keep their extension in the name ("skull.glb"),
+// since the format matters to the loader.
 const KINDS = {
   shaders: { exts: ['.fs'], binary: false },
   presets: { exts: ['.json'], binary: false },
   models: { exts: ['.glb', '.gltf', '.obj', '.stl'], binary: true },
+  textures: { exts: ['.png', '.jpg', '.jpeg', '.webp', '.gif', '.bmp', '.mp4', '.webm', '.mov'], binary: true },
 } as const;
 type Kind = keyof typeof KINDS;
 

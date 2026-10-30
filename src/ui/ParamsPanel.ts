@@ -3,7 +3,8 @@ import { MOD_SOURCES, newModulator, usesRate, type ModSource, type Modulator } f
 import type { ISFInput } from '../isf/isf';
 import { isModelFile, MODEL_EXTENSIONS, BUILTIN_MODELS } from '../model/load';
 import { BLEND_MODES, floatRange, type Layer, type ParamState } from '../render/Layer';
-import { ModelLayer } from '../render/ModelLayer';
+import { MODEL_TEXTURE, ModelLayer } from '../render/ModelLayer';
+import { BUILTIN_TEXTURES, INPUT_IMAGE, isTextureFile, isVideoTexture, TEXTURE_EXTENSIONS, thumbnailURL } from '../render/Textures';
 import { fmt, h, select, slider } from './dom';
 
 const toHex = (c: number[]) => '#' + c.slice(0, 3).map((v) => Math.round(v * 255).toString(16).padStart(2, '0')).join('');
@@ -85,6 +86,12 @@ export function ParamsPanel(root: HTMLElement, app: App, openEditor: (name: stri
         return row(h('div', { class: 'xy' },
           ...[0, 1].map((i) => slider({ min: min[i], max: max[i], value: p[i], oninput: (v) => { p[i] = v; app.touch(); } }))));
       }
+      case 'image': {
+        if (inp.NAME === 'inputImage') return null;
+        return h('div', { class: 'param' }, h('div', { class: 'row texture-row' },
+          h('span', { class: 'lbl' }, label),
+          texturePicker(layer, inp.NAME)));
+      }
       case 'event':
         return row(h('div', { class: 'btn-row' },
           h('button', { onclick: () => layer.trigger(inp.NAME) }, 'Trigger'),
@@ -93,6 +100,36 @@ export function ParamsPanel(root: HTMLElement, app: App, openEditor: (name: stri
       default:
         return null;
     }
+  };
+
+  /** Thumbnail + dropdown (specials, built-ins, library/textures) + Load… for one image input. */
+  const texturePicker = (layer: Layer, input: string) => {
+    const state = layer.params[input];
+    const value = String(state.value);
+    const opts: Record<string, string> = {};
+    if (layer instanceof ModelLayer) opts[MODEL_TEXTURE] = 'Model’s own';
+    opts[INPUT_IMAGE] = 'Layers below';
+    for (const [k, v] of Object.entries(BUILTIN_TEXTURES)) opts[k] = `${v.label} (built-in)`;
+    for (const t of app.library.textures) opts[t] = isVideoTexture(t) ? `🎞 ${t}` : t;
+    if (!(value in opts)) opts[value] = `${value} (missing)`;
+    const src = thumbnailURL(value);
+    const thumb = src
+      ? h('img', { class: 'thumb', src, alt: '' })
+      : h('span', { class: 'thumb' }, value === INPUT_IMAGE ? '↓' : value === MODEL_TEXTURE ? '◆' : isVideoTexture(value) ? '🎞' : '');
+    const file = h('input', {
+      type: 'file',
+      accept: TEXTURE_EXTENSIONS.join(','),
+      style: 'display:none',
+      onchange: (e: Event) => {
+        const f = (e.target as HTMLInputElement).files?.[0];
+        if (f && isTextureFile(f.name)) void app.importTexture(f, layer, input);
+      },
+    });
+    return h('div', { class: 'texture-picker' },
+      thumb,
+      select(opts, value, (v) => app.setTexture(layer, input, v)),
+      h('button', { title: 'Import an image or video into library/textures', onclick: () => (file as HTMLInputElement).click() }, 'Load…'),
+      file);
   };
 
   const modelRow = (layer: ModelLayer) => {

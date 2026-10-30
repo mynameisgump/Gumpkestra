@@ -125,6 +125,12 @@ input[type='color'] { width: 48px; height: 22px; border: 0; padding: 0; backgrou
 .param { margin: 6px 0; }
 .row.model-row { grid-template-columns: 82px minmax(0, 1fr) auto; }
 .row.model-row select { min-width: 0; }
+.row.texture-row { grid-template-columns: 82px minmax(0, 1fr); }
+.texture-picker { display: grid; grid-template-columns: 26px minmax(0, 1fr) auto; gap: 6px; align-items: center; }
+.texture-picker select { min-width: 0; }
+.thumb { width: 26px; height: 26px; border-radius: 3px; object-fit: cover; background: var(--panel-2); display: grid; place-items: center; font-size: 12px; color: var(--dim); }
+.lib-item.texture { display: flex; align-items: center; gap: 6px; }
+.lib-item.texture img, .lib-item.texture .thumb { width: 18px; height: 18px; }
 .slider-wrap { position: relative; }
 .live-marker {
   position: absolute; top: -3px; bottom: -3px; width: 2px; margin-left: -1px;

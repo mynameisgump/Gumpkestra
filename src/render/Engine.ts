@@ -2,6 +2,7 @@ import { TEX_WIDTH, type AudioEngine } from '../audio/AudioEngine';
 import { VERTEX_SHADER, type ParsedISF } from '../isf/isf';
 import { createDataTexture, createFullscreenTriangle, createTarget, deleteTarget, link, uniformCache, type Target } from './gl';
 import { BLEND_MODES, Layer, type FrameContext } from './Layer';
+import { TextureStore } from './Textures';
 
 const COMPOSITE_FS = `#version 300 es
 precision highp float;
@@ -39,6 +40,7 @@ void main() { color = texture(src, isf_FragNormCoord); }`;
  */
 export class Engine {
   readonly gl: WebGL2RenderingContext;
+  readonly textures: TextureStore;
   layers: Layer[] = [];
   /** Render resolution as a fraction of the canvas' device pixels. */
   scale = 1;
@@ -64,6 +66,7 @@ export class Engine {
     this.blitProg = link(gl, VERTEX_SHADER, BLIT_FS);
     this.fftTex = createDataTexture(gl, TEX_WIDTH);
     this.waveTex = createDataTexture(gl, TEX_WIDTH);
+    this.textures = new TextureStore(gl);
   }
 
   private ensureSize() {
@@ -125,10 +128,11 @@ export class Engine {
     gl.texSubImage2D(gl.TEXTURE_2D, 0, 0, 0, TEX_WIDTH, 1, gl.RGBA, gl.UNSIGNED_BYTE, audio.fftTex);
     gl.bindTexture(gl.TEXTURE_2D, this.waveTex);
     gl.texSubImage2D(gl.TEXTURE_2D, 0, 0, 0, TEX_WIDTH, 1, gl.RGBA, gl.UNSIGNED_BYTE, audio.waveTex);
+    this.textures.update();
 
     const ctx: FrameContext = {
       gl, width: this.width, height: this.height, time, dt, frame: this.frame++,
-      audio: audio.features, fftTex: this.fftTex, waveTex: this.waveTex, quad: this.vao,
+      audio: audio.features, fftTex: this.fftTex, waveTex: this.waveTex, quad: this.vao, textures: this.textures,
       blit: (src, dst) => this.blit(src, dst),
     };
 

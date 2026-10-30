@@ -1,0 +1,40 @@
+{
+  "layers": [
+    {
+      "shader": "image",
+      "params": {
+        "tex": { "value": "@rust", "mods": [] },
+        "fit": { "value": 3, "mods": [] },
+        "zoom": { "value": 2.0, "mods": [] },
+        "pulse": { "value": 0.0, "mods": [] },
+        "scroll": { "value": [0.0, 0.02], "mods": [] },
+        "brightness": { "value": 0.35, "mods": [] }
+      }
+    },
+    {
+      "shader": "@model",
+      "model": "@torus",
+      "params": {
+        "scale": { "value": 0.85, "mods": [{ "source": "beat", "amount": 0.03, "rate": 0.25, "smooth": 0 }] },
+        "spinY": { "value": 0.05, "mods": [] },
+        "spinX": { "value": 0.12, "mods": [{ "source": "bass", "amount": 0.2, "rate": 0.25, "smooth": 0.1 }] },
+        "twist": { "value": 0.0, "mods": [{ "source": "beat", "amount": 0.08, "rate": 0.25, "smooth": 0 }] },
+        "texture": { "value": "@rust", "mods": [] },
+        "mapping": { "value": 1, "mods": [] },
+        "texScale": { "value": 1.5, "mods": [] },
+        "wet": { "value": 0.3, "mods": [] },
+        "rim": { "value": 0.6, "mods": [] },
+        "rimColor": { "value": [1.0, 0.45, 0.1, 1.0], "mods": [] },
+        "lightAngle": { "value": -50, "mods": [] }
+      }
+    },
+    {
+      "shader": "siren",
+      "blend": "add",
+      "opacity": { "value": 0.6, "mods": [] },
+      "params": { "lampColor": { "value": [1.0, 0.45, 0.05, 1.0], "mods": [] }, "position": { "value": [0.15, 0.9], "mods": [] } }
+    },
+    { "shader": "grime", "params": {} },
+    { "shader": "psx", "params": { "resolution": { "value": 300, "mods": [] }, "fps": { "value": 30, "mods": [] } } }
+  ]
+}

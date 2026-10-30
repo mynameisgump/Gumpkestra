@@ -3,10 +3,12 @@ import { VERTEX_SHADER } from '../isf/isf';
 import { axisAngle, fromTRS, perspective, quatMul } from '../model/math';
 import { STRIDE, type MeshData } from '../model/mesh';
 import { createTarget, deleteTarget, link, uniformCache, type Target } from './gl';
-import { floatRange, Layer, type FrameContext } from './Layer';
+import { floatRange, Layer, resolveImage, type FrameContext } from './Layer';
 
 /** The `shader` name model layers use in presets. */
 export const MODEL_SHADER = '@model';
+/** `texture` value meaning "the model's own materials". */
+export const MODEL_TEXTURE = '@model';
 
 // Order in the vertex shader below:
 // skin → normalise to unit size → explode → twist → writhe →
@@ -30,12 +32,17 @@ uniform float uNormScale, TIME, uAspect;
 uniform float uInflate, uWrithe, uWritheScale, uWritheSpeed, uFFT, uTwist, uExplode, uMelt, uSnap;
 uniform int uCopies;
 uniform float uSpread, uOrbit;
+uniform bool uFlipV;
+uniform float uTexScale;
+uniform vec2 uTexOffset;
 
 out vec3 vNormal;
 out vec3 vViewPos;
 out vec2 vUV;
 out vec3 vUVw;
 out vec3 vBary;
+out vec3 vObjPos;
+out vec3 vObjNormal;
 
 mat4 joint(float i) {
   int r = int(i + 0.5);
@@ -66,6 +73,9 @@ void main() {
             + aWeights.z * joint(aJoints.z) + aWeights.w * joint(aJoints.w);
   vec3 p = ((skin * vec4(aPos, 1.0)).xyz - uCenter) * uNormScale;
   vec3 n = normalize(mat3(skin) * aNormal);
+  // Undeformed position/normal for box mapping, so textures stick to the surface as it writhes.
+  vObjPos = p;
+  vObjNormal = n;
 
   // Shatter: each triangle tumbles about its own centre and flies out along its face normal.
   if (uExplode > 0.0) {
@@ -113,8 +123,10 @@ void main() {
 
   vViewPos = view.xyz;
   vNormal = mat3(uView) * mat3(uModel) * n;
-  vUV = aUV;
-  vUVw = vec3(aUV * gl_Position.w, gl_Position.w);
+  // Library textures are stored bottom-up (ISF convention); model UVs are top-down (glTF).
+  vec2 uv = vec2(aUV.x, uFlipV ? 1.0 - aUV.y : aUV.y) * uTexScale + uTexOffset;
+  vUV = uv;
+  vUVw = vec3(uv * gl_Position.w, gl_Position.w);
 }`;
 
 const MESH_FS = `#version 300 es
@@ -124,18 +136,35 @@ in vec3 vViewPos;
 in vec2 vUV;
 in vec3 vUVw;
 in vec3 vBary;
+in vec3 vObjPos;
+in vec3 vObjNormal;
 out vec4 fragColor;
 
 uniform sampler2D uTex;
 uniform vec4 uBaseColor, uTint, uRimColor, uWireColor;
-uniform int uShading;
+uniform int uShading, uMapping;
+uniform float uTexScale;
+uniform vec2 uTexOffset;
+uniform bool uWrap;
+
+// The stack image ("@input") is clamped rather than repeating, so wrap by hand.
+vec4 samp(vec2 uv) { return texture(uTex, uWrap ? fract(uv) : uv); }
 uniform float uRim, uWet, uWire, uLightAngle, uFog, uFogStart, uAffine;
 
 void main() {
   // Interpolating uv*w and w perspective-correctly then dividing yields *affine*
   // (screen-space) uvs — the PS1's warping textures.
-  vec2 uv = mix(vUV, vUVw.xy / vUVw.z, uAffine);
-  vec4 albedo = uBaseColor * texture(uTex, uv);
+  vec4 tex;
+  if (uMapping == 1) {
+    // Box / triplanar: project along the three axes and blend by the normal.
+    vec3 w = pow(abs(normalize(vObjNormal)), vec3(4.0));
+    w /= w.x + w.y + w.z;
+    vec3 q = vObjPos * uTexScale * 0.5;
+    tex = samp(q.zy + uTexOffset) * w.x + samp(q.xz + uTexOffset) * w.y + samp(q.xy + uTexOffset) * w.z;
+  } else {
+    tex = samp(mix(vUV, vUVw.xy / vUVw.z, uAffine));
+  }
+  vec4 albedo = uBaseColor * tex;
   if (albedo.a < 0.4) discard;
 
   vec3 N = normalize(vNormal);
@@ -211,6 +240,11 @@ const BASE_INPUTS: ISFInput[] = [
   f('spread', 1.8, 0, 4, 'Ring radius'),
   f('orbit', 0, -1, 1, 'Ring spin (rev/s)'),
   { NAME: 'shading', TYPE: 'long', DEFAULT: 0, VALUES: SHADING_MODES.map((_, i) => i), LABELS: SHADING_MODES },
+  { NAME: 'texture', TYPE: 'image', DEFAULT: MODEL_TEXTURE, LABEL: 'Texture' },
+  { NAME: 'mapping', TYPE: 'long', DEFAULT: 0, VALUES: [0, 1], LABELS: ['Model UVs', 'Box (triplanar)'] },
+  f('texScale', 1, 0.1, 8, 'Texture scale'),
+  f('texScrollX', 0, -1, 1, 'Scroll X (/s)'),
+  f('texScrollY', 0, -1, 1, 'Scroll Y (/s)'),
   { NAME: 'tint', TYPE: 'color', DEFAULT: [1, 1, 1, 1] },
   f('wet', 0.4, 0, 2, 'Wet / specular'),
   f('rim', 0.4, 0, 2, 'Rim light'),
@@ -246,6 +280,7 @@ export class ModelLayer extends Layer {
   private msaa: { fbo: WebGLFramebuffer; color: WebGLRenderbuffer; depth: WebGLRenderbuffer } | null = null;
   private resolved: Target | null = null;
   private spin = { x: 0, y: 0, orbit: 0 };
+  private texOffset = [0, 0];
   private animTime = 0;
   private model = new Float32Array(16);
   private view = new Float32Array(16);
@@ -357,7 +392,7 @@ export class ModelLayer extends Layer {
     this.resolved = createTarget(gl, width, height);
   }
 
-  override render(ctx: FrameContext) {
+  override render(ctx: FrameContext, input: WebGLTexture) {
     const { gl } = ctx;
     if (!this.output || !this.msaa || !this.resolved) return;
     const { width: W, height: H } = this.output;
@@ -373,6 +408,8 @@ export class ModelLayer extends Layer {
     this.spin.x += this.f('spinX', ctx) * TAU * ctx.dt;
     this.spin.orbit += this.f('orbit', ctx) * TAU * ctx.dt;
     this.animTime += this.f('animSpeed', ctx) * ctx.dt;
+    this.texOffset[0] = (this.texOffset[0] + this.f('texScrollX', ctx) * ctx.dt) % 1;
+    this.texOffset[1] = (this.texOffset[1] + this.f('texScrollY', ctx) * ctx.dt) % 1;
 
     const mesh = this.mesh;
     if (mesh && this.vao) {
@@ -437,6 +474,14 @@ export class ModelLayer extends Layer {
       gl.uniform1f(u('uFogStart'), dist - 1);
       gl.uniform1f(u('uAffine'), this.f('affine', ctx));
       gl.uniform1i(u('uTex'), 0);
+      // Texture override: a library/built-in texture, or the layers below ("@input").
+      const texName = this.v<string>('texture');
+      const override = texName === MODEL_TEXTURE ? null : resolveImage(texName, input, ctx);
+      gl.uniform1i(u('uFlipV'), override ? 1 : 0);
+      gl.uniform1i(u('uWrap'), override === input ? 1 : 0);
+      gl.uniform1i(u('uMapping'), Number(this.v('mapping')));
+      gl.uniform1f(u('uTexScale'), this.f('texScale', ctx));
+      gl.uniform2fv(u('uTexOffset'), this.texOffset);
 
       const xray = shading === 4;
       if (xray) {
@@ -449,8 +494,8 @@ export class ModelLayer extends Layer {
       gl.activeTexture(gl.TEXTURE0);
       gl.bindSampler(0, this.v('pixelated') ? this.nearest : null);
       for (const g of mesh.groups) {
-        gl.bindTexture(gl.TEXTURE_2D, this.textures[g.texture] ?? this.white);
-        gl.uniform4fv(u('uBaseColor'), g.color);
+        gl.bindTexture(gl.TEXTURE_2D, override ?? this.textures[g.texture] ?? this.white);
+        gl.uniform4fv(u('uBaseColor'), override ? [1, 1, 1, 1] : g.color);
         gl.drawArraysInstanced(gl.TRIANGLES, g.start, g.count, copies);
       }
       gl.bindSampler(0, null);

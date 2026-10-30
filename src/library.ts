@@ -15,7 +15,9 @@ export interface Preset {
   layers: LayerJSON[];
 }
 
-type Kind = 'shaders' | 'presets' | 'models';
+type Kind = 'shaders' | 'presets' | FileKind;
+/** Binary kinds, listed by file name (with extension). */
+type FileKind = 'models' | 'textures';
 
 async function api(kind: Kind, name = '', init?: RequestInit) {
   const res = await fetch(`/api/library/${kind}/${encodeURIComponent(name)}`, init);
@@ -26,8 +28,8 @@ async function api(kind: Kind, name = '', init?: RequestInit) {
 export class Library {
   shaders = new Map<string, ShaderEntry>();
   presets = new Map<string, Preset>();
-  /** Model file names in library/models (with extension). */
-  models: string[] = [];
+  /** File names (with extension) in library/models and library/textures. */
+  files: Record<FileKind, string[]> = { models: [], textures: [] };
   /** Parsed meshes, shared by every layer showing the same model. */
   private meshes = new Map<string, Promise<MeshData>>();
   private listeners = new Set<(kind: Kind, name: string) => void>();
@@ -57,7 +59,8 @@ export class Library {
     const [shaders, presets] = await Promise.all([
       api('shaders').then((r) => r.json() as Promise<{ name: string; source: string }[]>),
       api('presets').then((r) => r.json() as Promise<{ name: string; source: string }[]>),
-      this.refreshModels(),
+      this.refreshFiles('models'),
+      this.refreshFiles('textures'),
     ]);
     for (const s of shaders) this.setShader(s.name, s.source);
     for (const p of presets) {
@@ -70,9 +73,9 @@ export class Library {
 
     // Files edited outside the app (VS Code etc.) hot-reload through here.
     import.meta.hot?.on('library-changed', async ({ kind, name }: { kind: Kind; name: string }) => {
-      if (kind === 'models') {
-        this.meshes.delete(name);
-        await this.refreshModels().catch(() => {});
+      if (kind === 'models' || kind === 'textures') {
+        if (kind === 'models') this.meshes.delete(name);
+        await this.refreshFiles(kind).catch(() => {});
         this.emit(kind, name);
         return;
       }
@@ -98,9 +101,21 @@ export class Library {
     return this.setShader(name, source);
   }
 
-  private async refreshModels() {
-    const items = (await (await api('models')).json()) as { name: string }[];
-    this.models = items.map((m) => m.name).sort((a, b) => a.localeCompare(b));
+  get models() {
+    return this.files.models;
+  }
+
+  get textures() {
+    return this.files.textures;
+  }
+
+  private async refreshFiles(kind: FileKind) {
+    const items = (await (await api(kind)).json()) as { name: string }[];
+    this.files[kind] = items.map((m) => m.name).sort((a, b) => a.localeCompare(b));
+  }
+
+  async fetchFile(kind: FileKind, name: string): Promise<Blob> {
+    return (await api(kind, name)).blob();
   }
 
   /** Load + parse a library model (or a built-in "@primitive"), cached. */
@@ -116,13 +131,13 @@ export class Library {
     return mesh;
   }
 
-  /** Copy a dropped/opened model file into library/models. Returns its library name. */
-  async importModel(file: File): Promise<string> {
-    const res = await api('models', file.name, { method: 'PUT', body: await file.arrayBuffer() });
+  /** Copy a dropped/opened file into library/models or library/textures. Returns its library name. */
+  async importFile(kind: FileKind, file: File): Promise<string> {
+    const res = await api(kind, file.name, { method: 'PUT', body: await file.arrayBuffer() });
     const { name } = (await res.json()) as { name: string };
-    this.meshes.delete(name);
-    if (!this.models.includes(name)) this.models = [...this.models, name].sort((a, b) => a.localeCompare(b));
-    this.emit('models', name);
+    if (kind === 'models') this.meshes.delete(name);
+    if (!this.files[kind].includes(name)) this.files[kind] = [...this.files[kind], name].sort((a, b) => a.localeCompare(b));
+    this.emit(kind, name);
     return name;
   }
 

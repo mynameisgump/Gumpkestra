@@ -98,10 +98,46 @@ export class App {
   /** Copy a model file into the library, then show it on `target` (or a new layer). */
   async importModel(file: File, target?: ModelLayer) {
     try {
-      const name = await this.library.importModel(file);
+      const name = await this.library.importFile('models', file);
       if (target) await this.setModel(target, name);
       else this.addModel(name);
       toast(`Imported ${name} into library/models`);
+    } catch (e) {
+      toast(`${file.name}: ${(e as Error).message}`, true);
+    }
+  }
+
+  /** Image inputs on a layer that can take a texture (everything except a filter's inputImage). */
+  textureInputs(layer: Layer | null) {
+    return layer ? layer.inputs.filter((i) => i.TYPE === 'image' && i.NAME !== 'inputImage') : [];
+  }
+
+  setTexture(layer: Layer, input: string, texture: string) {
+    layer.params[input].value = texture;
+    this.changed();
+  }
+
+  /**
+   * Use a texture: put it on the selected layer's first texture input if it has
+   * one, otherwise add an `image` layer showing it.
+   */
+  useTexture(texture: string) {
+    const [input] = this.textureInputs(this.selected);
+    if (this.selected && input) {
+      this.setTexture(this.selected, input.NAME, texture);
+      toast(`${this.selected.label} · ${input.LABEL ?? input.NAME} → ${texture}`);
+    } else {
+      this.addShader('image', { params: { tex: { value: texture, mods: [] } } });
+    }
+  }
+
+  /** Copy an image/video into library/textures, then use it (on `layer.input` if given). */
+  async importTexture(file: File, layer?: Layer, input?: string) {
+    try {
+      const name = await this.library.importFile('textures', file);
+      this.engine.textures.invalidate(name);
+      if (layer && input) this.setTexture(layer, input, name);
+      else this.useTexture(name);
     } catch (e) {
       toast(`${file.name}: ${(e as Error).message}`, true);
     }

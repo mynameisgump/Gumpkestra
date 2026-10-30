@@ -1,5 +1,6 @@
 import { toast, type App } from '../app';
 import { BUILTIN_MODELS } from '../model/load';
+import { BUILTIN_TEXTURES, isVideoTexture, thumbnailURL } from '../render/Textures';
 import { h } from './dom';
 
 const GENERATOR_TEMPLATE = `/*{
@@ -71,10 +72,23 @@ export function LibraryPanel(root: HTMLElement, app: App, openEditor: (name: str
     const modelItem = (m: string) =>
       h('button', { class: 'lib-item model', title: m.startsWith('@') ? 'Built-in shape' : `library/models/${m}`, onclick: () => app.addModel(m) },
         m.startsWith('@') ? m.slice(1) : m);
+    const textures = [...Object.keys(BUILTIN_TEXTURES), ...app.library.textures].filter((t) => t.toLowerCase().includes(filter));
+    const textureItem = (t: string) => {
+      const src = thumbnailURL(t);
+      const target = app.textureInputs(app.selected)[0];
+      return h('button', {
+        class: 'lib-item texture',
+        title: target ? `Set ${app.selected!.label} · ${target.LABEL ?? target.NAME}` : 'Add as an image layer',
+        onclick: () => app.useTexture(t),
+      },
+      src ? h('img', { src, alt: '', loading: 'lazy' }) : h('span', { class: 'thumb' }, isVideoTexture(t) ? '🎞' : ''),
+      t.startsWith('@') ? BUILTIN_TEXTURES[t].label.toLowerCase() : t);
+    };
     list.replaceChildren(
       h('h3', {}, `Generators · ${gens.length}`), ...gens.map(item),
       h('h3', {}, `Effects · ${fx.length}`), ...fx.map(item),
       h('h3', {}, `3D models · ${models.length}`), ...models.map(modelItem),
+      h('h3', {}, `Textures · ${textures.length}`), ...textures.map(textureItem),
       ...(broken.length ? [h('h3', {}, 'Broken'), ...broken.map(item)] : []),
     );
   };
@@ -91,7 +105,7 @@ export function LibraryPanel(root: HTMLElement, app: App, openEditor: (name: str
       h('button', { onclick: () => createShader('effect') }, '+ Effect'),
     ),
     list,
-    h('p', { class: 'hint' }, 'Click to add above the selected layer. Shaders live in library/shaders/*.fs (ISF) and hot-reload when edited in any editor. Drop a .glb/.obj/.stl on the canvas to add a 3D model.'),
+    h('p', { class: 'hint' }, 'Click to add above the selected layer. Shaders live in library/shaders/*.fs (ISF) and hot-reload when edited in any editor. Drop a .glb/.obj/.stl on the canvas to add a 3D model, or an image/video to add a texture. Clicking a texture puts it on the selected layer if it has a texture slot, otherwise adds an image layer.'),
   );
   render();
   app.library.onChange((kind) => kind !== 'presets' && render());
