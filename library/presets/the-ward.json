@@ -2,32 +2,226 @@
   "layers": [
     {
       "shader": "eye",
+      "enabled": true,
+      "blend": "normal",
+      "opacity": {
+        "value": 1,
+        "mods": []
+      },
       "params": {
-        "fillBackground": { "value": true, "mods": [] },
-        "size": { "value": 0.9, "mods": [] },
-        "blink": { "value": 0.0, "mods": [{ "source": "random", "amount": 0.35, "rate": 0.25, "smooth": 0.05 }] }
+        "count": {
+          "value": 1,
+          "mods": []
+        },
+        "size": {
+          "value": 0.9,
+          "mods": []
+        },
+        "pupil": {
+          "value": 0.35,
+          "mods": []
+        },
+        "dilate": {
+          "value": 0.5,
+          "mods": []
+        },
+        "look": {
+          "value": 0.7,
+          "mods": []
+        },
+        "blink": {
+          "value": 0,
+          "mods": [
+            {
+              "source": "random",
+              "amount": 0.35,
+              "rate": 0.25,
+              "smooth": 0.05
+            }
+          ]
+        },
+        "bloodshot": {
+          "value": 0.6,
+          "mods": []
+        },
+        "irisColor": {
+          "value": [
+            0.4,
+            0.55,
+            0.2,
+            1
+          ],
+          "mods": []
+        },
+        "skinColor": {
+          "value": [
+            0.4,
+            0.16,
+            0.13,
+            1
+          ],
+          "mods": []
+        },
+        "fillBackground": {
+          "value": true,
+          "mods": []
+        }
       }
     },
     {
       "shader": "nausea",
+      "enabled": true,
+      "blend": "normal",
+      "opacity": {
+        "value": 1,
+        "mods": []
+      },
       "params": {
-        "doubleVision": { "value": 0.015, "mods": [{ "source": "bass", "amount": 0.2, "rate": 0.25, "smooth": 0.1 }] }
+        "doubleVision": {
+          "value": 0.015,
+          "mods": [
+            {
+              "source": "bass",
+              "amount": 0.2,
+              "rate": 0.25,
+              "smooth": 0.1
+            }
+          ]
+        },
+        "sway": {
+          "value": 0.04,
+          "mods": []
+        },
+        "rate": {
+          "value": 0.12,
+          "mods": []
+        },
+        "waver": {
+          "value": 0.006,
+          "mods": []
+        },
+        "sick": {
+          "value": 0.35,
+          "mods": []
+        },
+        "tunnelVision": {
+          "value": 0.5,
+          "mods": []
+        }
       }
     },
     {
       "shader": "psx",
+      "enabled": true,
+      "blend": "normal",
+      "opacity": {
+        "value": 1,
+        "mods": []
+      },
       "params": {
-        "resolution": { "value": 180, "mods": [] },
-        "bits": { "value": 4, "mods": [] },
-        "fps": { "value": 15, "mods": [] }
+        "resolution": {
+          "value": 180,
+          "mods": []
+        },
+        "bits": {
+          "value": 4,
+          "mods": []
+        },
+        "dither": {
+          "value": 0.8,
+          "mods": []
+        },
+        "wobble": {
+          "value": 0.3,
+          "mods": []
+        },
+        "fps": {
+          "value": 60,
+          "mods": []
+        }
       }
     },
-    { "shader": "vhs", "params": {} },
+    {
+      "shader": "vhs",
+      "enabled": true,
+      "blend": "normal",
+      "opacity": {
+        "value": 1,
+        "mods": []
+      },
+      "params": {
+        "tracking": {
+          "value": 0.2,
+          "mods": []
+        },
+        "beatTear": {
+          "value": 0.6,
+          "mods": []
+        },
+        "chroma": {
+          "value": 0.5,
+          "mods": []
+        },
+        "tapeNoise": {
+          "value": 0.35,
+          "mods": []
+        },
+        "saturation": {
+          "value": 0.8,
+          "mods": []
+        },
+        "headSwitch": {
+          "value": true,
+          "mods": []
+        }
+      }
+    },
     {
       "shader": "grime",
+      "enabled": true,
+      "blend": "normal",
+      "opacity": {
+        "value": 1,
+        "mods": []
+      },
       "params": {
-        "tint": { "value": [0.8, 1.0, 0.7, 1.0], "mods": [] },
-        "flicker": { "value": 0.4, "mods": [] }
+        "grain": {
+          "value": 0.12,
+          "mods": []
+        },
+        "dust": {
+          "value": 0.3,
+          "mods": []
+        },
+        "smudge": {
+          "value": 0.3,
+          "mods": []
+        },
+        "flicker": {
+          "value": 0.4,
+          "mods": []
+        },
+        "crush": {
+          "value": 0.25,
+          "mods": []
+        },
+        "vignette": {
+          "value": 0.6,
+          "mods": []
+        },
+        "tintAmount": {
+          "value": 0.3,
+          "mods": []
+        },
+        "tint": {
+          "value": [
+            0.8,
+            1,
+            0.7,
+            1
+          ],
+          "mods": []
+        }
       }
     }
   ]
