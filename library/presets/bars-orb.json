@@ -1,6 +1,75 @@
 {
   "layers": [
     {
+      "shader": "image",
+      "enabled": true,
+      "blend": "normal",
+      "opacity": {
+        "value": 1,
+        "mods": []
+      },
+      "params": {
+        "tex": {
+          "value": "Horror_Wall_14-128x128.png",
+          "mods": []
+        },
+        "fit": {
+          "value": 3,
+          "mods": []
+        },
+        "zoom": {
+          "value": 0.28,
+          "mods": []
+        },
+        "pulse": {
+          "value": 0,
+          "mods": [
+            {
+              "source": "beat",
+              "amount": 0.12,
+              "rate": 0.25,
+              "smooth": 0
+            }
+          ]
+        },
+        "rotate": {
+          "value": 0,
+          "mods": []
+        },
+        "spin": {
+          "value": 0,
+          "mods": []
+        },
+        "offset": {
+          "value": [
+            0,
+            0
+          ],
+          "mods": []
+        },
+        "scroll": {
+          "value": [
+            0,
+            0
+          ],
+          "mods": []
+        },
+        "brightness": {
+          "value": 1,
+          "mods": []
+        },
+        "tint": {
+          "value": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "mods": []
+        }
+      }
+    },
+    {
       "shader": "audio-orb",
       "enabled": true,
       "blend": "normal",
@@ -36,6 +105,17 @@
           "value": 0.55,
           "mods": []
         },
+        "rim": {
+          "value": 0.6,
+          "mods": [
+            {
+              "source": "high",
+              "amount": 0.5,
+              "rate": 0.25,
+              "smooth": 0
+            }
+          ]
+        },
         "tex": {
           "value": "str_bloodvein6.png",
           "mods": []
@@ -54,6 +134,10 @@
         },
         "gloss": {
           "value": 0.628,
+          "mods": []
+        },
+        "fillBackground": {
+          "value": false,
           "mods": []
         }
       }

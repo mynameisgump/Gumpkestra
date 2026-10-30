@@ -1,5 +1,5 @@
 /*{
-  "DESCRIPTION": "Raymarched sphere whose surface is displaced by the spectrum: lumps low on the ball follow the bass, higher up the treble. It swells with the bass and its edge glows with the highs through modulators on radius and Edge glow (∿). Wrap it in a texture (try the built-in Meat) and add bump and gloss for a wet, fleshy look; set Texture mix to 0 for the plain hue colouring.",
+  "DESCRIPTION": "Raymarched sphere whose surface is displaced by the spectrum: lumps low on the ball follow the bass, higher up the treble. It swells with the bass and its edge glows with the highs through modulators on radius and Edge glow (∿). Wrap it in a texture (try the built-in Meat) and add bump and gloss for a wet, fleshy look; set Texture mix to 0 for the plain hue colouring. The background is transparent, so layers below show around the ball.",
   "CREDIT": "Gumpkestra",
   "CATEGORIES": ["Generator", "Audio", "3D", "Texture"],
   "INPUTS": [
@@ -14,7 +14,8 @@
     { "NAME": "texMix", "TYPE": "float", "DEFAULT": 1.0, "MIN": 0.0, "MAX": 1.0, "LABEL": "Texture mix" },
     { "NAME": "texScale", "TYPE": "float", "DEFAULT": 1.0, "MIN": 0.25, "MAX": 6.0, "LABEL": "Texture scale" },
     { "NAME": "bump", "TYPE": "float", "DEFAULT": 0.6, "MIN": 0.0, "MAX": 2.0, "LABEL": "Texture bump" },
-    { "NAME": "gloss", "TYPE": "float", "DEFAULT": 0.5, "MIN": 0.0, "MAX": 2.0, "LABEL": "Wet gloss" }
+    { "NAME": "gloss", "TYPE": "float", "DEFAULT": 0.5, "MIN": 0.0, "MAX": 2.0, "LABEL": "Wet gloss" },
+    { "NAME": "fillBackground", "TYPE": "bool", "DEFAULT": false, "LABEL": "Fill background" }
   ]
 }*/
 
@@ -64,16 +65,18 @@ void main() {
   vec2 uv = (isf_FragNormCoord - 0.5) * vec2(RENDERSIZE.x / RENDERSIZE.y, 1.0);
   vec3 ro = vec3(0.0, 0.0, 3.2);
   vec3 rd = normalize(vec3(uv, -1.4));
-  float t = 0.0;
+  float t = 0.0, tEdge = 0.0, dMin = 1e9;
   bool hit = false;
   for (int i = 0; i < 80; i++) {
     float d = map(ro + rd * t);
+    if (d < dMin) { dMin = d; tEdge = t; }
     if (d < 0.001) { hit = true; break; }
     t += d * 0.6;
     if (t > 8.0) break;
   }
   // Shade every pixel and discard misses at the end, so dFdx/dFdy run in uniform control flow.
-  vec3 p = ro + rd * t;
+  // A miss is shaded where the ray passed closest to the surface, so the silhouette can be antialiased.
+  vec3 p = ro + rd * (hit ? t : tEdge);
   vec3 n = normalAt(p);
   vec3 q = toOrb(p) * texScale;
   vec3 w = pow(abs(toOrb(n)), vec3(4.0));
@@ -97,5 +100,7 @@ void main() {
   float fres = pow(1.0 - max(dot(n, -rd), 0.0), 3.0);
   float spec = pow(max(dot(reflect(rd, n), light), 0.0), 40.0);
   vec3 col = base * (0.15 + diff * 0.85) + fres * rim + spec * gloss;
-  gl_FragColor = vec4(hit ? col : vec3(0.0), 1.0);
+  // Coverage fades over about a pixel and a half outside the surface.
+  float cover = hit ? 1.0 : 1.0 - smoothstep(0.0, 1.5 * tEdge / (1.4 * RENDERSIZE.y), dMin);
+  gl_FragColor = fillBackground ? vec4(col * cover, 1.0) : vec4(col, cover);
 }
