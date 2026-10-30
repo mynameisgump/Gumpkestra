@@ -50,9 +50,9 @@
         },
         "lightColor": {
           "value": [
-            0,
             1,
-            0.16470588235294117,
+            1,
+            1,
             1
           ],
           "mods": []
@@ -101,8 +101,8 @@
         },
         "position": {
           "value": [
-            0.919,
-            1
+            0.738,
+            0.909
           ],
           "mods": []
         },
@@ -120,7 +120,7 @@
     {
       "shader": "grime",
       "enabled": true,
-      "blend": "screen",
+      "blend": "normal",
       "opacity": {
         "value": 1,
         "mods": []
@@ -191,7 +191,7 @@
           "mods": []
         },
         "fps": {
-          "value": 240,
+          "value": 30,
           "mods": []
         }
       }
@@ -235,6 +235,44 @@
         },
         "vignette": {
           "value": 0.5,
+          "mods": []
+        }
+      }
+    },
+    {
+      "shader": "color-grade",
+      "enabled": true,
+      "blend": "normal",
+      "opacity": {
+        "value": 1,
+        "mods": []
+      },
+      "params": {
+        "hue": {
+          "value": 0,
+          "mods": [
+            {
+              "source": "lfoSaw",
+              "amount": 1,
+              "rate": 0.25,
+              "smooth": 0
+            }
+          ]
+        },
+        "saturation": {
+          "value": 1,
+          "mods": []
+        },
+        "contrast": {
+          "value": 1,
+          "mods": []
+        },
+        "exposure": {
+          "value": 0,
+          "mods": []
+        },
+        "invert": {
+          "value": false,
           "mods": []
         }
       }
