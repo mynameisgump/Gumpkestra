@@ -27,7 +27,7 @@ async function main() {
   LibraryPanel($('library-panel'), app, editor.open);
   StackPanel($('stack-panel'), app);
   const tickParams = ParamsPanel($('params-panel'), app, editor.open);
-  Topbar(app);
+  const topbar = Topbar(app);
 
   engine.textures.fetchBlob = (name) => library.fetchFile('textures', name);
   library.onChange((kind, name) => {
@@ -36,7 +36,7 @@ async function main() {
     else if (kind === 'textures') {
       engine.textures.invalidate(name);
       app.changed();
-    } else Topbar.refreshPresets?.();
+    } else topbar.refresh();
   });
 
   if (!app.restoreSession()) {
@@ -64,6 +64,8 @@ async function main() {
     if (fpsTime > 0.5) {
       fpsEl.textContent = `${Math.round(fpsFrames / fpsTime)} fps · ${engine.width}×${engine.height}`;
       fpsFrames = fpsTime = 0;
+      // Slider drags don't trigger a structural change, so poll for unsaved edits here.
+      topbar.updateDirty();
     }
     requestAnimationFrame(loop);
   };
@@ -71,8 +73,15 @@ async function main() {
 
   // Keyboard
   window.addEventListener('keydown', (e) => {
+    if ((e.metaKey || e.ctrlKey) && e.key === 's' && !e.defaultPrevented) {
+      e.preventDefault();
+      void topbar.save();
+      return;
+    }
     const t = e.target as HTMLElement;
     if (t.matches('input, textarea, select')) return;
+    if (e.key === '[') topbar.step(-1);
+    if (e.key === ']') topbar.step(1);
     if (e.key === 'h') document.body.classList.toggle('perform');
     if (e.key === 'f') $('stage').requestFullscreen?.();
     if (e.key === ' ' && audio.mediaElement) {
@@ -85,33 +94,68 @@ async function main() {
 }
 
 function Topbar(app: App) {
-  const presetSelect = h('select', { title: 'Presets in library/presets/' });
-  const refreshPresets = () => {
-    presetSelect.replaceChildren(
-      h('option', { value: '' }, 'Load preset…'),
-      ...[...app.library.presets.keys()].sort().map((n) => h('option', { value: n }, n)),
-    );
-  };
-  presetSelect.addEventListener('change', () => {
-    const p = app.library.presets.get(presetSelect.value);
-    if (p) app.loadPreset(p);
-    presetSelect.value = '';
-  });
-  Topbar.refreshPresets = refreshPresets;
-  refreshPresets();
+  const names = () => [...app.library.presets.keys()].sort((a, b) => a.localeCompare(b));
+  const confirmDiscard = () => !app.dirty || confirm(`Discard unsaved changes to "${app.presetName}"?`);
 
-  const savePreset = async () => {
-    const name = prompt('Preset name:', app.presetName)?.trim();
+  const presetSelect = h('select', { class: 'preset-select', title: 'Presets in library/presets/' }) as HTMLSelectElement;
+  const dirtyDot = h('span', { class: 'dirty-dot', title: 'Unsaved changes' }, '●');
+  const saveBtn = h('button', { title: 'Save over the current preset (⌘S)', onclick: () => save() }, 'Save') as HTMLButtonElement;
+
+  const updateDirty = () => {
+    const dirty = app.dirty;
+    dirtyDot.classList.toggle('on', dirty);
+    saveBtn.disabled = app.presetSaved && !dirty;
+  };
+
+  const refresh = () => {
+    presetSelect.replaceChildren(
+      ...(app.presetSaved ? [] : [h('option', { value: '' }, `${app.presetName} (unsaved)`)]),
+      ...names().map((n) => h('option', { value: n }, n)),
+    );
+    presetSelect.value = app.presetSaved ? app.presetName : '';
+    updateDirty();
+  };
+
+  const load = (name: string) => {
+    const p = app.library.presets.get(name);
+    if (p && name !== app.presetName && confirmDiscard()) app.loadPreset(p);
+    refresh();
+  };
+  presetSelect.addEventListener('change', () => load(presetSelect.value));
+
+  /** Load the previous/next preset, wrapping around. From an unsaved stack, next is the first. */
+  const step = (dir: 1 | -1) => {
+    const list = names();
+    if (!list.length) return;
+    const i = list.indexOf(app.presetName);
+    load(list[i < 0 ? (dir > 0 ? 0 : list.length - 1) : (i + dir + list.length) % list.length]);
+  };
+
+  const newPreset = () => {
+    if (confirmDiscard()) app.newPreset();
+  };
+
+  const saveAs = async () => {
+    const name = prompt('Save preset as:', app.presetSaved ? `${app.presetName} copy` : app.presetName)?.trim();
     if (!name) return;
-    app.presetName = name;
+    if (name !== app.presetName && app.library.presets.has(name) && !confirm(`Overwrite preset "${name}"?`)) return;
+    await write(name);
+  };
+
+  /** Overwrite the current preset; a new, never-saved one asks for a name first. */
+  const save = () => (app.presetSaved ? write(app.presetName) : saveAs());
+
+  const write = async (name: string) => {
     try {
-      await app.library.savePreset(app.snapshot());
-      refreshPresets();
+      await app.savePreset(name);
       toast(`Saved library/presets/${name}.json`);
     } catch (e) {
       toast((e as Error).message, true);
     }
   };
+
+  app.onChange(refresh);
+  refresh();
 
   // Recording: canvas video + whatever audio source is active.
   let recorder: MediaRecorder | null = null;
@@ -141,8 +185,14 @@ function Topbar(app: App) {
 
   $('topbar').append(
     h('div', { class: 'brand' }, 'GUMPKESTRA'),
-    presetSelect,
-    h('button', { onclick: savePreset }, 'Save preset…'),
+    h('div', { class: 'preset-nav' },
+      h('button', { title: 'Previous preset ([)', onclick: () => step(-1) }, '◀'),
+      presetSelect,
+      dirtyDot,
+      h('button', { title: 'Next preset (])', onclick: () => step(1) }, '▶')),
+    h('button', { title: 'Start a new, empty preset', onclick: newPreset }, 'New'),
+    saveBtn,
+    h('button', { title: 'Save under a new name', onclick: () => saveAs() }, 'Save as…'),
     h('span', { class: 'spacer' }),
     h('label', { class: 'res', title: 'Render resolution' }, 'res ',
       h('select', { onchange: (e: Event) => (app.engine.scale = Number((e.target as HTMLSelectElement).value)) },
@@ -152,8 +202,8 @@ function Topbar(app: App) {
     h('button', { onclick: () => document.body.classList.toggle('perform'), title: 'H' }, 'Hide UI'),
     h('span', { id: 'fps' }),
   );
+  return { refresh, updateDirty, step, save };
 }
-Topbar.refreshPresets = undefined as undefined | (() => void);
 
 main().catch((e) => {
   console.error(e);

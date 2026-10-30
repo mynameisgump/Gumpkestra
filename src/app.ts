@@ -32,7 +32,7 @@ export class App {
     clearTimeout(this.saveTimer);
     this.saveTimer = setTimeout(() => {
       try {
-        localStorage.setItem(AUTOSAVE_KEY, JSON.stringify(this.snapshot()));
+        localStorage.setItem(AUTOSAVE_KEY, JSON.stringify({ ...this.snapshot(), baseline: this.baseline }));
       } catch {
         /* storage unavailable — autosave is a convenience only */
       }
@@ -202,12 +202,42 @@ export class App {
     return { name: this.presetName, layers: this.engine.layers.map((l) => l.toJSON()) };
   }
 
+  /** The layers as last loaded or saved, to tell whether there are unsaved changes. */
+  private baseline = '[]';
+
+  private layersJSON() {
+    return JSON.stringify(this.engine.layers.map((l) => l.toJSON()));
+  }
+
+  get dirty() {
+    return this.layersJSON() !== this.baseline;
+  }
+
+  /** Whether the current preset exists in library/presets (vs a new, never-saved one). */
+  get presetSaved() {
+    return this.library.presets.has(this.presetName);
+  }
+
   loadPreset(preset: Preset) {
     this.engine.clear();
     this.selected = null;
     for (const json of preset.layers) this.addShader(json.shader, json, this.engine.layers.length);
     this.presetName = preset.name;
     this.selected = this.engine.layers[this.engine.layers.length - 1] ?? null;
+    this.baseline = this.layersJSON();
+    this.changed();
+  }
+
+  /** Start over with an empty, unsaved stack. */
+  newPreset() {
+    this.loadPreset({ name: 'untitled', layers: [] });
+  }
+
+  async savePreset(name: string) {
+    const preset = { ...this.snapshot(), name };
+    await this.library.savePreset(preset);
+    this.presetName = name;
+    this.baseline = JSON.stringify(preset.layers);
     this.changed();
   }
 
@@ -215,8 +245,12 @@ export class App {
     try {
       const raw = localStorage.getItem(AUTOSAVE_KEY);
       if (!raw) return false;
-      this.loadPreset(JSON.parse(raw));
-      return this.engine.layers.length > 0;
+      const session = JSON.parse(raw) as Preset & { baseline?: string };
+      this.loadPreset(session);
+      if (typeof session.baseline === 'string') this.baseline = session.baseline;
+      this.changed();
+      // An intentionally empty session (after New) restores as empty; one whose layers all failed doesn't.
+      return this.engine.layers.length > 0 || session.layers.length === 0;
     } catch {
       return false;
     }

@@ -42,6 +42,11 @@ body {
 }
 .brand { font: 700 13px var(--mono); letter-spacing: 0.25em; color: var(--accent); margin-right: 12px; }
 .spacer { flex: 1; }
+.preset-nav { display: flex; align-items: center; gap: 4px; }
+.preset-nav > button { padding-left: 7px; padding-right: 7px; }
+.preset-select { min-width: 160px; font-family: var(--mono); }
+.dirty-dot { font-size: 10px; color: var(--accent-2); visibility: hidden; }
+.dirty-dot.on { visibility: visible; }
 #fps { font: 11px var(--mono); color: var(--dim); min-width: 150px; text-align: right; }
 .rec.on { background: var(--accent-2); color: #000; border-color: var(--accent-2); }
 
