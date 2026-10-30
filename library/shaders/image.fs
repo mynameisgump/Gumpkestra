@@ -5,7 +5,7 @@
     { "NAME": "tex", "TYPE": "image", "DEFAULT": "@meat", "LABEL": "Texture" },
     { "NAME": "fit", "TYPE": "long", "DEFAULT": 1, "VALUES": [0, 1, 2, 3], "LABELS": ["Contain", "Cover", "Stretch", "Tile"] },
     { "NAME": "zoom", "TYPE": "float", "DEFAULT": 1.0, "MIN": 0.25, "MAX": 4.0 },
-    { "NAME": "pulse", "TYPE": "float", "DEFAULT": 0.06, "MIN": 0.0, "MAX": 0.5, "LABEL": "Beat pulse" },
+    { "NAME": "pulse", "TYPE": "float", "DEFAULT": 0.0, "MIN": 0.0, "MAX": 0.5, "LABEL": "Pulse", "MODS": [{ "SOURCE": "beat", "AMOUNT": 0.12 }] },
     { "NAME": "rotate", "TYPE": "float", "DEFAULT": 0.0, "MIN": -180.0, "MAX": 180.0, "LABEL": "Rotate°" },
     { "NAME": "spin", "TYPE": "float", "DEFAULT": 0.0, "MIN": -0.5, "MAX": 0.5, "LABEL": "Spin (rev/s)" },
     { "NAME": "offset", "TYPE": "point2D", "DEFAULT": [0.0, 0.0], "MIN": [-1.0, -1.0], "MAX": [1.0, 1.0] },
@@ -22,7 +22,7 @@ void main() {
 
   // Screen space with height 1, centred.
   vec2 p = (isf_FragNormCoord - 0.5) * vec2(sa, 1.0);
-  p /= zoom * (1.0 + pulse * AUDIO_BEAT);
+  p /= zoom * (1.0 + pulse);
   float a = radians(rotate) + TIME * spin * 6.2831853;
   p = mat2(cos(a), sin(a), -sin(a), cos(a)) * p;
 

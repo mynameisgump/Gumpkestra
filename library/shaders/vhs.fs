@@ -5,7 +5,7 @@
   "INPUTS": [
     { "NAME": "inputImage", "TYPE": "image" },
     { "NAME": "tracking", "TYPE": "float", "DEFAULT": 0.2, "MIN": 0.0, "MAX": 1.0 },
-    { "NAME": "beatTear", "TYPE": "float", "DEFAULT": 0.6, "MIN": 0.0, "MAX": 2.0, "LABEL": "Beat tear" },
+    { "NAME": "beatTear", "TYPE": "float", "DEFAULT": 0.0, "MIN": 0.0, "MAX": 2.0, "LABEL": "Tear", "MODS": [{ "SOURCE": "beat", "AMOUNT": 0.3 }] },
     { "NAME": "chroma", "TYPE": "float", "DEFAULT": 0.5, "MIN": 0.0, "MAX": 1.0, "LABEL": "Chroma bleed" },
     { "NAME": "tapeNoise", "TYPE": "float", "DEFAULT": 0.35, "MIN": 0.0, "MAX": 1.0 },
     { "NAME": "saturation", "TYPE": "float", "DEFAULT": 0.8, "MIN": 0.0, "MAX": 1.5 },
@@ -29,7 +29,7 @@ void main() {
   vec2 uv = isf_FragNormCoord;
   float t = TIME;
   float ly = floor(uv.y * 240.0);
-  float amt = tracking + AUDIO_BEAT * beatTear;
+  float amt = tracking + beatTear;
 
   float dx = (vnoise(vec2(ly * 0.3, t * 8.0)) - 0.5) * 0.004 * amt;
   float bandY = 1.0 - fract(t * 0.12 + 0.3 * vnoise(vec2(t * 0.5, 0.0)));

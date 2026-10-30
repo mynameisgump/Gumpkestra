@@ -11,22 +11,25 @@
       "params": {
         "radius": {
           "value": 0.9,
-          "mods": []
-        },
-        "pulse": {
-          "value": 0.25,
-          "mods": []
+          "mods": [
+            {
+              "source": "bass",
+              "amount": 0.173,
+              "rate": 0.25,
+              "smooth": 0
+            }
+          ]
         },
         "displace": {
-          "value": 0.25,
+          "value": 0.4744,
           "mods": []
         },
         "frequency": {
-          "value": 6,
+          "value": 16.428,
           "mods": []
         },
         "spin": {
-          "value": 0.3,
+          "value": 0.956,
           "mods": []
         },
         "hue": {
@@ -34,129 +37,23 @@
           "mods": []
         },
         "tex": {
-          "value": "@meat",
+          "value": "str_bloodvein6.png",
           "mods": []
         },
         "texMix": {
-          "value": 0,
+          "value": 1,
           "mods": []
         },
         "texScale": {
-          "value": 1,
+          "value": 3.125,
           "mods": []
         },
         "bump": {
-          "value": 0,
+          "value": 1.16,
           "mods": []
         },
         "gloss": {
-          "value": 0,
-          "mods": []
-        }
-      }
-    },
-    {
-      "shader": "spectrum-bars",
-      "enabled": false,
-      "blend": "screen",
-      "opacity": {
-        "value": 0.7,
-        "mods": []
-      },
-      "params": {
-        "bars": {
-          "value": 64,
-          "mods": []
-        },
-        "height": {
-          "value": 0.8,
-          "mods": []
-        },
-        "gap": {
-          "value": 0.25,
-          "mods": []
-        },
-        "mirror": {
-          "value": true,
-          "mods": []
-        },
-        "colorLow": {
-          "value": [
-            0.1,
-            1,
-            0.6,
-            1
-          ],
-          "mods": []
-        },
-        "colorHigh": {
-          "value": [
-            1,
-            0.2,
-            0.6,
-            1
-          ],
-          "mods": []
-        }
-      }
-    },
-    {
-      "shader": "color-grade",
-      "enabled": true,
-      "blend": "normal",
-      "opacity": {
-        "value": 1,
-        "mods": []
-      },
-      "params": {
-        "hue": {
-          "value": 0,
-          "mods": [
-            {
-              "source": "beatStep",
-              "amount": 0.5,
-              "rate": 8,
-              "smooth": 0.2
-            }
-          ]
-        },
-        "saturation": {
-          "value": 1,
-          "mods": []
-        },
-        "contrast": {
-          "value": 1,
-          "mods": []
-        },
-        "exposure": {
-          "value": 0,
-          "mods": []
-        },
-        "invert": {
-          "value": false,
-          "mods": []
-        }
-      }
-    },
-    {
-      "shader": "glow",
-      "enabled": true,
-      "blend": "normal",
-      "opacity": {
-        "value": 1,
-        "mods": []
-      },
-      "params": {
-        "threshold": {
-          "value": 0.4,
-          "mods": []
-        },
-        "radius": {
-          "value": 12,
-          "mods": []
-        },
-        "intensity": {
-          "value": 0.6,
+          "value": 0.628,
           "mods": []
         }
       }

@@ -5,7 +5,7 @@
   "INPUTS": [
     { "NAME": "speed", "TYPE": "float", "DEFAULT": 0.2, "MIN": -2.0, "MAX": 2.0 },
     { "NAME": "ratchet", "TYPE": "float", "DEFAULT": 0.6, "MIN": 0.0, "MAX": 3.0, "LABEL": "Beat ratchet" },
-    { "NAME": "slam", "TYPE": "float", "DEFAULT": 1.0, "MIN": 0.0, "MAX": 1.0, "LABEL": "Piston slam" },
+    { "NAME": "slam", "TYPE": "float", "DEFAULT": 0.0, "MIN": 0.0, "MAX": 1.0, "LABEL": "Piston slam", "MODS": [{ "SOURCE": "beat", "AMOUNT": 1.0 }] },
     { "NAME": "rust", "TYPE": "float", "DEFAULT": 0.5, "MIN": 0.0, "MAX": 1.0 },
     { "NAME": "lampSwing", "TYPE": "float", "DEFAULT": 0.3, "MIN": 0.0, "MAX": 1.0 },
     { "NAME": "lightColor", "TYPE": "color", "DEFAULT": [1.0, 0.6, 0.3, 1.0], "LABEL": "Light" },
@@ -54,7 +54,7 @@ float scene(vec2 p) {
   d = min(d, sdGear(p - cC, 0.1, 6.0, a * 16.0 / 6.0));
 
   vec2 pp = p - vec2(0.58, 0.0);
-  float headY = 0.12 - AUDIO_BEAT * slam * 0.3;
+  float headY = 0.12 - slam * 0.3;
   d = min(d, sdBox(pp - vec2(0.0, 0.33), vec2(0.07, 0.12)));
   d = min(d, sdBox(pp - vec2(0.0, headY + 0.12), vec2(0.025, 0.12)));
   d = min(d, sdBox(pp - vec2(0.0, headY), vec2(0.09, 0.035)));
@@ -104,6 +104,6 @@ void main() {
   col *= lightColor.rgb * 1.6 / (1.0 + dot(p - lampPos, p - lampPos) * 2.5);
 
   vec2 impact = vec2(0.58, -0.215);
-  col += vec3(1.0, 0.7, 0.3) * pow(AUDIO_BEAT, 4.0) * slam * exp(-length(p - impact) * 12.0) * 1.2;
+  col += vec3(1.0, 0.7, 0.3) * pow(slam, 4.0) * exp(-length(p - impact) * 12.0) * 1.2;
   gl_FragColor = vec4(col, 1.0);
 }

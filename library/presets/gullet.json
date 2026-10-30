@@ -2,14 +2,228 @@
   "layers": [
     {
       "shader": "texture-tunnel",
+      "enabled": true,
+      "blend": "normal",
+      "opacity": {
+        "value": 1,
+        "mods": []
+      },
       "params": {
-        "kick": { "value": 0.3, "mods": [] },
-        "twist": { "value": 0.25, "mods": [{ "source": "lfoSine", "amount": 0.1, "rate": 0.05, "smooth": 0 }] },
-        "tint": { "value": [1.0, 0.85, 0.85, 1.0], "mods": [] }
+        "tex": {
+          "value": "str_bloodvein6.png",
+          "mods": []
+        },
+        "speed": {
+          "value": 0.25,
+          "mods": []
+        },
+        "kick": {
+          "value": 0.3,
+          "mods": []
+        },
+        "twist": {
+          "value": 0.25,
+          "mods": [
+            {
+              "source": "lfoSine",
+              "amount": 0.1,
+              "rate": 0.05,
+              "smooth": 0
+            }
+          ]
+        },
+        "roll": {
+          "value": 0.02,
+          "mods": []
+        },
+        "wraps": {
+          "value": 2,
+          "mods": []
+        },
+        "stretch": {
+          "value": 1,
+          "mods": []
+        },
+        "shape": {
+          "value": 0,
+          "mods": []
+        },
+        "swell": {
+          "value": 0,
+          "mods": [
+            {
+              "source": "bass",
+              "amount": 0.25,
+              "rate": 0.25,
+              "smooth": 0
+            }
+          ]
+        },
+        "darkness": {
+          "value": 1.5,
+          "mods": []
+        },
+        "flash": {
+          "value": 0,
+          "mods": [
+            {
+              "source": "beat",
+              "amount": 0.15,
+              "rate": 0.25,
+              "smooth": 0
+            }
+          ]
+        },
+        "tint": {
+          "value": [
+            1,
+            0.85,
+            0.85,
+            1
+          ],
+          "mods": []
+        }
       }
     },
-    { "shader": "displace-map", "params": { "map": { "value": "@meat", "mods": [] }, "amount": { "value": 0.02, "mods": [] } } },
-    { "shader": "blood-drip", "params": { "pour": { "value": 0.4, "mods": [] } } },
-    { "shader": "crt", "params": { "curvature": { "value": 0.25, "mods": [] } } }
+    {
+      "shader": "displace-map",
+      "enabled": true,
+      "blend": "normal",
+      "opacity": {
+        "value": 1,
+        "mods": []
+      },
+      "params": {
+        "map": {
+          "value": "@meat",
+          "mods": []
+        },
+        "amount": {
+          "value": 0.02,
+          "mods": []
+        },
+        "beatKick": {
+          "value": 0,
+          "mods": [
+            {
+              "source": "beat",
+              "amount": 0.16,
+              "rate": 0.25,
+              "smooth": 0
+            }
+          ]
+        },
+        "scale": {
+          "value": 1,
+          "mods": []
+        },
+        "scroll": {
+          "value": [
+            0,
+            0.03
+          ],
+          "mods": []
+        },
+        "mode": {
+          "value": 0,
+          "mods": []
+        },
+        "stain": {
+          "value": 0,
+          "mods": []
+        }
+      }
+    },
+    {
+      "shader": "blood-drip",
+      "enabled": true,
+      "blend": "normal",
+      "opacity": {
+        "value": 1,
+        "mods": []
+      },
+      "params": {
+        "pour": {
+          "value": 0.4,
+          "mods": []
+        },
+        "bleed": {
+          "value": 0,
+          "mods": []
+        },
+        "threshold": {
+          "value": 0.8,
+          "mods": []
+        },
+        "speed": {
+          "value": 0.4,
+          "mods": []
+        },
+        "columns": {
+          "value": 90,
+          "mods": []
+        },
+        "dry": {
+          "value": 0.15,
+          "mods": []
+        },
+        "gloss": {
+          "value": 0.6,
+          "mods": []
+        },
+        "bloodColor": {
+          "value": [
+            0.45,
+            0,
+            0.02,
+            1
+          ],
+          "mods": []
+        }
+      }
+    },
+    {
+      "shader": "crt",
+      "enabled": true,
+      "blend": "normal",
+      "opacity": {
+        "value": 1,
+        "mods": []
+      },
+      "params": {
+        "curvature": {
+          "value": 0.25,
+          "mods": []
+        },
+        "scanlines": {
+          "value": 0.55,
+          "mods": []
+        },
+        "lineSize": {
+          "value": 3,
+          "mods": []
+        },
+        "mask": {
+          "value": 0.3,
+          "mods": []
+        },
+        "convergence": {
+          "value": 0.5,
+          "mods": []
+        },
+        "hum": {
+          "value": 0.25,
+          "mods": []
+        },
+        "flicker": {
+          "value": 0.2,
+          "mods": []
+        },
+        "vignette": {
+          "value": 0.5,
+          "mods": []
+        }
+      }
+    }
   ]
 }

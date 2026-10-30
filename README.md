@@ -58,7 +58,11 @@ Standard ISF: you can paste in shaders from [editor.isf.video](https://editor.is
 | `BEAT_COUNT` | int, increments on each beat (use it to seed per-beat randomness) |
 | `AUDIO_FFT`, `AUDIO_WAVE` | 256×1 textures (log-frequency spectrum, and waveform centred on 0.5) |
 
-For shaders you want to share with other ISF hosts, prefer exposing a float parameter and modulating it over reading `AUDIO_*` directly.
+For shaders you want to share with other ISF hosts, prefer exposing a float parameter and modulating it over reading `AUDIO_*` directly. That also puts the audio reaction in the UI, where it can be tuned. To ship a parameter already modulated, give the input a `MODS` list (a Gumpkestra extension that other hosts ignore). `SOURCE` is any modulator source (`bass`, `high`, `beat`, `lfoSine`, …). `AMOUNT` is a fraction of the parameter's range, and `RATE` and `SMOOTH` are optional:
+
+```json
+{ "NAME": "radius", "TYPE": "float", "DEFAULT": 0.9, "MIN": 0.3, "MAX": 1.6, "MODS": [{ "SOURCE": "bass", "AMOUNT": 0.1731 }] }
+```
 
 ## Textures
 

@@ -10,9 +10,9 @@
     { "NAME": "wraps", "TYPE": "long", "DEFAULT": 2, "VALUES": [1, 2, 3, 4, 6], "LABEL": "Texture wraps" },
     { "NAME": "stretch", "TYPE": "float", "DEFAULT": 1.0, "MIN": 0.2, "MAX": 4.0, "LABEL": "Depth stretch" },
     { "NAME": "shape", "TYPE": "long", "DEFAULT": 0, "VALUES": [0, 1, 2], "LABELS": ["Round", "Square", "Hex"] },
-    { "NAME": "swell", "TYPE": "float", "DEFAULT": 0.15, "MIN": 0.0, "MAX": 0.6, "LABEL": "Bass swell" },
+    { "NAME": "swell", "TYPE": "float", "DEFAULT": 0.0, "MIN": 0.0, "MAX": 0.6, "LABEL": "Swell", "MODS": [{ "SOURCE": "bass", "AMOUNT": 0.25 }] },
     { "NAME": "darkness", "TYPE": "float", "DEFAULT": 1.5, "MIN": 0.0, "MAX": 4.0 },
-    { "NAME": "flash", "TYPE": "float", "DEFAULT": 0.3, "MIN": 0.0, "MAX": 2.0, "LABEL": "Beat flash" },
+    { "NAME": "flash", "TYPE": "float", "DEFAULT": 0.0, "MIN": 0.0, "MAX": 2.0, "LABEL": "Flash", "MODS": [{ "SOURCE": "beat", "AMOUNT": 0.15 }] },
     { "NAME": "tint", "TYPE": "color", "DEFAULT": [1.0, 1.0, 1.0, 1.0] }
   ]
 }*/
@@ -29,7 +29,7 @@ void main() {
     r = max(q.x * 0.866 + q.y * 0.5, q.y);
   }
   // Walls breathe with the bass and ripple around the circumference.
-  r *= 1.0 - swell * AUDIO_BASS * (0.7 + 0.3 * sin(ang * 5.0 + TIME * 3.0));
+  r *= 1.0 - swell * (0.7 + 0.3 * sin(ang * 5.0 + TIME * 3.0));
 
   // Smooth travel plus a lurch per beat ("ratchet"): BEAT_COUNT steps, AUDIO_BEAT eases each step in.
   float travel = TIME * speed + (float(BEAT_COUNT) - AUDIO_BEAT) * kick;
@@ -46,6 +46,6 @@ void main() {
   vec4 c = textureGrad(tex, uv, dx, dy);
 
   float light = pow(clamp(r * 2.2, 0.0, 1.0), darkness);
-  c.rgb *= tint.rgb * light * (1.0 + flash * AUDIO_BEAT);
+  c.rgb *= tint.rgb * light * (1.0 + flash);
   gl_FragColor = vec4(c.rgb, 1.0);
 }

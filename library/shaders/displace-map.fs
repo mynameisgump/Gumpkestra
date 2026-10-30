@@ -5,7 +5,7 @@
     { "NAME": "inputImage", "TYPE": "image" },
     { "NAME": "map", "TYPE": "image", "DEFAULT": "@noise", "LABEL": "Displacement map" },
     { "NAME": "amount", "TYPE": "float", "DEFAULT": 0.025, "MIN": 0.0, "MAX": 0.25 },
-    { "NAME": "beatKick", "TYPE": "float", "DEFAULT": 0.04, "MIN": 0.0, "MAX": 0.25, "LABEL": "Beat kick" },
+    { "NAME": "beatKick", "TYPE": "float", "DEFAULT": 0.0, "MIN": 0.0, "MAX": 0.25, "LABEL": "Kick", "MODS": [{ "SOURCE": "beat", "AMOUNT": 0.16 }] },
     { "NAME": "scale", "TYPE": "float", "DEFAULT": 1.0, "MIN": 0.25, "MAX": 8.0, "LABEL": "Map scale" },
     { "NAME": "scroll", "TYPE": "point2D", "DEFAULT": [0.0, 0.03], "MIN": [-0.5, -0.5], "MAX": [0.5, 0.5], "LABEL": "Map scroll (/s)" },
     { "NAME": "mode", "TYPE": "long", "DEFAULT": 0, "VALUES": [0, 1], "LABELS": ["Crawl (two-way)", "Radial (bulge)"] },
@@ -27,7 +27,7 @@ void main() {
   } else {
     d = normalize(uv - 0.5 + 1e-5) * (l - 0.5);
   }
-  float amt = amount + beatKick * AUDIO_BEAT;
+  float amt = amount + beatKick;
   vec4 c = IMG_NORM_PIXEL(inputImage, uv + d * 2.0 * amt);
   c.rgb = mix(c.rgb, c.rgb * m.rgb * 1.8, stain);
   gl_FragColor = vec4(c.rgb, 1.0);

@@ -6,10 +6,11 @@
     { "NAME": "count", "TYPE": "float", "DEFAULT": 1.0, "MIN": 1.0, "MAX": 6.0, "LABEL": "Eyes (grid)" },
     { "NAME": "size", "TYPE": "float", "DEFAULT": 0.8, "MIN": 0.3, "MAX": 1.0 },
     { "NAME": "pupil", "TYPE": "float", "DEFAULT": 0.35, "MIN": 0.1, "MAX": 0.9 },
-    { "NAME": "dilate", "TYPE": "float", "DEFAULT": 0.5, "MIN": 0.0, "MAX": 1.0, "LABEL": "Bass dilate" },
+    { "NAME": "dilate", "TYPE": "float", "DEFAULT": 0.0, "MIN": 0.0, "MAX": 1.0, "LABEL": "Dilate", "MODS": [{ "SOURCE": "bass", "AMOUNT": 0.5 }] },
     { "NAME": "look", "TYPE": "float", "DEFAULT": 0.7, "MIN": 0.0, "MAX": 1.0, "LABEL": "Darting" },
     { "NAME": "blink", "TYPE": "float", "DEFAULT": 0.0, "MIN": 0.0, "MAX": 1.0 },
     { "NAME": "bloodshot", "TYPE": "float", "DEFAULT": 0.6, "MIN": 0.0, "MAX": 1.0 },
+    { "NAME": "veinFlush", "TYPE": "float", "DEFAULT": 0.0, "MIN": 0.0, "MAX": 2.0, "LABEL": "Vein flush", "MODS": [{ "SOURCE": "beat", "AMOUNT": 0.5 }] },
     { "NAME": "irisColor", "TYPE": "color", "DEFAULT": [0.4, 0.55, 0.2, 1.0] },
     { "NAME": "skinColor", "TYPE": "color", "DEFAULT": [0.4, 0.16, 0.13, 1.0] },
     { "NAME": "fillBackground", "TYPE": "bool", "DEFAULT": false, "LABEL": "Fill background" }
@@ -51,13 +52,13 @@ void main() {
   vec2 dir = q / max(r, 1e-4);
   float vn = vnoise(dir * 3.0 + r * vec2(2.7, -1.9) + id * 13.0) + 0.5 * vnoise(dir * 7.0 + r * 5.0 + id * 3.0);
   float vein = smoothstep(0.05, 0.0, abs(vn - 0.8)) * smoothstep(0.3, 0.95, r) * bloodshot;
-  sclera = mix(sclera, vec3(0.6, 0.02, 0.03), clamp(vein * (1.0 + AUDIO_BEAT), 0.0, 1.0));
+  sclera = mix(sclera, vec3(0.6, 0.02, 0.03), clamp(vein * (1.0 + veinFlush), 0.0, 1.0));
 
   // Iris + pupil
   vec2 qi = q - lk;
   float ri = length(qi);
   float irisR = 0.45;
-  float pr = irisR * clamp(pupil + AUDIO_BASS * dilate * 0.5, 0.05, 0.92);
+  float pr = irisR * clamp(pupil + dilate * 0.5, 0.05, 0.92);
   float fib = vnoise(qi / max(ri, 1e-4) * 9.0 + id * 3.0 + ri * 4.0);
   vec3 iris = irisColor.rgb * (0.45 + fib * 0.9);
   iris *= mix(1.0, 0.25, smoothstep(irisR * 0.7, irisR, ri));

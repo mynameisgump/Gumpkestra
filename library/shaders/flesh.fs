@@ -5,7 +5,8 @@
   "INPUTS": [
     { "NAME": "scale", "TYPE": "float", "DEFAULT": 3.0, "MIN": 1.0, "MAX": 10.0 },
     { "NAME": "writhe", "TYPE": "float", "DEFAULT": 0.4, "MIN": 0.0, "MAX": 1.5 },
-    { "NAME": "throb", "TYPE": "float", "DEFAULT": 0.6, "MIN": 0.0, "MAX": 2.0, "LABEL": "Bass throb" },
+    { "NAME": "throb", "TYPE": "float", "DEFAULT": 0.0, "MIN": 0.0, "MAX": 2.0, "LABEL": "Throb", "MODS": [{ "SOURCE": "bass", "AMOUNT": 0.3 }] },
+    { "NAME": "flush", "TYPE": "float", "DEFAULT": 0.0, "MIN": 0.0, "MAX": 1.0, "MODS": [{ "SOURCE": "beat", "AMOUNT": 0.3 }] },
     { "NAME": "fibers", "TYPE": "float", "DEFAULT": 0.5, "MIN": 0.0, "MAX": 1.0, "LABEL": "Muscle fibre" },
     { "NAME": "fat", "TYPE": "float", "DEFAULT": 0.3, "MIN": 0.0, "MAX": 1.0 },
     { "NAME": "wetness", "TYPE": "float", "DEFAULT": 0.7, "MIN": 0.0, "MAX": 1.5 },
@@ -62,7 +63,7 @@ float tissue(vec2 p, out float fatMask) {
 
 void main() {
   vec2 uv = (isf_FragNormCoord - 0.5) * vec2(RENDERSIZE.x / RENDERSIZE.y, 1.0);
-  uv /= 1.0 + AUDIO_BASS * throb * 0.12;
+  uv /= 1.0 + throb * 0.12;
   vec2 p = uv * scale;
 
   float fm, unused;
@@ -80,6 +81,6 @@ void main() {
   vec3 col = mix(meat, fatColor.rgb * (0.7 + h * 0.4), fm);
   col *= 0.35 + diff * 0.9;
   col += spec * mix(vec3(1.0, 0.8, 0.75), vec3(1.0), fm);
-  col += meatColor.rgb * AUDIO_BEAT * 0.3;
+  col += meatColor.rgb * flush;
   gl_FragColor = vec4(col, 1.0);
 }

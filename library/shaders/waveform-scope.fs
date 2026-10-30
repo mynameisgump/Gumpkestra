@@ -7,6 +7,7 @@
     { "NAME": "amplitude", "TYPE": "float", "DEFAULT": 0.4, "MIN": 0.0, "MAX": 2.0 },
     { "NAME": "thickness", "TYPE": "float", "DEFAULT": 2.5, "MIN": 0.5, "MAX": 20.0, "LABEL": "Thickness (px)" },
     { "NAME": "glow", "TYPE": "float", "DEFAULT": 12.0, "MIN": 0.0, "MAX": 60.0, "LABEL": "Glow (px)" },
+    { "NAME": "brightness", "TYPE": "float", "DEFAULT": 0.8, "MIN": 0.0, "MAX": 2.0, "MODS": [{ "SOURCE": "level", "AMOUNT": 0.3 }] },
     { "NAME": "color", "TYPE": "color", "DEFAULT": [0.7, 1.0, 0.3, 1.0] }
   ]
 }*/
@@ -28,5 +29,5 @@ void main() {
 
   float line = smoothstep(thickness, thickness * 0.5, d);
   float halo = glow > 0.0 ? exp(-d / glow) * 0.5 : 0.0;
-  gl_FragColor = vec4(color.rgb * (line + halo) * (0.8 + AUDIO_LEVEL * 0.6), 1.0);
+  gl_FragColor = vec4(color.rgb * (line + halo) * brightness, 1.0);
 }

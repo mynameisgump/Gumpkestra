@@ -15,6 +15,8 @@ export interface ISFInput {
   MAX?: unknown;
   VALUES?: number[];
   LABELS?: string[];
+  /** Gumpkestra extension: modulators a float input starts with (see README). */
+  MODS?: { SOURCE: string; AMOUNT?: number; RATE?: number; SMOOTH?: number }[];
 }
 
 export interface ISFPass {

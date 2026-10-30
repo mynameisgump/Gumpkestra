@@ -1,5 +1,5 @@
 import type { AudioFeatures } from '../audio/AudioEngine';
-import { evalModulator, serialiseModulator, type Modulator } from '../audio/Modulators';
+import { evalModulator, MOD_SOURCES, newModulator, serialiseModulator, type Modulator, type ModSource } from '../audio/Modulators';
 import {
   AUDIO_UNIFORMS, buildFragment, evalSizeExpr, ISFError, mapErrorLog, VERTEX_SHADER,
   type ISFInput, type ISFPass, type ParsedISF,
@@ -66,6 +66,14 @@ export function defaultValue(input: ISFInput): unknown {
     case 'image': return typeof input.DEFAULT === 'string' ? input.DEFAULT : INPUT_IMAGE;
     default: return null;
   }
+}
+
+/** The modulators a shader attaches to an input by default (`MODS`); unknown sources are skipped. */
+export function defaultMods(input: ISFInput): Modulator[] {
+  return (input.MODS ?? []).filter((m) => m.SOURCE in MOD_SOURCES).map((m) => {
+    const mod = newModulator(m.SOURCE as ModSource);
+    return { ...mod, amount: m.AMOUNT ?? mod.amount, rate: m.RATE ?? mod.rate, smooth: m.SMOOTH ?? mod.smooth };
+  });
 }
 
 export const floatRange = (input: ISFInput): [number, number] => [
@@ -139,7 +147,7 @@ export class Layer {
     for (const input of parsed.meta.INPUTS) {
       if (['audio', 'audioFFT'].includes(input.TYPE) || isInputImage(input)) continue;
       const keep = oldInputs.get(input.NAME) === input.TYPE ? this.params[input.NAME] : undefined;
-      params[input.NAME] = keep ?? { value: defaultValue(input), mods: [] };
+      params[input.NAME] = keep ?? { value: defaultValue(input), mods: defaultMods(input) };
     }
     this.params = params;
     this.parsed = parsed;
@@ -165,7 +173,8 @@ export class Layer {
     this.blend = json.blend ?? 'normal';
     if (json.opacity) this.opacity = { ...json.opacity, mods: json.opacity.mods ?? [] };
     for (const [k, v] of Object.entries(json.params ?? {})) {
-      if (this.params[k]) this.params[k] = { ...v, mods: v.mods ?? [] };
+      // A param saved without a mods list keeps the shader's default modulators.
+      if (this.params[k]) this.params[k] = { ...v, mods: v.mods ?? this.params[k].mods };
     }
   }
 

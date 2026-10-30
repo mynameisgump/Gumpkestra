@@ -9,6 +9,7 @@
     { "NAME": "seedSize", "TYPE": "float", "DEFAULT": 0.03, "MIN": 0.005, "MAX": 0.2 },
     { "NAME": "heal", "TYPE": "float", "DEFAULT": 0.15, "MIN": 0.0, "MAX": 1.0 },
     { "NAME": "corrupt", "TYPE": "float", "DEFAULT": 0.7, "MIN": 0.0, "MAX": 1.0, "LABEL": "Corruption" },
+    { "NAME": "rimGlow", "TYPE": "float", "DEFAULT": 0.6, "MIN": 0.0, "MAX": 2.0, "LABEL": "Rim glow", "MODS": [{ "SOURCE": "high", "AMOUNT": 0.4 }] },
     { "NAME": "rotColor", "TYPE": "color", "DEFAULT": [0.3, 0.4, 0.05, 1.0] },
     { "NAME": "rimColor", "TYPE": "color", "DEFAULT": [0.85, 1.0, 0.25, 1.0] }
   ],
@@ -64,6 +65,6 @@ void main() {
 
   float body = smoothstep(0.3, 0.6, m);
   float rim = smoothstep(0.08, 0.3, m) * (1.0 - body);
-  vec3 col = mix(src, rotted, body) + rimColor.rgb * rim * (0.6 + AUDIO_HIGH * 0.8);
+  vec3 col = mix(src, rotted, body) + rimColor.rgb * rim * rimGlow;
   gl_FragColor = vec4(col, 1.0);
 }

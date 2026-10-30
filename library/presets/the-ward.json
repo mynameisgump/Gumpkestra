@@ -22,8 +22,15 @@
           "mods": []
         },
         "dilate": {
-          "value": 0.5,
-          "mods": []
+          "value": 0,
+          "mods": [
+            {
+              "source": "bass",
+              "amount": 0.5,
+              "rate": 0.25,
+              "smooth": 0
+            }
+          ]
         },
         "look": {
           "value": 0.7,
@@ -85,6 +92,17 @@
               "amount": 0.2,
               "rate": 0.25,
               "smooth": 0.1
+            }
+          ]
+        },
+        "split": {
+          "value": 0,
+          "mods": [
+            {
+              "source": "beat",
+              "amount": 0.15,
+              "rate": 0.25,
+              "smooth": 0
             }
           ]
         },
@@ -155,8 +173,15 @@
           "mods": []
         },
         "beatTear": {
-          "value": 0.6,
-          "mods": []
+          "value": 0,
+          "mods": [
+            {
+              "source": "beat",
+              "amount": 0.3,
+              "rate": 0.25,
+              "smooth": 0
+            }
+          ]
         },
         "chroma": {
           "value": 0.5,

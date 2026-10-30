@@ -1,17 +1,17 @@
 /*{
-  "DESCRIPTION": "Raymarched sphere whose surface is displaced by the spectrum. Wrap it in a texture (try the built-in Meat) and add bump and gloss for a wet, fleshy look; set Texture amount to 0 for the plain hue colouring.",
+  "DESCRIPTION": "Raymarched sphere whose surface is displaced by the spectrum: lumps low on the ball follow the bass, higher up the treble. It swells with the bass and its edge glows with the highs through modulators on radius and Edge glow (∿). Wrap it in a texture (try the built-in Meat) and add bump and gloss for a wet, fleshy look; set Texture mix to 0 for the plain hue colouring.",
   "CREDIT": "Gumpkestra",
   "CATEGORIES": ["Generator", "Audio", "3D", "Texture"],
   "INPUTS": [
     { "NAME": "audioFFT", "TYPE": "audioFFT" },
-    { "NAME": "radius", "TYPE": "float", "DEFAULT": 0.9, "MIN": 0.3, "MAX": 1.6 },
-    { "NAME": "pulse", "TYPE": "float", "DEFAULT": 0.25, "MIN": 0.0, "MAX": 1.0, "LABEL": "Bass pulse" },
-    { "NAME": "displace", "TYPE": "float", "DEFAULT": 0.25, "MIN": 0.0, "MAX": 0.8 },
-    { "NAME": "frequency", "TYPE": "float", "DEFAULT": 6.0, "MIN": 1.0, "MAX": 20.0 },
+    { "NAME": "radius", "TYPE": "float", "DEFAULT": 0.9, "MIN": 0.3, "MAX": 1.6, "MODS": [{ "SOURCE": "bass", "AMOUNT": 0.1731 }] },
+    { "NAME": "displace", "TYPE": "float", "DEFAULT": 0.25, "MIN": 0.0, "MAX": 0.8, "LABEL": "Lump height" },
+    { "NAME": "frequency", "TYPE": "float", "DEFAULT": 6.0, "MIN": 1.0, "MAX": 20.0, "LABEL": "Lump count" },
     { "NAME": "spin", "TYPE": "float", "DEFAULT": 0.3, "MIN": -2.0, "MAX": 2.0 },
     { "NAME": "hue", "TYPE": "float", "DEFAULT": 0.55, "MIN": 0.0, "MAX": 1.0 },
+    { "NAME": "rim", "TYPE": "float", "DEFAULT": 0.6, "MIN": 0.0, "MAX": 2.0, "LABEL": "Edge glow", "MODS": [{ "SOURCE": "high", "AMOUNT": 0.5 }] },
     { "NAME": "tex", "TYPE": "image", "DEFAULT": "@meat", "LABEL": "Texture" },
-    { "NAME": "texMix", "TYPE": "float", "DEFAULT": 1.0, "MIN": 0.0, "MAX": 1.0, "LABEL": "Texture amount" },
+    { "NAME": "texMix", "TYPE": "float", "DEFAULT": 1.0, "MIN": 0.0, "MAX": 1.0, "LABEL": "Texture mix" },
     { "NAME": "texScale", "TYPE": "float", "DEFAULT": 1.0, "MIN": 0.25, "MAX": 6.0, "LABEL": "Texture scale" },
     { "NAME": "bump", "TYPE": "float", "DEFAULT": 0.6, "MIN": 0.0, "MAX": 2.0, "LABEL": "Texture bump" },
     { "NAME": "gloss", "TYPE": "float", "DEFAULT": 0.5, "MIN": 0.0, "MAX": 2.0, "LABEL": "Wet gloss" }
@@ -42,7 +42,7 @@ float map(vec3 p) {
   vec3 n = p / max(r, 1e-4);
   float f = IMG_NORM_PIXEL(audioFFT, vec2(0.03 + 0.55 * (0.5 + 0.5 * n.y), 0.5)).r;
   float d = sin(n.x * frequency + TIME) * sin(n.y * frequency + TIME * 1.3) * sin(n.z * frequency - TIME * 0.7);
-  return r - (radius * (1.0 + AUDIO_BASS * pulse) + d * displace * (0.2 + f * 1.5));
+  return r - (radius + d * displace * (0.2 + f * 1.5));
 }
 
 vec3 normalAt(vec3 p) {
@@ -96,6 +96,6 @@ void main() {
   float diff = max(dot(n, light), 0.0);
   float fres = pow(1.0 - max(dot(n, -rd), 0.0), 3.0);
   float spec = pow(max(dot(reflect(rd, n), light), 0.0), 40.0);
-  vec3 col = base * (0.15 + diff * 0.85) + fres * (0.6 + AUDIO_HIGH) + spec * gloss;
+  vec3 col = base * (0.15 + diff * 0.85) + fres * rim + spec * gloss;
   gl_FragColor = vec4(hit ? col : vec3(0.0), 1.0);
 }

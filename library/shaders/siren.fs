@@ -7,7 +7,7 @@
     { "NAME": "beams", "TYPE": "float", "DEFAULT": 2.0, "MIN": 1.0, "MAX": 6.0 },
     { "NAME": "width", "TYPE": "float", "DEFAULT": 0.3, "MIN": 0.05, "MAX": 1.0, "LABEL": "Beam width" },
     { "NAME": "haze", "TYPE": "float", "DEFAULT": 0.8, "MIN": 0.0, "MAX": 1.5 },
-    { "NAME": "strobe", "TYPE": "float", "DEFAULT": 0.4, "MIN": 0.0, "MAX": 1.0, "LABEL": "Beat strobe" },
+    { "NAME": "strobe", "TYPE": "float", "DEFAULT": 0.0, "MIN": 0.0, "MAX": 1.0, "LABEL": "Strobe", "MODS": [{ "SOURCE": "beat", "AMOUNT": 0.7368 }] },
     { "NAME": "position", "TYPE": "point2D", "DEFAULT": [0.5, 0.8], "MIN": [0.0, 0.0], "MAX": [1.0, 1.0] },
     { "NAME": "lampColor", "TYPE": "color", "DEFAULT": [1.0, 0.07, 0.02, 1.0] }
   ]
@@ -44,6 +44,6 @@ void main() {
 
   vec3 col = lampColor.rgb * (shaft + lamp + flash * wall + 0.02 * wall);
   col *= 1.0 - smoothstep(0.05, 0.0, abs(p.y - 0.04)) * step(abs(p.x), 0.06) * 0.8;
-  col += vec3(1.0, 0.95, 0.9) * pow(AUDIO_BEAT, 3.0) * strobe * 0.7;
+  col += vec3(1.0, 0.95, 0.9) * pow(strobe, 3.0) * 0.7;
   gl_FragColor = vec4(col, 1.0);
 }

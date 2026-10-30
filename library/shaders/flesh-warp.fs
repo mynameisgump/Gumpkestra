@@ -7,7 +7,7 @@
     { "NAME": "warp", "TYPE": "float", "DEFAULT": 0.025, "MIN": 0.0, "MAX": 0.15 },
     { "NAME": "scale", "TYPE": "float", "DEFAULT": 3.0, "MIN": 0.5, "MAX": 10.0 },
     { "NAME": "breathRate", "TYPE": "float", "DEFAULT": 0.25, "MIN": 0.0, "MAX": 2.0, "LABEL": "Breaths / sec" },
-    { "NAME": "heartbeat", "TYPE": "float", "DEFAULT": 0.06, "MIN": 0.0, "MAX": 0.25, "LABEL": "Bass swell" },
+    { "NAME": "heartbeat", "TYPE": "float", "DEFAULT": 0.0, "MIN": 0.0, "MAX": 0.25, "LABEL": "Swell", "MODS": [{ "SOURCE": "bass", "AMOUNT": 0.24 }] },
     { "NAME": "fleshTint", "TYPE": "float", "DEFAULT": 0.3, "MIN": 0.0, "MAX": 1.0 },
     { "NAME": "wetness", "TYPE": "float", "DEFAULT": 0.4, "MIN": 0.0, "MAX": 1.5 },
     { "NAME": "tint", "TYPE": "color", "DEFAULT": [0.75, 0.12, 0.12, 1.0] }
@@ -34,7 +34,7 @@ void main() {
   vec2 p = uv * scale * vec2(RENDERSIZE.x / RENDERSIZE.y, 1.0);
   float breath = 0.5 + 0.5 * sin(TIME * breathRate * 6.28318);
   vec2 d = vec2(fbm(p + TIME * 0.1), fbm(p + 5.2 - TIME * 0.1)) - 0.5;
-  vec2 swell = -(uv - 0.5) * AUDIO_BASS * heartbeat;
+  vec2 swell = -(uv - 0.5) * heartbeat;
   vec3 col = IMG_NORM_PIXEL(inputImage, uv + d * warp * (0.5 + breath) + swell).rgb;
 
   float e = 0.01;

@@ -7,8 +7,8 @@
     { "NAME": "density", "TYPE": "float", "DEFAULT": 0.7, "MIN": 0.0, "MAX": 1.0 },
     { "NAME": "size", "TYPE": "float", "DEFAULT": 0.45, "MIN": 0.2, "MAX": 0.8 },
     { "NAME": "writhe", "TYPE": "float", "DEFAULT": 0.4, "MIN": 0.0, "MAX": 1.0 },
-    { "NAME": "jitter", "TYPE": "float", "DEFAULT": 0.6, "MIN": 0.0, "MAX": 2.0, "LABEL": "Treble jitter" },
-    { "NAME": "swell", "TYPE": "float", "DEFAULT": 0.5, "MIN": 0.0, "MAX": 1.0, "LABEL": "Bass swell" },
+    { "NAME": "jitter", "TYPE": "float", "DEFAULT": 0.0, "MIN": 0.0, "MAX": 2.0, "LABEL": "Jitter", "MODS": [{ "SOURCE": "high", "AMOUNT": 0.3 }] },
+    { "NAME": "swell", "TYPE": "float", "DEFAULT": 0.0, "MIN": 0.0, "MAX": 1.0, "LABEL": "Swell", "MODS": [{ "SOURCE": "bass", "AMOUNT": 0.5 }] },
     { "NAME": "lens", "TYPE": "float", "DEFAULT": 0.48, "MIN": 0.3, "MAX": 1.0, "LABEL": "Lens radius" },
     { "NAME": "stain", "TYPE": "color", "DEFAULT": [0.6, 0.25, 0.65, 1.0] },
     { "NAME": "nucleusColor", "TYPE": "color", "DEFAULT": [0.18, 0.04, 0.32, 1.0] },
@@ -42,9 +42,9 @@ void main() {
     vec2 h = hash2(cell);
     if (h.x > density) continue;
     vec2 o = 0.5 + 0.35 * sin(TIME * (0.3 + h) * writhe * 2.0 + 6.2831 * h);
-    o += (hash2(cell + floor(TIME * 20.0)) - 0.5) * AUDIO_HIGH * jitter * 0.08;
+    o += (hash2(cell + floor(TIME * 20.0)) - 0.5) * jitter * 0.08;
     vec2 rel = g + o - f;
-    float rad = size * (0.7 + 0.6 * h.y) * (1.0 + AUDIO_BASS * swell * 0.35);
+    float rad = size * (0.7 + 0.6 * h.y) * (1.0 + swell * 0.35);
     float a = atan(rel.y, rel.x);
     rad *= 1.0 + 0.12 * sin(a * 3.0 + TIME * 2.0 * writhe + h.x * 20.0) * writhe;
     float d = length(rel);

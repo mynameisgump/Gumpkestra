@@ -7,6 +7,7 @@
     { "NAME": "bars", "TYPE": "float", "DEFAULT": 64.0, "MIN": 8.0, "MAX": 256.0 },
     { "NAME": "height", "TYPE": "float", "DEFAULT": 0.8, "MIN": 0.1, "MAX": 2.0 },
     { "NAME": "gap", "TYPE": "float", "DEFAULT": 0.25, "MIN": 0.0, "MAX": 0.9 },
+    { "NAME": "boost", "TYPE": "float", "DEFAULT": 0.0, "MIN": 0.0, "MAX": 2.0, "MODS": [{ "SOURCE": "beat", "AMOUNT": 0.3 }] },
     { "NAME": "mirror", "TYPE": "bool", "DEFAULT": true },
     { "NAME": "colorLow", "TYPE": "color", "DEFAULT": [0.1, 1.0, 0.6, 1.0] },
     { "NAME": "colorHigh", "TYPE": "color", "DEFAULT": [1.0, 0.2, 0.6, 1.0] }
@@ -27,6 +28,6 @@ void main() {
   float glow = exp(-max(y - h, 0.0) * 18.0) * inBar * 0.45;
 
   vec3 col = mix(colorLow.rgb, colorHigh.rgb, uv.x);
-  col *= max(fill, glow) * (1.0 + AUDIO_BEAT * 0.6);
+  col *= max(fill, glow) * (1.0 + boost);
   gl_FragColor = vec4(col, 1.0);
 }

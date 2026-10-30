@@ -5,8 +5,9 @@
   "INPUTS": [
     { "NAME": "audioFFT", "TYPE": "audioFFT" },
     { "NAME": "radius", "TYPE": "float", "DEFAULT": 0.22, "MIN": 0.02, "MAX": 0.6 },
-    { "NAME": "pulse", "TYPE": "float", "DEFAULT": 0.35, "MIN": 0.0, "MAX": 1.5, "LABEL": "Bass pulse" },
+    { "NAME": "pulse", "TYPE": "float", "DEFAULT": 0.0, "MIN": 0.0, "MAX": 1.5, "LABEL": "Pulse", "MODS": [{ "SOURCE": "bass", "AMOUNT": 0.2333 }] },
     { "NAME": "spikes", "TYPE": "float", "DEFAULT": 0.35, "MIN": 0.0, "MAX": 1.0 },
+    { "NAME": "coreGlow", "TYPE": "float", "DEFAULT": 0.0, "MIN": 0.0, "MAX": 1.0, "LABEL": "Core glow", "MODS": [{ "SOURCE": "beat", "AMOUNT": 0.35 }] },
     { "NAME": "thickness", "TYPE": "float", "DEFAULT": 0.006, "MIN": 0.001, "MAX": 0.05 },
     { "NAME": "spin", "TYPE": "float", "DEFAULT": 0.03, "MIN": -0.5, "MAX": 0.5 },
     { "NAME": "colorA", "TYPE": "color", "DEFAULT": [0.2, 0.9, 1.0, 1.0] },
@@ -22,7 +23,7 @@ void main() {
   float m = abs(a * 2.0 - 1.0);
   float f = IMG_NORM_PIXEL(audioFFT, vec2(0.02 + m * 0.8, 0.5)).r;
 
-  float rr = radius * (1.0 + AUDIO_BASS * pulse);
+  float rr = radius * (1.0 + pulse);
   float outer = rr + pow(f, 2.2) * spikes;
   float ring = smoothstep(thickness, 0.0, abs(r - rr));
   float bars = step(rr, r) * step(r, outer);
@@ -30,6 +31,6 @@ void main() {
 
   vec3 col = mix(colorA.rgb, colorB.rgb, m);
   vec3 c = col * (bars * 0.75 + tip * 0.8) + vec3(1.0) * ring;
-  c += colorA.rgb * smoothstep(rr, 0.0, r) * AUDIO_BEAT * 0.35;
+  c += colorA.rgb * smoothstep(rr, 0.0, r) * coreGlow;
   gl_FragColor = vec4(c, 1.0);
 }

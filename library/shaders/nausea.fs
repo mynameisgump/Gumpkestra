@@ -5,11 +5,13 @@
   "INPUTS": [
     { "NAME": "inputImage", "TYPE": "image" },
     { "NAME": "doubleVision", "TYPE": "float", "DEFAULT": 0.02, "MIN": 0.0, "MAX": 0.1 },
+    { "NAME": "split", "TYPE": "float", "DEFAULT": 0.0, "MIN": 0.0, "MAX": 0.1, "MODS": [{ "SOURCE": "beat", "AMOUNT": 0.2 }] },
     { "NAME": "sway", "TYPE": "float", "DEFAULT": 0.04, "MIN": 0.0, "MAX": 0.2 },
     { "NAME": "rate", "TYPE": "float", "DEFAULT": 0.12, "MIN": 0.0, "MAX": 1.0, "LABEL": "Sway speed" },
     { "NAME": "waver", "TYPE": "float", "DEFAULT": 0.006, "MIN": 0.0, "MAX": 0.04 },
     { "NAME": "sick", "TYPE": "float", "DEFAULT": 0.35, "MIN": 0.0, "MAX": 1.0, "LABEL": "Sick tint" },
-    { "NAME": "tunnelVision", "TYPE": "float", "DEFAULT": 0.5, "MIN": 0.0, "MAX": 1.0 }
+    { "NAME": "tunnelVision", "TYPE": "float", "DEFAULT": 0.5, "MIN": 0.0, "MAX": 1.0 },
+    { "NAME": "tunnelPulse", "TYPE": "float", "DEFAULT": 0.0, "MIN": 0.0, "MAX": 1.0, "LABEL": "Tunnel pulse", "MODS": [{ "SOURCE": "level", "AMOUNT": 0.4 }] }
   ]
 }*/
 
@@ -24,12 +26,12 @@ void main() {
   vec2 base = c / vec2(aspect, 1.0) + 0.5;
 
   vec2 off = vec2(cos(t * 0.7), sin(t * 1.3)) * doubleVision * (0.6 + 0.4 * sin(t * 0.5));
-  off += vec2(doubleVision * AUDIO_BEAT, 0.0);
+  off += vec2(split, 0.0);
   vec3 col = 0.5 * (IMG_NORM_PIXEL(inputImage, base + off).rgb + IMG_NORM_PIXEL(inputImage, base - off).rgb);
 
   float l = dot(col, vec3(0.299, 0.587, 0.114));
   col = mix(col, l * vec3(0.85, 1.0, 0.55) + vec3(0.0, 0.02, 0.0), sick);
-  float closing = 1.0 + tunnelVision * (0.6 + AUDIO_LEVEL * 0.4);
+  float closing = 1.0 + tunnelVision * (0.6 + tunnelPulse);
   float v = smoothstep(0.85, 0.15, length(c) * closing);
   gl_FragColor = vec4(col * mix(1.0, v, tunnelVision), 1.0);
 }
