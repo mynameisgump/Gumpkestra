@@ -8,6 +8,8 @@ import { h } from './ui/dom';
 import { Editor } from './ui/Editor';
 import { LibraryPanel } from './ui/LibraryPanel';
 import { ParamsPanel } from './ui/ParamsPanel';
+import { PresetPicker } from './ui/PresetPicker';
+import { PresetsPanel } from './ui/PresetsPanel';
 import { StackPanel } from './ui/StackPanel';
 
 const $ = (id: string) => document.getElementById(id)!;
@@ -28,6 +30,7 @@ async function main() {
   StackPanel($('stack-panel'), app);
   const tickParams = ParamsPanel($('params-panel'), app, editor.open);
   const topbar = Topbar(app);
+  const presetsPanel = PresetsPanel($('presets-panel'), app, topbar.load);
 
   engine.textures.fetchBlob = (name) => library.fetchFile('textures', name);
   library.onChange((kind, name) => {
@@ -66,6 +69,7 @@ async function main() {
       fpsFrames = fpsTime = 0;
       // Slider drags don't trigger a structural change, so poll for unsaved edits here.
       topbar.updateDirty();
+      presetsPanel.updateDirty();
     }
     requestAnimationFrame(loop);
   };
@@ -82,6 +86,10 @@ async function main() {
     if (t.matches('input, textarea, select')) return;
     if (e.key === '[') topbar.step(-1);
     if (e.key === ']') topbar.step(1);
+    if (e.key === 'p') {
+      e.preventDefault();
+      topbar.openPicker();
+    }
     if (e.key === 'h') document.body.classList.toggle('perform');
     if (e.key === 'f') $('stage').requestFullscreen?.();
     if (e.key === ' ' && audio.mediaElement) {
@@ -97,7 +105,8 @@ function Topbar(app: App) {
   const names = () => [...app.library.presets.keys()].sort((a, b) => a.localeCompare(b));
   const confirmDiscard = () => !app.dirty || confirm(`Discard unsaved changes to "${app.presetName}"?`);
 
-  const presetSelect = h('select', { class: 'preset-select', title: 'Presets in library/presets/' }) as HTMLSelectElement;
+  // `load` is defined below; the wrapper defers the lookup until a tile is clicked.
+  const picker = PresetPicker(app, (name) => load(name));
   const dirtyDot = h('span', { class: 'dirty-dot', title: 'Unsaved changes' }, '●');
   const saveBtn = h('button', { title: 'Save over the current preset (⌘S)', onclick: () => save() }, 'Save') as HTMLButtonElement;
 
@@ -108,11 +117,7 @@ function Topbar(app: App) {
   };
 
   const refresh = () => {
-    presetSelect.replaceChildren(
-      ...(app.presetSaved ? [] : [h('option', { value: '' }, `${app.presetName} (unsaved)`)]),
-      ...names().map((n) => h('option', { value: n }, n)),
-    );
-    presetSelect.value = app.presetSaved ? app.presetName : '';
+    picker.refresh();
     updateDirty();
   };
 
@@ -121,7 +126,6 @@ function Topbar(app: App) {
     if (p && name !== app.presetName && confirmDiscard()) app.loadPreset(p);
     refresh();
   };
-  presetSelect.addEventListener('change', () => load(presetSelect.value));
 
   /** Load the previous/next preset, wrapping around. From an unsaved stack, next is the first. */
   const step = (dir: 1 | -1) => {
@@ -187,7 +191,7 @@ function Topbar(app: App) {
     h('div', { class: 'brand' }, 'GUMPKESTRA'),
     h('div', { class: 'preset-nav' },
       h('button', { title: 'Previous preset ([)', onclick: () => step(-1) }, '◀'),
-      presetSelect,
+      picker.el,
       dirtyDot,
       h('button', { title: 'Next preset (])', onclick: () => step(1) }, '▶')),
     h('button', { title: 'Start a new, empty preset', onclick: newPreset }, 'New'),
@@ -202,7 +206,7 @@ function Topbar(app: App) {
     h('button', { onclick: () => document.body.classList.toggle('perform'), title: 'H' }, 'Hide UI'),
     h('span', { id: 'fps' }),
   );
-  return { refresh, updateDirty, step, save };
+  return { refresh, updateDirty, load, step, save, openPicker: picker.open };
 }
 
 main().catch((e) => {

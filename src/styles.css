@@ -44,7 +44,21 @@ body {
 .spacer { flex: 1; }
 .preset-nav { display: flex; align-items: center; gap: 4px; }
 .preset-nav > button { padding-left: 7px; padding-right: 7px; }
-.preset-select { min-width: 160px; font-family: var(--mono); }
+.preset-picker { position: relative; }
+.preset-name { min-width: 140px; max-width: 260px; font: 12px var(--mono); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.preset-pop {
+  position: absolute; top: calc(100% + 6px); left: 0; z-index: 30;
+  width: min(640px, 90vw); padding: 10px;
+  background: var(--panel); border: 1px solid var(--line); border-radius: 6px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6);
+}
+.preset-pop input { width: 100%; }
+.preset-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 6px; margin-top: 8px; }
+.preset-tile { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; padding: 8px 10px; text-align: left; background: var(--panel-2); font-family: var(--mono); }
+.preset-tile .name { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.preset-tile .count { font-size: 10px; color: var(--dim); }
+.preset-tile.current { border-color: var(--accent); }
+.preset-tile:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
 .dirty-dot { font-size: 10px; color: var(--accent-2); visibility: hidden; }
 .dirty-dot.on { visibility: visible; }
 #fps { font: 11px var(--mono); color: var(--dim); min-width: 150px; text-align: right; }
@@ -112,6 +126,14 @@ input[type='color'] { width: 48px; height: 22px; border: 0; padding: 0; backgrou
 .lib-del { padding: 0 5px; background: transparent; border-color: transparent; color: var(--dim); opacity: 0; }
 .lib-row:hover .lib-del, .lib-del:focus-visible { opacity: 1; }
 .lib-del:hover { color: var(--accent-2); }
+
+/* ---------- presets ---------- */
+.preset-list { display: flex; flex-direction: column; gap: 2px; max-height: 240px; overflow-y: auto; }
+.preset-item { display: flex; align-items: center; gap: 6px; text-align: left; background: transparent; border-color: transparent; font-family: var(--mono); }
+.preset-item:hover { background: var(--panel-2); }
+.preset-item.current { border-color: var(--accent); background: var(--panel-2); }
+.preset-item .name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.preset-item .count { font-size: 10px; color: var(--dim); }
 
 /* ---------- stack ---------- */
 .stack { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 3px; }
