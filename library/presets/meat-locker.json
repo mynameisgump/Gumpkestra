@@ -1,0 +1,24 @@
+{
+  "layers": [
+    {
+      "shader": "flesh",
+      "params": {
+        "writhe": { "value": 0.4, "mods": [{ "source": "mid", "amount": 0.25, "rate": 0.25, "smooth": 0.2 }] }
+      }
+    },
+    {
+      "shader": "veins",
+      "blend": "screen",
+      "opacity": { "value": 0.85, "mods": [] },
+      "params": {
+        "spread": { "value": 0.6, "mods": [{ "source": "level", "amount": 0.4, "rate": 0.25, "smooth": 0.4 }] }
+      }
+    },
+    { "shader": "flesh-warp", "params": { "fleshTint": { "value": 0.15, "mods": [] } } },
+    {
+      "shader": "blood-drip",
+      "params": { "pour": { "value": 0.7, "mods": [] } }
+    },
+    { "shader": "crt", "params": { "curvature": { "value": 0.2, "mods": [] } } }
+  ]
+}

@@ -1,0 +1,34 @@
+{
+  "layers": [
+    {
+      "shader": "eye",
+      "params": {
+        "fillBackground": { "value": true, "mods": [] },
+        "size": { "value": 0.9, "mods": [] },
+        "blink": { "value": 0.0, "mods": [{ "source": "random", "amount": 0.35, "rate": 0.25, "smooth": 0.05 }] }
+      }
+    },
+    {
+      "shader": "nausea",
+      "params": {
+        "doubleVision": { "value": 0.015, "mods": [{ "source": "bass", "amount": 0.2, "rate": 0.25, "smooth": 0.1 }] }
+      }
+    },
+    {
+      "shader": "psx",
+      "params": {
+        "resolution": { "value": 180, "mods": [] },
+        "bits": { "value": 4, "mods": [] },
+        "fps": { "value": 15, "mods": [] }
+      }
+    },
+    { "shader": "vhs", "params": {} },
+    {
+      "shader": "grime",
+      "params": {
+        "tint": { "value": [0.8, 1.0, 0.7, 1.0], "mods": [] },
+        "flicker": { "value": 0.4, "mods": [] }
+      }
+    }
+  ]
+}

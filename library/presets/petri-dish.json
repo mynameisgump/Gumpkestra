@@ -1,0 +1,18 @@
+{
+  "layers": [
+    { "shader": "petri", "params": {} },
+    {
+      "shader": "infection",
+      "params": { "infect": { "value": false, "mods": [], "onBeat": true } }
+    },
+    {
+      "shader": "dither",
+      "params": {
+        "palette": { "value": 4, "mods": [] },
+        "amount": { "value": 0.35, "mods": [] }
+      }
+    },
+    { "shader": "grime", "params": { "tintAmount": { "value": 0.0, "mods": [] } } },
+    { "shader": "crt", "params": {} }
+  ]
+}
