@@ -40,3 +40,74 @@ export function select<T extends string>(options: Record<T, string> | T[], value
 }
 
 export const fmt = (v: number) => (Math.abs(v) >= 100 ? v.toFixed(0) : Math.abs(v) >= 10 ? v.toFixed(1) : v.toFixed(2));
+
+// Remembered open/closed state for collapsible panels and sections. Per browser and best-effort:
+// if storage is unavailable everything just starts expanded.
+const COLLAPSED_KEY = 'gumpkestra:collapsed';
+let collapsed: Set<string> | null = null;
+
+export function isCollapsed(id: string) {
+  if (!collapsed) {
+    try {
+      collapsed = new Set(JSON.parse(localStorage.getItem(COLLAPSED_KEY) ?? '[]') as string[]);
+    } catch {
+      collapsed = new Set();
+    }
+  }
+  return collapsed.has(id);
+}
+
+export function setCollapsed(id: string, value: boolean) {
+  isCollapsed(id);
+  if (value) collapsed!.add(id);
+  else collapsed!.delete(id);
+  try {
+    localStorage.setItem(COLLAPSED_KEY, JSON.stringify([...collapsed!]));
+  } catch {
+    /* storage unavailable: state lasts until reload */
+  }
+}
+
+/** Make a panel fold away when its heading is clicked. */
+export function collapsiblePanel(panel: HTMLElement, id: string) {
+  const heading = panel.querySelector('h2');
+  if (!heading) return;
+  heading.classList.add('collapsible');
+  heading.title = 'Click to collapse / expand';
+  panel.classList.toggle('collapsed', isCollapsed(id));
+  heading.addEventListener('click', (e) => {
+    if ((e.target as HTMLElement).closest('button, input, select')) return;
+    const value = !panel.classList.contains('collapsed');
+    panel.classList.toggle('collapsed', value);
+    setCollapsed(id, value);
+  });
+}
+
+export type NumberField = HTMLInputElement & { show(v: number): void };
+
+/**
+ * A value readout you can click and type an exact number into: Enter or clicking away applies it
+ * (clamped to min..max), Esc cancels. `get` is the value to edit; `show` updates the readout (e.g.
+ * with a live, modulated value) whenever it isn't being edited.
+ */
+export function numberField(opts: { min: number; max: number; get: () => number; set: (v: number) => void }): NumberField {
+  const el = h('input', { type: 'text', inputMode: 'decimal', spellcheck: false, class: 'num-field', title: 'Click to type a value' }) as NumberField;
+  let cancelled = false;
+  el.show = (v) => { if (document.activeElement !== el) el.value = fmt(v); };
+  el.show(opts.get());
+  el.addEventListener('focus', () => {
+    cancelled = false;
+    el.value = String(Number(opts.get().toFixed(4)));
+    el.select();
+  });
+  el.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') el.blur();
+    else if (e.key === 'Escape') { cancelled = true; el.blur(); }
+  });
+  el.addEventListener('blur', () => {
+    const v = Number.parseFloat(el.value);
+    if (!cancelled && Number.isFinite(v)) opts.set(Math.min(opts.max, Math.max(opts.min, v)));
+    el.value = fmt(opts.get());
+  });
+  return el;
+}

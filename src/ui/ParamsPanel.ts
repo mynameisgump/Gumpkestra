@@ -4,8 +4,9 @@ import type { ISFInput } from '../isf/isf';
 import { isModelFile, MODEL_EXTENSIONS, BUILTIN_MODELS } from '../model/load';
 import { BLEND_MODES, floatRange, type Layer, type ParamState } from '../render/Layer';
 import { MODEL_TEXTURE, ModelLayer } from '../render/ModelLayer';
+import { DEFAULT_TEXT_MODEL, isTextModel, parseTextModel, TEXT_FONTS, textModelName } from '../model/text';
 import { BUILTIN_TEXTURES, INPUT_IMAGE, isTextureFile, isVideoTexture, TEXTURE_EXTENSIONS, thumbnailURL } from '../render/Textures';
-import { fmt, h, select, slider } from './dom';
+import { h, numberField, select, slider, type NumberField } from './dom';
 
 const toHex = (c: number[]) => '#' + c.slice(0, 3).map((v) => Math.round(v * 255).toString(16).padStart(2, '0')).join('');
 const fromHex = (hex: string, a = 1) => [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255).concat(a);
@@ -14,41 +15,70 @@ const fromHex = (hex: string, a = 1) => [1, 3, 5].map((i) => parseInt(hex.slice(
 export function ParamsPanel(root: HTMLElement, app: App, openEditor: (name: string) => void) {
   /** The texture slot whose thumbnail grid is open, if any. */
   let openGrid: { layer: Layer; input: string } | null = null;
-  let liveMarkers: { el: HTMLElement; text: HTMLElement; layer: Layer; key: string; min: number; max: number }[] = [];
+  let liveMarkers: { el: HTMLElement; text: NumberField; layer: Layer; key: string; min: number; max: number }[] = [];
 
-  const modRow = (state: ParamState, m: Modulator, rerender: () => void) =>
-    h('div', { class: 'mod' },
-      select(MOD_SOURCES, m.source, (v: ModSource) => {
-        const wasRate = usesRate(m.source);
-        m.source = v;
-        if (usesRate(v) !== wasRate || v === 'beatStep') m.rate = newModulator(v).rate;
-        app.touch();
-        rerender();
-      }),
-      h('label', { title: 'Amount (fraction of the parameter range, negative inverts)' }, 'amt',
-        slider({ min: -1, max: 1, step: 0.01, value: m.amount, oninput: (v) => { m.amount = v; app.touch(); } })),
+  /**
+   * Modulator amount as a "sensitivity" slider. Amount is a fraction of the parameter's range per unit
+   * of signal; up to ±MAX_SENS lets quiet bands still swing a parameter end to end. The slider is
+   * squared so its middle half keeps fine control over the old ±1 range.
+   */
+  const MAX_SENS = 4;
+  /** One full-width control line in a modulator block: name, control, value readout. */
+  const modCtl = (name: string, title: string, control: Node, val?: Node) =>
+    h('label', { class: 'mod-ctl', title }, h('span', {}, name), control, val ?? h('span'));
+
+  const sensitivity = (m: Modulator) => {
+    const pos = (a: number) => Math.sign(a) * Math.sqrt(Math.min(Math.abs(a), MAX_SENS) / MAX_SENS);
+    const sl = slider({ min: -1, max: 1, step: 0.005, value: pos(m.amount), oninput: (s) => {
+      m.amount = Math.round(s * Math.abs(s) * MAX_SENS * 100) / 100;
+      val.show(m.amount);
+      app.touch();
+    } }) as HTMLInputElement;
+    const val = numberField({ min: -MAX_SENS, max: MAX_SENS, get: () => m.amount, set: (v) => { m.amount = v; sl.value = String(pos(v)); app.touch(); } });
+    val.classList.add('mod-val');
+    return modCtl('sens', 'Sensitivity: how far the signal pushes the parameter (1 = its full range at full signal; negative inverts)', sl, val);
+  };
+
+  const smoothCtl = (m: Modulator) => {
+    const sl = slider({ min: 0, max: 1, step: 0.01, value: m.smooth, oninput: (v) => { m.smooth = v; val.show(v); app.touch(); } }) as HTMLInputElement;
+    const val = numberField({ min: 0, max: 1, get: () => m.smooth, set: (v) => { m.smooth = v; sl.value = String(v); app.touch(); } });
+    val.classList.add('mod-val');
+    return modCtl('smooth', 'Extra smoothing (seconds)', sl, val);
+  };
+
+  const modRow = (state: ParamState, m: Modulator, rerender: () => void) => {
+    return h('div', { class: 'mod' },
+      h('div', { class: 'mod-head' },
+        select(MOD_SOURCES, m.source, (v: ModSource) => {
+          const wasRate = usesRate(m.source);
+          m.source = v;
+          if (usesRate(v) !== wasRate || v === 'beatStep') m.rate = newModulator(v).rate;
+          app.touch();
+          rerender();
+        }),
+        h('button', { class: 'icon', title: 'Remove modulator', onclick: () => { state.mods.splice(state.mods.indexOf(m), 1); app.touch(); rerender(); } }, '✕')),
+      sensitivity(m),
       usesRate(m.source)
-        ? h('label', { title: m.source === 'beatStep' ? 'Beats per cycle' : 'Rate (Hz)' }, m.source === 'beatStep' ? 'beats' : 'Hz',
+        ? modCtl(m.source === 'beatStep' ? 'beats' : 'Hz', m.source === 'beatStep' ? 'Beats per cycle' : 'Rate (Hz)',
           h('input', { type: 'number', min: 0, step: m.source === 'beatStep' ? 1 : 0.05, value: m.rate,
             onchange: (e: Event) => { m.rate = Number((e.target as HTMLInputElement).value); app.touch(); } }))
-        : h('label', { title: 'Extra smoothing (seconds)' }, 'smooth',
-          slider({ min: 0, max: 1, step: 0.01, value: m.smooth, oninput: (v) => { m.smooth = v; app.touch(); } })),
-      h('button', { class: 'icon', title: 'Remove modulator', onclick: () => { state.mods.splice(state.mods.indexOf(m), 1); app.touch(); rerender(); } }, '✕'),
+        : smoothCtl(m),
     );
+  };
 
   const floatRow = (layer: Layer, key: string, label: string, state: ParamState, min: number, max: number) => {
     const marker = h('div', { class: 'live-marker' });
-    const valText = h('span', { class: 'val' }, fmt(state.value as number));
     const mods = h('div', { class: 'mods' });
     const renderMods = () => mods.replaceChildren(...state.mods.map((m) => modRow(state, m, renderMods)));
     renderMods();
+    const sl = slider({ min, max, value: state.value as number, oninput: (v) => { state.value = v; app.touch(); } }) as HTMLInputElement;
+    const valText = numberField({ min, max, get: () => state.value as number, set: (v) => { state.value = v; sl.value = String(v); app.touch(); } });
+    valText.classList.add('val');
     liveMarkers.push({ el: marker, text: valText, layer, key, min, max });
     return h('div', { class: 'param' },
       h('div', { class: 'row' },
         h('span', { class: 'lbl', title: key }, label),
-        h('div', { class: 'slider-wrap' },
-          slider({ min, max, value: state.value as number, oninput: (v) => { state.value = v; app.touch(); } }),
-          marker),
+        h('div', { class: 'slider-wrap' }, sl, marker),
         valText,
         h('button', {
           class: 'icon mod-add',
@@ -163,10 +193,29 @@ export function ParamsPanel(root: HTMLElement, app: App, openEditor: (name: stri
       file);
   };
 
+  /** Text + font for a 3D text model; applied on Enter / leaving the box. */
+  const textRows = (layer: ModelLayer) => {
+    const { font, text } = parseTextModel(layer.modelName);
+    const apply = (f: string, t: string) => { if (textModelName(f, t) !== layer.modelName) void app.setModel(layer, textModelName(f, t)); };
+    const input = h('input', {
+      type: 'text', value: text, class: 'text-model-input', placeholder: 'Type some text',
+      onchange: (e: Event) => apply(font, (e.target as HTMLInputElement).value),
+      onkeydown: (e: KeyboardEvent) => { if (e.key === 'Enter') (e.target as HTMLInputElement).blur(); },
+    });
+    return [
+      h('div', { class: 'param' }, h('div', { class: 'row model-row' }, h('span', { class: 'lbl' }, 'Text'), input)),
+      h('div', { class: 'param' }, h('div', { class: 'row model-row' }, h('span', { class: 'lbl' }, 'Font'),
+        select(Object.fromEntries(Object.entries(TEXT_FONTS).map(([k, v]) => [k, v.label])), font, (f) => apply(f, (input as HTMLInputElement).value)))),
+    ];
+  };
+
   const modelRow = (layer: ModelLayer) => {
-    const names = [...BUILTIN_MODELS, ...app.library.models];
+    const isText = isTextModel(layer.modelName);
+    // 3D text is one entry; picking it keeps the current text if there is one.
+    const textOption = isText ? layer.modelName : DEFAULT_TEXT_MODEL;
+    const names = [...BUILTIN_MODELS, textOption, ...app.library.models];
     if (!names.includes(layer.modelName)) names.push(layer.modelName);
-    const opts = Object.fromEntries(names.map((n) => [n, n.startsWith('@') ? `${n.slice(1)} (built-in)` : n]));
+    const opts = Object.fromEntries(names.map((n) => [n, isTextModel(n) ? '3D text (built-in)' : n.startsWith('@') ? `${n.slice(1)} (built-in)` : n]));
     const file = h('input', {
       type: 'file',
       accept: MODEL_EXTENSIONS.join(','),
@@ -183,6 +232,7 @@ export function ParamsPanel(root: HTMLElement, app: App, openEditor: (name: stri
         select(opts, layer.modelName, (v) => void app.setModel(layer, v)),
         h('button', { title: 'Import a .glb/.gltf/.obj/.stl into library/models', onclick: () => file.click() }, 'Load…'),
         file)),
+      ...(isText ? textRows(layer) : []),
       h('p', { class: 'hint' }, layer.status
         ?? (mesh ? `${(mesh.vertexCount / 3).toLocaleString()} triangles · ${mesh.textures.length} textures · ${mesh.rig.animations.length} animations` : '')),
     ];
@@ -220,7 +270,7 @@ export function ParamsPanel(root: HTMLElement, app: App, openEditor: (name: stri
       const v = m.layer.live[m.key];
       if (v === undefined) continue;
       m.el.style.left = `${((v - m.min) / (m.max - m.min || 1)) * 100}%`;
-      m.text.textContent = fmt(v);
+      m.text.show(v);
     }
   };
 }

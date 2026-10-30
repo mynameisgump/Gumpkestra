@@ -83,7 +83,37 @@
       },
       "params": {
         "count": {
-          "value": 3,
+          "value": 5.36,
+          "mods": []
+        },
+        "moveX": {
+          "value": 0,
+          "mods": [
+            {
+              "source": "lfoSine",
+              "amount": 0.04,
+              "rate": 0.25,
+              "smooth": 0
+            }
+          ]
+        },
+        "moveY": {
+          "value": 0,
+          "mods": []
+        },
+        "zoom": {
+          "value": 1.4274,
+          "mods": [
+            {
+              "source": "mid",
+              "amount": -0.22,
+              "rate": 0.25,
+              "smooth": 1
+            }
+          ]
+        },
+        "rotate": {
+          "value": 0,
           "mods": []
         },
         "size": {
@@ -91,8 +121,15 @@
           "mods": []
         },
         "pupil": {
-          "value": 0.35,
-          "mods": []
+          "value": 0.3936,
+          "mods": [
+            {
+              "source": "bass",
+              "amount": 1.56,
+              "rate": 0.25,
+              "smooth": 0
+            }
+          ]
         },
         "dilate": {
           "value": 0,
@@ -107,11 +144,25 @@
         },
         "look": {
           "value": 0.7,
-          "mods": []
+          "mods": [
+            {
+              "source": "high",
+              "amount": 0.5,
+              "rate": 0.25,
+              "smooth": 0
+            }
+          ]
         },
         "blink": {
           "value": 0,
-          "mods": []
+          "mods": [
+            {
+              "source": "bass",
+              "amount": 0.5,
+              "rate": 0.25,
+              "smooth": 0
+            }
+          ]
         },
         "bloodshot": {
           "value": 0.6,
@@ -167,16 +218,23 @@
           "mods": []
         },
         "jpeg": {
-          "value": 0.6,
+          "value": 1,
           "mods": []
         },
         "posterize": {
-          "value": 8,
+          "value": 16.19,
           "mods": []
         },
         "bulge": {
           "value": 0,
-          "mods": []
+          "mods": [
+            {
+              "source": "bass",
+              "amount": 0.5,
+              "rate": 0.25,
+              "smooth": 0
+            }
+          ]
         },
         "hueSpin": {
           "value": 0,
@@ -246,6 +304,129 @@
         },
         "amount": {
           "value": 0.3,
+          "mods": []
+        }
+      }
+    },
+    {
+      "shader": "grime",
+      "enabled": true,
+      "blend": "normal",
+      "opacity": {
+        "value": 1,
+        "mods": []
+      },
+      "params": {
+        "grain": {
+          "value": 0.12,
+          "mods": [
+            {
+              "source": "bass",
+              "amount": 0.5,
+              "rate": 0.25,
+              "smooth": 0
+            }
+          ]
+        },
+        "dust": {
+          "value": 0.3,
+          "mods": []
+        },
+        "smudge": {
+          "value": 0.3,
+          "mods": []
+        },
+        "flicker": {
+          "value": 0.25,
+          "mods": []
+        },
+        "crush": {
+          "value": 0.25,
+          "mods": []
+        },
+        "vignette": {
+          "value": 0.6,
+          "mods": []
+        },
+        "tintAmount": {
+          "value": 0.3,
+          "mods": []
+        },
+        "tint": {
+          "value": [
+            1,
+            0.75,
+            0.45,
+            1
+          ],
+          "mods": []
+        }
+      }
+    },
+    {
+      "shader": "rgb-split",
+      "enabled": true,
+      "blend": "normal",
+      "opacity": {
+        "value": 1,
+        "mods": []
+      },
+      "params": {
+        "amount": {
+          "value": 0.00592,
+          "mods": [
+            {
+              "source": "high",
+              "amount": 1.39,
+              "rate": 0.25,
+              "smooth": 1
+            }
+          ]
+        },
+        "radial": {
+          "value": true,
+          "mods": []
+        },
+        "angle": {
+          "value": 0,
+          "mods": []
+        }
+      }
+    },
+    {
+      "shader": "color-grade",
+      "enabled": true,
+      "blend": "normal",
+      "opacity": {
+        "value": 1,
+        "mods": []
+      },
+      "params": {
+        "hue": {
+          "value": 0,
+          "mods": [
+            {
+              "source": "lfoSaw",
+              "amount": 1,
+              "rate": 0.1,
+              "smooth": 0
+            }
+          ]
+        },
+        "saturation": {
+          "value": 1,
+          "mods": []
+        },
+        "contrast": {
+          "value": 1,
+          "mods": []
+        },
+        "exposure": {
+          "value": 0,
+          "mods": []
+        },
+        "invert": {
+          "value": false,
           "mods": []
         }
       }

@@ -2,6 +2,7 @@ import type { ISFInput, ParsedISF } from '../isf/isf';
 import { VERTEX_SHADER } from '../isf/isf';
 import { axisAngle, fromTRS, perspective, quatMul } from '../model/math';
 import { STRIDE, type MeshData } from '../model/mesh';
+import { isTextModel, parseTextModel } from '../model/text';
 import { createTarget, deleteTarget, link, uniformCache, type Target } from './gl';
 import { floatRange, Layer, resolveImage, type FrameContext } from './Layer';
 
@@ -304,6 +305,7 @@ export class ModelLayer extends Layer {
   }
 
   override get label() {
+    if (isTextModel(this.modelName)) return `◆ "${parseTextModel(this.modelName).text}"`;
     return `◆ ${this.modelName.replace(/^@/, '')}`;
   }
 

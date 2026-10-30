@@ -4,7 +4,7 @@ import { AudioEngine } from './audio/AudioEngine';
 import { Library } from './library';
 import { Engine } from './render/Engine';
 import { AudioPanel } from './ui/AudioPanel';
-import { h } from './ui/dom';
+import { collapsiblePanel, h } from './ui/dom';
 import { Editor } from './ui/Editor';
 import { LibraryPanel } from './ui/LibraryPanel';
 import { ParamsPanel } from './ui/ParamsPanel';
@@ -31,6 +31,7 @@ async function main() {
   const tickParams = ParamsPanel($('params-panel'), app, editor.open);
   const topbar = Topbar(app);
   const presetsPanel = PresetsPanel($('presets-panel'), app, topbar.load);
+  for (const id of ['audio-panel', 'presets-panel', 'library-panel']) collapsiblePanel($(id), id);
 
   engine.textures.fetchBlob = (name) => library.fetchFile('textures', name);
   library.onChange((kind, name) => {
@@ -83,6 +84,11 @@ async function main() {
       return;
     }
     const t = e.target as HTMLElement;
+    if ((e.metaKey || e.ctrlKey) && e.key === 'd' && !t.matches('textarea')) {
+      e.preventDefault();
+      if (app.selected) app.duplicateLayer(app.selected);
+      return;
+    }
     if (t.matches('input, textarea, select')) return;
     if (e.key === '[') topbar.step(-1);
     if (e.key === ']') topbar.step(1);

@@ -65,7 +65,7 @@
     },
     {
       "shader": "siren",
-      "enabled": false,
+      "enabled": true,
       "blend": "add",
       "opacity": {
         "value": 0.8,
@@ -93,7 +93,7 @@
           "mods": [
             {
               "source": "beat",
-              "amount": 0.7368,
+              "amount": 0.5,
               "rate": 0.25,
               "smooth": 0
             }
@@ -101,8 +101,8 @@
         },
         "position": {
           "value": [
-            0.85,
-            0.92
+            0.919,
+            1
           ],
           "mods": []
         },
@@ -119,8 +119,8 @@
     },
     {
       "shader": "grime",
-      "enabled": false,
-      "blend": "normal",
+      "enabled": true,
+      "blend": "screen",
       "opacity": {
         "value": 1,
         "mods": []
@@ -175,15 +175,15 @@
       },
       "params": {
         "resolution": {
-          "value": 240,
+          "value": 178.8,
           "mods": []
         },
         "bits": {
-          "value": 5,
+          "value": 3.898,
           "mods": []
         },
         "dither": {
-          "value": 0.8,
+          "value": 0.883,
           "mods": []
         },
         "wobble": {

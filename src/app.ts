@@ -192,6 +192,15 @@ export class App {
     this.changed();
   }
 
+  /** Copy a layer with all its settings and modulators, right after it in the stack, and select the copy. */
+  duplicateLayer(layer: Layer) {
+    // Deep copy: colours and points are arrays that would otherwise be shared with the original.
+    const json = structuredClone(layer.toJSON());
+    const copy = this.addShader(json.shader, json, this.engine.layers.indexOf(layer) + 1);
+    if (copy) this.select(copy);
+    return copy;
+  }
+
   removeLayer(layer: Layer) {
     const i = this.engine.layers.indexOf(layer);
     this.engine.removeLayer(layer);

@@ -1,9 +1,13 @@
 /*{
-  "DESCRIPTION": "Bloodshot eyes that dart to a new spot on every beat and dilate with the bass. Transparent outside the lids unless 'fill background' is on.",
+  "DESCRIPTION": "Bloodshot eyes that dart to a new spot on every beat and dilate with the bass. Transparent outside the lids unless 'fill background' is on. Move X/Y, Zoom and Rotate transform the whole set of eyes; add ∿ modulators to them to make the eyes move with the audio.",
   "CREDIT": "Gumpkestra",
   "CATEGORIES": ["Generator", "Biological"],
   "INPUTS": [
     { "NAME": "count", "TYPE": "float", "DEFAULT": 1.0, "MIN": 1.0, "MAX": 6.0, "LABEL": "Eyes (grid)" },
+    { "NAME": "moveX", "TYPE": "float", "DEFAULT": 0.0, "MIN": -1.0, "MAX": 1.0, "LABEL": "Move X" },
+    { "NAME": "moveY", "TYPE": "float", "DEFAULT": 0.0, "MIN": -1.0, "MAX": 1.0, "LABEL": "Move Y" },
+    { "NAME": "zoom", "TYPE": "float", "DEFAULT": 1.0, "MIN": 0.2, "MAX": 4.0 },
+    { "NAME": "rotate", "TYPE": "float", "DEFAULT": 0.0, "MIN": -180.0, "MAX": 180.0, "LABEL": "Rotate°" },
     { "NAME": "size", "TYPE": "float", "DEFAULT": 0.8, "MIN": 0.3, "MAX": 1.0 },
     { "NAME": "pupil", "TYPE": "float", "DEFAULT": 0.35, "MIN": 0.1, "MAX": 0.9 },
     { "NAME": "dilate", "TYPE": "float", "DEFAULT": 0.0, "MIN": 0.0, "MAX": 1.0, "LABEL": "Dilate", "MODS": [{ "SOURCE": "bass", "AMOUNT": 0.5 }] },
@@ -33,6 +37,9 @@ vec2 target(vec2 id, float n) { return hash2(id * 7.3 + n * 1.618) * 2.0 - 1.0; 
 
 void main() {
   vec2 uv = (isf_FragNormCoord - 0.5) * vec2(RENDERSIZE.x / RENDERSIZE.y, 1.0);
+  // Transform (in screen heights): undo the move, zoom and rotation to find where we are on the eyes.
+  float ra = radians(rotate);
+  uv = mat2(cos(ra), -sin(ra), sin(ra), cos(ra)) * ((uv - vec2(moveX, moveY)) / zoom);
   float n = floor(count);
   vec2 g = uv * n + (mod(n, 2.0) == 0.0 ? 0.5 : 0.0);
   vec2 id = floor(g + 0.5);

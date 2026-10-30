@@ -26,7 +26,7 @@
           "mods": [
             {
               "source": "bass",
-              "amount": 0.5,
+              "amount": 0.46,
               "rate": 0.25,
               "smooth": 0
             }
@@ -50,6 +50,17 @@
         "bloodshot": {
           "value": 0.6,
           "mods": []
+        },
+        "veinFlush": {
+          "value": 0,
+          "mods": [
+            {
+              "source": "beat",
+              "amount": 0.5,
+              "rate": 0.25,
+              "smooth": 0
+            }
+          ]
         },
         "irisColor": {
           "value": [
@@ -125,6 +136,17 @@
         "tunnelVision": {
           "value": 0.5,
           "mods": []
+        },
+        "tunnelPulse": {
+          "value": 0,
+          "mods": [
+            {
+              "source": "level",
+              "amount": 0.4,
+              "rate": 0.25,
+              "smooth": 0
+            }
+          ]
         }
       }
     },
@@ -154,7 +176,7 @@
           "mods": []
         },
         "fps": {
-          "value": 60,
+          "value": 240,
           "mods": []
         }
       }

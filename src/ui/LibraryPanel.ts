@@ -1,7 +1,8 @@
 import { toast, type App } from '../app';
 import { BUILTIN_MODELS } from '../model/load';
+import { DEFAULT_TEXT_MODEL, isTextModel } from '../model/text';
 import { BUILTIN_TEXTURES, isVideoTexture, thumbnailURL } from '../render/Textures';
-import { h } from './dom';
+import { h, isCollapsed, setCollapsed } from './dom';
 
 const GENERATOR_TEMPLATE = `/*{
   "DESCRIPTION": "New generator",
@@ -92,43 +93,56 @@ export function LibraryPanel(root: HTMLElement, app: App, openEditor: (name: str
     const gens = entries.filter((s) => s.parsed && !s.parsed.isFilter);
     const fx = entries.filter((s) => s.parsed?.isFilter);
     const broken = entries.filter((s) => !s.parsed);
-    const models = [...BUILTIN_MODELS, ...app.library.models].filter((m) => m.toLowerCase().includes(filter));
+    const modelLabel = (m: string) => (isTextModel(m) ? '3D text' : m.startsWith('@') ? m.slice(1) : m);
+    const models = [...BUILTIN_MODELS, DEFAULT_TEXT_MODEL, ...app.library.models].filter((m) => modelLabel(m).toLowerCase().includes(filter));
     const modelItem = (m: string) => {
-      const item = h('button', { class: 'lib-item model', title: m.startsWith('@') ? 'Built-in shape' : `library/models/${m}`, onclick: () => app.addModel(m) },
-        m.startsWith('@') ? m.slice(1) : m);
+      const item = h('button', {
+        class: 'lib-item model',
+        title: isTextModel(m) ? 'Extruded 3D text: set the text and font in the layer settings' : m.startsWith('@') ? 'Built-in shape' : `library/models/${m}`,
+        onclick: () => app.addModel(m),
+      }, modelLabel(m));
       if (m.startsWith('@')) return item;
       return h('div', { class: 'lib-row' }, item,
         h('button', { class: 'lib-del', title: `Delete library/models/${m}`, onclick: () => deleteModel(m) }, '✕'));
     };
     const textures = [...Object.keys(BUILTIN_TEXTURES), ...app.library.textures].filter((t) => t.toLowerCase().includes(filter));
+    // Textures are a grid of thumbnails (name on hover) to keep the list short.
     const textureItem = (t: string) => {
       const src = thumbnailURL(t);
       const target = app.textureInputs(app.selected)[0];
-      const item = h('button', {
-        class: 'lib-item texture',
-        title: target ? `Set ${app.selected!.label} · ${target.LABEL ?? target.NAME}` : 'Add as an image layer',
-        onclick: () => app.useTexture(t),
-      },
-      src ? h('img', { src, alt: '', loading: 'lazy' }) : h('span', { class: 'thumb' }, isVideoTexture(t) ? '🎞' : ''),
-      t.startsWith('@') ? BUILTIN_TEXTURES[t].label.toLowerCase() : t);
-      if (t.startsWith('@')) return item;
-      return h('div', { class: 'lib-row' }, item,
-        h('button', { class: 'lib-del', title: `Delete library/textures/${t}`, onclick: () => deleteTexture(t) }, '✕'));
+      const name = t.startsWith('@') ? `${BUILTIN_TEXTURES[t].label} (built-in)` : t;
+      return h('div', { class: 'tex-tile' },
+        h('button', {
+          class: 'tex-pick',
+          title: `${name}\n${target ? `Click: set ${app.selected!.label} · ${target.LABEL ?? target.NAME}` : 'Click: add as an image layer'}`,
+          onclick: () => app.useTexture(t),
+        }, src ? h('img', { src, alt: name, loading: 'lazy' }) : h('span', { class: 'thumb' }, isVideoTexture(t) ? '🎞' : '')),
+        t.startsWith('@') ? null : h('button', { class: 'lib-del', title: `Delete library/textures/${t}`, onclick: () => deleteTexture(t) }, '✕'));
     };
-    list.replaceChildren(
-      h('h3', {}, `Generators · ${gens.length}`), ...gens.map(item),
-      h('h3', {}, `Effects · ${fx.length}`), ...fx.map(item),
-      h('h3', {}, `3D models · ${models.length}`), ...models.map(modelItem),
-      h('h3', {}, `Textures · ${textures.length}`), ...textures.map(textureItem),
-      ...(broken.length ? [h('h3', {}, 'Broken'), ...broken.map(item)] : []),
-    );
+    /** A heading that folds its items away (remembered). Everything shows while filtering. */
+    const section = (id: string, title: string, items: Node[], cls = 'lib-section'): (HTMLElement | null)[] => {
+      const key = `lib:${id}`;
+      const closed = !filter && isCollapsed(key);
+      return [
+        h('h3', { class: `section-head ${closed ? 'closed' : ''}`, onclick: () => { setCollapsed(key, !isCollapsed(key)); render(); } },
+          `${title} · ${items.length}`),
+        closed ? null : h('div', { class: cls }, ...items),
+      ];
+    };
+    list.replaceChildren(...[
+      ...section('generators', 'Generators', gens.map(item)),
+      ...section('effects', 'Effects', fx.map(item)),
+      ...section('models', '3D models', models.map(modelItem)),
+      ...section('textures', 'Textures', textures.map(textureItem), 'tex-grid'),
+      ...(broken.length ? section('broken', 'Broken', broken.map(item)) : []),
+    ].filter((n): n is HTMLElement => !!n));
   };
 
   root.append(
     h('h2', {}, 'Library'),
     h('input', {
       type: 'search',
-      placeholder: 'Filter shaders…',
+      placeholder: 'Filter library…',
       oninput: (e: Event) => { filter = (e.target as HTMLInputElement).value.toLowerCase(); render(); },
     }),
     h('div', { class: 'btn-row' },

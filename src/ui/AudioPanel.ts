@@ -1,7 +1,7 @@
 import { toast, type App } from '../app';
 import { isModelFile } from '../model/load';
 import { isTextureFile } from '../render/Textures';
-import { fmt, h, slider } from './dom';
+import { h, numberField, slider } from './dom';
 
 const METER_BANDS = ['level', 'bass', 'lowMid', 'mid', 'high', 'beat'] as const;
 
@@ -64,11 +64,10 @@ export function AudioPanel(root: HTMLElement, app: App) {
   };
 
   const settingRow = (label: string, key: keyof typeof audio.settings, min: number, max: number) => {
-    const val = h('span', { class: 'val' }, fmt(audio.settings[key]));
-    return h('label', { class: 'row' },
-      h('span', { class: 'lbl' }, label),
-      slider({ min, max, value: audio.settings[key], oninput: (v) => { audio.settings[key] = v; val.textContent = fmt(v); } }),
-      val);
+    const sl = slider({ min, max, value: audio.settings[key], oninput: (v) => { audio.settings[key] = v; val.show(v); } }) as HTMLInputElement;
+    const val = numberField({ min, max, get: () => audio.settings[key], set: (v) => { audio.settings[key] = v; sl.value = String(v); } });
+    val.classList.add('val');
+    return h('div', { class: 'row' }, h('span', { class: 'lbl' }, label), sl, val);
   };
 
   const meter = h('canvas', { class: 'meter', width: 480, height: 150 });
