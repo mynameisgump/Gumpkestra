@@ -66,6 +66,19 @@ export function LibraryPanel(root: HTMLElement, app: App, openEditor: (name: str
     void app.deleteModel(name);
   };
 
+  const deleteTexture = (name: string) => {
+    const slots = app.textureUses(name).length;
+    const presets = [...app.library.presets.values()]
+      .filter((p) => p.layers.some((l) => Object.values(l.params ?? {}).some((s) => s.value === name)))
+      .map((p) => p.name);
+    const warnings = [
+      slots && `${slots} texture slot${slots > 1 ? 's' : ''} showing it will go back to ${slots > 1 ? 'their' : 'its'} default.`,
+      presets.length && `Still used by preset${presets.length > 1 ? 's' : ''}: ${presets.join(', ')}.`,
+    ].filter(Boolean);
+    if (!confirm([`Delete library/textures/${name}? This removes the file from disk.`, ...warnings].join('\n\n'))) return;
+    void app.deleteTexture(name);
+  };
+
   const render = () => {
     const entries = [...app.library.shaders.values()]
       .filter((s) => s.name.toLowerCase().includes(filter))
@@ -91,13 +104,16 @@ export function LibraryPanel(root: HTMLElement, app: App, openEditor: (name: str
     const textureItem = (t: string) => {
       const src = thumbnailURL(t);
       const target = app.textureInputs(app.selected)[0];
-      return h('button', {
+      const item = h('button', {
         class: 'lib-item texture',
         title: target ? `Set ${app.selected!.label} · ${target.LABEL ?? target.NAME}` : 'Add as an image layer',
         onclick: () => app.useTexture(t),
       },
       src ? h('img', { src, alt: '', loading: 'lazy' }) : h('span', { class: 'thumb' }, isVideoTexture(t) ? '🎞' : ''),
       t.startsWith('@') ? BUILTIN_TEXTURES[t].label.toLowerCase() : t);
+      if (t.startsWith('@')) return item;
+      return h('div', { class: 'lib-row' }, item,
+        h('button', { class: 'lib-del', title: `Delete library/textures/${t}`, onclick: () => deleteTexture(t) }, '✕'));
     };
     list.replaceChildren(
       h('h3', {}, `Generators · ${gens.length}`), ...gens.map(item),

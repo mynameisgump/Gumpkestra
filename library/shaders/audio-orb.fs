@@ -1,12 +1,16 @@
 /*{
-  "DESCRIPTION": "Raymarched sphere whose surface is displaced by the spectrum: lumps low on the ball follow the bass, higher up the treble. It swells with the bass and its edge glows with the highs through modulators on radius and Edge glow (∿). Wrap it in a texture (try the built-in Meat) and add bump and gloss for a wet, fleshy look; set Texture mix to 0 for the plain hue colouring. The background is transparent, so layers below show around the ball.",
+  "DESCRIPTION": "Raymarched sphere with two surface layers: lumps that drift on their own (Lump height / count / speed, no audio) and a ripple driven by the spectrum, where the bottom of the ball follows the bass and the top the treble (Ripple / Ripple count). Every audio reaction is a ∿ modulator: Level on Ripple, Bass on radius, High on Edge glow. Remove them and the orb ignores the audio. Wrap it in a texture (try the built-in Meat) and add bump and gloss for a wet, fleshy look; set Texture mix to 0 for the plain hue colouring. The background is transparent, so layers below show around the ball.",
   "CREDIT": "Gumpkestra",
   "CATEGORIES": ["Generator", "Audio", "3D", "Texture"],
   "INPUTS": [
     { "NAME": "audioFFT", "TYPE": "audioFFT" },
     { "NAME": "radius", "TYPE": "float", "DEFAULT": 0.9, "MIN": 0.3, "MAX": 1.6, "MODS": [{ "SOURCE": "bass", "AMOUNT": 0.1731 }] },
+    { "NAME": "scale", "TYPE": "float", "DEFAULT": 1.0, "MIN": 0.1, "MAX": 4.0, "LABEL": "Scale" },
     { "NAME": "displace", "TYPE": "float", "DEFAULT": 0.25, "MIN": 0.0, "MAX": 0.8, "LABEL": "Lump height" },
     { "NAME": "frequency", "TYPE": "float", "DEFAULT": 6.0, "MIN": 1.0, "MAX": 20.0, "LABEL": "Lump count" },
+    { "NAME": "lumpSpeed", "TYPE": "float", "DEFAULT": 1.0, "MIN": 0.0, "MAX": 4.0, "LABEL": "Lump speed" },
+    { "NAME": "spectrum", "TYPE": "float", "DEFAULT": 0.0, "MIN": 0.0, "MAX": 4.0, "LABEL": "Ripple", "MODS": [{ "SOURCE": "level", "AMOUNT": 0.5 }] },
+    { "NAME": "rippleCount", "TYPE": "float", "DEFAULT": 6.0, "MIN": 1.0, "MAX": 20.0, "LABEL": "Ripple count" },
     { "NAME": "spin", "TYPE": "float", "DEFAULT": 0.3, "MIN": -2.0, "MAX": 2.0 },
     { "NAME": "hue", "TYPE": "float", "DEFAULT": 0.55, "MIN": 0.0, "MAX": 1.0 },
     { "NAME": "rim", "TYPE": "float", "DEFAULT": 0.6, "MIN": 0.0, "MAX": 2.0, "LABEL": "Edge glow", "MODS": [{ "SOURCE": "high", "AMOUNT": 0.5 }] },
@@ -42,8 +46,12 @@ float map(vec3 p) {
   float r = length(p);
   vec3 n = p / max(r, 1e-4);
   float f = IMG_NORM_PIXEL(audioFFT, vec2(0.03 + 0.55 * (0.5 + 0.5 * n.y), 0.5)).r;
-  float d = sin(n.x * frequency + TIME) * sin(n.y * frequency + TIME * 1.3) * sin(n.z * frequency - TIME * 0.7);
-  return r - (radius + d * displace * (0.2 + f * 1.5));
+  // Lumps: time-driven only. Ripple: the same kind of pattern on its own count and clock,
+  // scaled by the spectrum at this height on the ball.
+  float lt = TIME * lumpSpeed;
+  float lumps = sin(n.x * frequency + lt) * sin(n.y * frequency + lt * 1.3) * sin(n.z * frequency - lt * 0.7);
+  float ripple = sin(n.x * rippleCount + TIME) * sin(n.y * rippleCount + TIME * 1.3) * sin(n.z * rippleCount - TIME * 0.7);
+  return r - (radius + lumps * displace * 0.2 + ripple * f * spectrum * 0.25);
 }
 
 vec3 normalAt(vec3 p) {
@@ -64,7 +72,8 @@ float luma(vec3 c) { return dot(c, vec3(0.299, 0.587, 0.114)); }
 void main() {
   vec2 uv = (isf_FragNormCoord - 0.5) * vec2(RENDERSIZE.x / RENDERSIZE.y, 1.0);
   vec3 ro = vec3(0.0, 0.0, 3.2);
-  vec3 rd = normalize(vec3(uv, -1.4));
+  // Narrowing the view scales the whole picture (lumps, glow and all), unlike radius.
+  vec3 rd = normalize(vec3(uv / scale, -1.4));
   float t = 0.0, tEdge = 0.0, dMin = 1e9;
   bool hit = false;
   for (int i = 0; i < 80; i++) {
@@ -101,6 +110,6 @@ void main() {
   float spec = pow(max(dot(reflect(rd, n), light), 0.0), 40.0);
   vec3 col = base * (0.15 + diff * 0.85) + fres * rim + spec * gloss;
   // Coverage fades over about a pixel and a half outside the surface.
-  float cover = hit ? 1.0 : 1.0 - smoothstep(0.0, 1.5 * tEdge / (1.4 * RENDERSIZE.y), dMin);
+  float cover = hit ? 1.0 : 1.0 - smoothstep(0.0, 1.5 * tEdge / (1.4 * RENDERSIZE.y * scale), dMin);
   gl_FragColor = fillBackground ? vec4(col * cover, 1.0) : vec4(col, cover);
 }

@@ -12,6 +12,8 @@ const fromHex = (hex: string, a = 1) => [1, 3, 5].map((i) => parseInt(hex.slice(
 
 /** Parameters + modulators for the selected layer. Returns a per-frame function that animates live-value markers. */
 export function ParamsPanel(root: HTMLElement, app: App, openEditor: (name: string) => void) {
+  /** The texture slot whose thumbnail grid is open, if any. */
+  let openGrid: { layer: Layer; input: string } | null = null;
   let liveMarkers: { el: HTMLElement; text: HTMLElement; layer: Layer; key: string; min: number; max: number }[] = [];
 
   const modRow = (state: ParamState, m: Modulator, rerender: () => void) =>
@@ -88,9 +90,11 @@ export function ParamsPanel(root: HTMLElement, app: App, openEditor: (name: stri
       }
       case 'image': {
         if (inp.NAME === 'inputImage') return null;
+        const open = openGrid?.layer === layer && openGrid.input === inp.NAME;
         return h('div', { class: 'param' }, h('div', { class: 'row texture-row' },
           h('span', { class: 'lbl' }, label),
-          texturePicker(layer, inp.NAME)));
+          texturePicker(layer, inp.NAME, open)),
+          open ? textureGrid(layer, inp.NAME) : null);
       }
       case 'event':
         return row(h('div', { class: 'btn-row' },
@@ -102,20 +106,47 @@ export function ParamsPanel(root: HTMLElement, app: App, openEditor: (name: stri
     }
   };
 
-  /** Thumbnail + dropdown (specials, built-ins, library/textures) + Load… for one image input. */
-  const texturePicker = (layer: Layer, input: string) => {
-    const state = layer.params[input];
-    const value = String(state.value);
+  /** Every value a texture slot can take, with display names: specials, built-ins, library/textures. */
+  const textureOptions = (layer: Layer, value: string) => {
     const opts: Record<string, string> = {};
     if (layer instanceof ModelLayer) opts[MODEL_TEXTURE] = 'Model’s own';
     opts[INPUT_IMAGE] = 'Layers below';
-    for (const [k, v] of Object.entries(BUILTIN_TEXTURES)) opts[k] = `${v.label} (built-in)`;
-    for (const t of app.library.textures) opts[t] = isVideoTexture(t) ? `🎞 ${t}` : t;
+    for (const [k, v] of Object.entries(BUILTIN_TEXTURES)) opts[k] = v.label;
+    for (const t of app.library.textures) opts[t] = t;
     if (!(value in opts)) opts[value] = `${value} (missing)`;
+    return opts;
+  };
+
+  /** A preview of a texture value: image thumbnail, looping muted video, or an icon for the specials. */
+  const preview = (value: string, cls: string) => {
     const src = thumbnailURL(value);
-    const thumb = src
-      ? h('img', { class: 'thumb', src, alt: '' })
-      : h('span', { class: 'thumb' }, value === INPUT_IMAGE ? '↓' : value === MODEL_TEXTURE ? '◆' : isVideoTexture(value) ? '🎞' : '');
+    if (src) return h('img', { class: cls, src, alt: '', loading: 'lazy' });
+    if (isVideoTexture(value) && app.library.textures.includes(value)) {
+      return h('video', { class: cls, src: `/api/library/textures/${encodeURIComponent(value)}`, muted: true, autoplay: true, loop: true, playsInline: true });
+    }
+    return h('span', { class: cls }, value === INPUT_IMAGE ? '↓' : value === MODEL_TEXTURE ? '◆' : isVideoTexture(value) ? '🎞' : '?');
+  };
+
+  const toggleGrid = (layer: Layer, input: string) => {
+    openGrid = openGrid?.layer === layer && openGrid.input === input ? null : { layer, input };
+    render();
+  };
+
+  /** Click-to-pick grid of every texture, shown under the slot. */
+  const textureGrid = (layer: Layer, input: string) => {
+    const value = String(layer.params[input].value);
+    return h('div', { class: 'texture-grid' },
+      ...Object.entries(textureOptions(layer, value)).map(([key, name]) => h('button', {
+        class: `texture-tile ${key === value ? 'current' : ''}`,
+        title: name,
+        onclick: () => { openGrid = null; app.setTexture(layer, input, key); },
+      }, preview(key, 'tile-preview'), h('span', { class: 'cap' }, name))));
+  };
+
+  /** Current texture (click to open the thumbnail grid) + Load… for one image input. */
+  const texturePicker = (layer: Layer, input: string, open: boolean) => {
+    const value = String(layer.params[input].value);
+    const name = textureOptions(layer, value)[value];
     const file = h('input', {
       type: 'file',
       accept: TEXTURE_EXTENSIONS.join(','),
@@ -126,8 +157,8 @@ export function ParamsPanel(root: HTMLElement, app: App, openEditor: (name: stri
       },
     });
     return h('div', { class: 'texture-picker' },
-      thumb,
-      select(opts, value, (v) => app.setTexture(layer, input, v)),
+      h('button', { class: `texture-current ${open ? 'open' : ''}`, title: 'Choose a texture', onclick: () => toggleGrid(layer, input) },
+        preview(value, 'thumb'), h('span', { class: 'cap' }, name)),
       h('button', { title: 'Import an image or video into library/textures', onclick: () => (file as HTMLInputElement).click() }, 'Load…'),
       file);
   };
@@ -160,6 +191,7 @@ export function ParamsPanel(root: HTMLElement, app: App, openEditor: (name: stri
   const render = () => {
     liveMarkers = [];
     const layer = app.selected;
+    if (openGrid && openGrid.layer !== layer) openGrid = null;
     if (!layer) {
       root.replaceChildren(h('h2', {}, 'Parameters'), h('p', { class: 'hint' }, 'Select a layer.'));
       return;

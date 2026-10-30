@@ -2,3 +2,6 @@ node_modules
 dist
 shots
 *.webm
+
+# Imported textures stay local (large binaries); the app recreates the folder if missing.
+library/textures/

@@ -1,5 +1,5 @@
 /*{
-  "DESCRIPTION": "Grimy gearbox under a swinging sodium lamp. Gears ratchet forward on every beat and a piston slams on the kick.",
+  "DESCRIPTION": "Grimy gearbox under a swinging sodium lamp. Gears ratchet forward on every beat and a piston slams on the kick. Pick a texture and raise Texture mix to skin the gears and piston with it; it turns and moves with each part.",
   "CREDIT": "Gumpkestra",
   "CATEGORIES": ["Generator", "Industrial"],
   "INPUTS": [
@@ -8,6 +8,9 @@
     { "NAME": "slam", "TYPE": "float", "DEFAULT": 0.0, "MIN": 0.0, "MAX": 1.0, "LABEL": "Piston slam", "MODS": [{ "SOURCE": "beat", "AMOUNT": 1.0 }] },
     { "NAME": "rust", "TYPE": "float", "DEFAULT": 0.5, "MIN": 0.0, "MAX": 1.0 },
     { "NAME": "lampSwing", "TYPE": "float", "DEFAULT": 0.3, "MIN": 0.0, "MAX": 1.0 },
+    { "NAME": "tex", "TYPE": "image", "DEFAULT": "@rust", "LABEL": "Texture" },
+    { "NAME": "texMix", "TYPE": "float", "DEFAULT": 0.0, "MIN": 0.0, "MAX": 1.0, "LABEL": "Texture mix" },
+    { "NAME": "texScale", "TYPE": "float", "DEFAULT": 1.0, "MIN": 0.25, "MAX": 6.0, "LABEL": "Texture scale" },
     { "NAME": "lightColor", "TYPE": "color", "DEFAULT": [1.0, 0.6, 0.3, 1.0], "LABEL": "Light" },
     { "NAME": "hazard", "TYPE": "bool", "DEFAULT": true, "LABEL": "Hazard stripes" }
   ]
@@ -43,23 +46,43 @@ float sdGear(vec2 p, float R, float teeth, float a) {
   return max(d, -window);
 }
 
-float scene(vec2 p) {
+vec2 rot2(vec2 v, float a) {
+  float c = cos(a), s = sin(a);
+  return vec2(c * v.x - s * v.y, s * v.x + c * v.y);
+}
+
+// Keep the nearest part, and its texture coordinates in that part's own frame
+// (offset per part so they don't all show the same patch).
+void part(inout float d, inout vec2 uv, float pd, vec2 local, float id) {
+  if (pd < d) { d = pd; uv = local + vec2(id * 0.37, id * 0.61); }
+}
+
+float scene(vec2 p, out vec2 uv) {
   // Ratchet: BEAT_COUNT jumps by 1 while AUDIO_BEAT jumps to 1, so this eases forward after each beat.
   float a = TIME * speed + (float(BEAT_COUNT) - AUDIO_BEAT) * ratchet * 0.4;
   vec2 cA = vec2(-0.32, 0.02);
   vec2 cB = cA + normalize(vec2(1.0, 0.45)) * 0.515;
   vec2 cC = cB + normalize(vec2(0.25, -1.0)) * 0.305;
-  float d = sdGear(p - cA, 0.3, 16.0, a);
-  d = min(d, sdGear(p - cB, 0.17, 9.0, -a * 16.0 / 9.0 + 0.35));
-  d = min(d, sdGear(p - cC, 0.1, 6.0, a * 16.0 / 6.0));
+  float aB = -a * 16.0 / 9.0 + 0.35, aC = a * 16.0 / 6.0;
+  float d = 1e9;
+  uv = vec2(0.0);
+  // sdGear turns a gear by -angle, so rotating by +angle undoes it.
+  part(d, uv, sdGear(p - cA, 0.3, 16.0, a), rot2(p - cA, a), 1.0);
+  part(d, uv, sdGear(p - cB, 0.17, 9.0, aB), rot2(p - cB, aB), 2.0);
+  part(d, uv, sdGear(p - cC, 0.1, 6.0, aC), rot2(p - cC, aC), 3.0);
 
   vec2 pp = p - vec2(0.58, 0.0);
   float headY = 0.12 - slam * 0.3;
-  d = min(d, sdBox(pp - vec2(0.0, 0.33), vec2(0.07, 0.12)));
-  d = min(d, sdBox(pp - vec2(0.0, headY + 0.12), vec2(0.025, 0.12)));
-  d = min(d, sdBox(pp - vec2(0.0, headY), vec2(0.09, 0.035)));
-  d = min(d, sdBox(pp - vec2(0.0, -0.26), vec2(0.13, 0.04)));
+  part(d, uv, sdBox(pp - vec2(0.0, 0.33), vec2(0.07, 0.12)), pp, 4.0);
+  part(d, uv, sdBox(pp - vec2(0.0, headY + 0.12), vec2(0.025, 0.12)), pp - vec2(0.0, headY), 5.0);
+  part(d, uv, sdBox(pp - vec2(0.0, headY), vec2(0.09, 0.035)), pp - vec2(0.0, headY), 6.0);
+  part(d, uv, sdBox(pp - vec2(0.0, -0.26), vec2(0.13, 0.04)), pp, 7.0);
   return d;
+}
+
+float scene(vec2 p) {
+  vec2 unused;
+  return scene(p, unused);
 }
 
 void main() {
@@ -85,7 +108,8 @@ void main() {
   bg *= mix(0.3, 1.0, smoothstep(-0.01, 0.04, scene(p - vec2(0.025, -0.035))));
 
   // Bevelled metal objects
-  float d = scene(p);
+  vec2 partUV;
+  float d = scene(p, partUV);
   float e = 0.002, bevel = 0.018;
   float hC = clamp(-d / bevel, 0.0, 1.0);
   float hX = clamp(-scene(p + vec2(e, 0.0)) / bevel, 0.0, 1.0);
@@ -97,6 +121,7 @@ void main() {
   float diff = max(dot(nrm, L), 0.0);
   float spec = pow(max(dot(nrm, normalize(L + vec3(0.0, 0.0, 1.0))), 0.0), 30.0);
   vec3 metal = vec3(0.4, 0.38, 0.35) * (0.7 + fbm(p * 15.0) * 0.5);
+  metal = mix(metal, IMG_NORM_PIXEL(tex, partUV * 2.0 * texScale).rgb, texMix);
   metal = mix(metal, rustC * 1.2, rustMask * 0.7);
   vec3 obj = metal * (0.25 + diff * 0.9) + spec * 0.6 * (1.0 - rustMask * 0.8);
 

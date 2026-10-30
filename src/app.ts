@@ -1,7 +1,7 @@
 import type { AudioEngine } from './audio/AudioEngine';
 import type { Library, Preset } from './library';
 import type { Engine } from './render/Engine';
-import type { Layer, LayerJSON } from './render/Layer';
+import { defaultValue, type Layer, type LayerJSON } from './render/Layer';
 import { MODEL_SHADER, ModelLayer } from './render/ModelLayer';
 import { h } from './ui/dom';
 
@@ -123,6 +123,27 @@ export class App {
     }
   }
 
+  /** Texture slots currently showing a library texture. */
+  textureUses(name: string) {
+    return this.engine.layers.flatMap((layer) =>
+      this.textureInputs(layer).filter((i) => layer.params[i.NAME]?.value === name).map((input) => ({ layer, input })));
+  }
+
+  /** Delete a texture file from the library, putting slots that show it back to their default. */
+  async deleteTexture(name: string) {
+    // Reset first: deleting re-renders the panels, which would otherwise fetch the gone file's thumbnail.
+    const uses = this.textureUses(name);
+    for (const { layer, input } of uses) layer.params[input.NAME].value = defaultValue(input);
+    try {
+      await this.library.deleteFile('textures', name);
+      toast(`Deleted ${name} from library/textures`);
+    } catch (e) {
+      for (const { layer, input } of uses) layer.params[input.NAME].value = name;
+      toast(`${name}: ${(e as Error).message}`, true);
+    }
+    this.changed();
+  }
+
   /** Image inputs on a layer that can take a texture (everything except a filter's inputImage). */
   textureInputs(layer: Layer | null) {
     return layer ? layer.inputs.filter((i) => i.TYPE === 'image' && i.NAME !== 'inputImage') : [];
@@ -130,6 +151,10 @@ export class App {
 
   setTexture(layer: Layer, input: string, texture: string) {
     layer.params[input].value = texture;
+    // Shaders that blend their texture in with a `texMix` param start it at 0. Lift it so a
+    // texture you just picked actually shows (left alone if you've set it or modulated it).
+    const mix = layer.params.texMix;
+    if (mix && mix.value === 0 && !mix.mods.length) mix.value = 1;
     this.changed();
   }
 

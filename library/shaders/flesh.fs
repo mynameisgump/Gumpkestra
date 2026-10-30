@@ -1,5 +1,5 @@
 /*{
-  "DESCRIPTION": "Wet, writhing meat: wriggling fat cells, muscle striations and specular slime. Swells with the bass.",
+  "DESCRIPTION": "Wet, writhing meat: wriggling fat cells, muscle striations and specular slime. Swells with the bass. Pick a texture and raise Texture mix to make the meat out of it; it writhes with the tissue.",
   "CREDIT": "Gumpkestra",
   "CATEGORIES": ["Generator", "Biological"],
   "INPUTS": [
@@ -11,6 +11,9 @@
     { "NAME": "fat", "TYPE": "float", "DEFAULT": 0.3, "MIN": 0.0, "MAX": 1.0 },
     { "NAME": "wetness", "TYPE": "float", "DEFAULT": 0.7, "MIN": 0.0, "MAX": 1.5 },
     { "NAME": "speed", "TYPE": "float", "DEFAULT": 0.2, "MIN": 0.0, "MAX": 2.0 },
+    { "NAME": "tex", "TYPE": "image", "DEFAULT": "@meat", "LABEL": "Texture" },
+    { "NAME": "texMix", "TYPE": "float", "DEFAULT": 0.0, "MIN": 0.0, "MAX": 1.0, "LABEL": "Texture mix" },
+    { "NAME": "texScale", "TYPE": "float", "DEFAULT": 1.0, "MIN": 0.25, "MAX": 6.0, "LABEL": "Texture scale" },
     { "NAME": "meatColor", "TYPE": "color", "DEFAULT": [0.55, 0.03, 0.05, 1.0] },
     { "NAME": "fatColor", "TYPE": "color", "DEFAULT": [0.95, 0.78, 0.5, 1.0] }
   ]
@@ -49,10 +52,12 @@ vec2 voronoi(vec2 x, float t) {
   return sqrt(vec2(f1, f2));
 }
 
-float tissue(vec2 p, out float fatMask) {
+// warped = p after the writhe, so a texture can move with the tissue.
+float tissue(vec2 p, out float fatMask, out vec2 warped) {
   float t = TIME * speed;
   vec2 w = vec2(fbm(p * 0.6 + t), fbm(p * 0.6 - t + 4.7)) - 0.5;
   p += w * writhe * 2.0;
+  warped = p;
   vec2 v = voronoi(p * 1.4, t * 3.0);
   float cells = smoothstep(0.0, 0.3, v.y - v.x);
   float fib = 0.5 + 0.5 * sin((p.x * 0.5 + p.y) * 14.0 + fbm(p * 2.5) * 8.0);
@@ -67,10 +72,11 @@ void main() {
   vec2 p = uv * scale;
 
   float fm, unused;
+  vec2 wp, unusedP;
   float e = 0.015;
-  float h = tissue(p, fm);
-  float hx = tissue(p + vec2(e, 0.0), unused);
-  float hy = tissue(p + vec2(0.0, e), unused);
+  float h = tissue(p, fm, wp);
+  float hx = tissue(p + vec2(e, 0.0), unused, unusedP);
+  float hy = tissue(p + vec2(0.0, e), unused, unusedP);
   vec3 n = normalize(vec3((h - hx) / e, (h - hy) / e, 3.0));
 
   vec3 l = normalize(vec3(-0.4, 0.6, 0.7));
@@ -78,6 +84,9 @@ void main() {
   float spec = pow(max(dot(reflect(-l, n), vec3(0.0, 0.0, 1.0)), 0.0), 40.0) * wetness;
 
   vec3 meat = mix(meatColor.rgb * 0.3, meatColor.rgb * 1.6, h);
+  // Textured meat keeps the tissue's relief as shading.
+  vec3 texC = IMG_NORM_PIXEL(tex, wp / scale * texScale).rgb;
+  meat = mix(meat, texC * (0.4 + h * 1.2), texMix);
   vec3 col = mix(meat, fatColor.rgb * (0.7 + h * 0.4), fm);
   col *= 0.35 + diff * 0.9;
   col += spec * mix(vec3(1.0, 0.8, 0.75), vec3(1.0), fm);

@@ -158,8 +158,15 @@ input[type='color'] { width: 48px; height: 22px; border: 0; padding: 0; backgrou
 .row.model-row { grid-template-columns: 82px minmax(0, 1fr) auto; }
 .row.model-row select { min-width: 0; }
 .row.texture-row { grid-template-columns: 82px minmax(0, 1fr); }
-.texture-picker { display: grid; grid-template-columns: 26px minmax(0, 1fr) auto; gap: 6px; align-items: center; }
-.texture-picker select { min-width: 0; }
+.texture-picker { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px; align-items: center; }
+.texture-current { display: flex; align-items: center; gap: 6px; min-width: 0; padding: 2px 6px 2px 2px; text-align: left; font-family: var(--mono); }
+.texture-current.open { border-color: var(--accent); }
+.texture-current .thumb { flex: none; }
+.texture-current .cap, .texture-tile .cap { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+.texture-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(68px, 1fr)); gap: 6px; margin-top: 6px; }
+.texture-tile { display: flex; flex-direction: column; gap: 3px; padding: 4px; background: var(--panel-2); font: 10px var(--mono); }
+.texture-tile.current { border-color: var(--accent); }
+.tile-preview { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 3px; background: #000; display: grid; place-items: center; font-size: 20px; color: var(--dim); }
 .thumb { width: 26px; height: 26px; border-radius: 3px; object-fit: cover; background: var(--panel-2); display: grid; place-items: center; font-size: 12px; color: var(--dim); }
 .lib-item.texture { display: flex; align-items: center; gap: 6px; }
 .lib-item.texture img, .lib-item.texture .thumb { width: 18px; height: 18px; }

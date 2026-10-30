@@ -16,9 +16,14 @@ export function AudioPanel(root: HTMLElement, app: App) {
     hidden: true,
     onchange: () => fileInput.files?.[0] && useFile(fileInput.files[0]),
   });
-  const deviceSelect = h('select', { class: 'device-select' }, h('option', { value: '' }, 'Default input'));
+  const deviceSelect = h('select', { class: 'device-select', title: 'Microphone or line input', onchange: () => useInput() }) as HTMLSelectElement;
+  /** Placeholder value, so even "Default input" is a change that starts it. */
+  const NO_INPUT = '-';
+  /** The input device in use ('' = default), or null while the source is a file or tab. */
+  let activeInput: string | null = null;
 
   const refreshSource = () => {
+    deviceSelect.value = activeInput ?? NO_INPUT;
     sourceLabel.textContent = audio.sourceLabel === 'none' ? 'No audio source' : `▶ ${audio.sourceLabel}`;
     playerSlot.replaceChildren();
     const el = audio.mediaElement;
@@ -31,20 +36,31 @@ export function AudioPanel(root: HTMLElement, app: App) {
   const run = (fn: () => Promise<void>) => async () => {
     try {
       await fn();
-      refreshSource();
     } catch (e) {
       toast((e as Error).message, true);
     }
+    // Also on failure, so the input picker snaps back to what's really playing.
+    refreshSource();
   };
 
-  const useFile = (file: File) => run(() => audio.useFile(file))();
+  const useFile = (file: File) => run(async () => { await audio.useFile(file); activeInput = null; })();
+
+  const useInput = run(async () => {
+    const id = deviceSelect.value;
+    await audio.useInput(id || undefined);
+    activeInput = id;
+    // Device names are only visible once mic permission is granted.
+    await listDevices();
+  });
 
   const listDevices = async () => {
     const devices = await audio.listInputDevices();
     deviceSelect.replaceChildren(
+      h('option', { value: NO_INPUT, disabled: true }, 'Use an input…'),
       h('option', { value: '' }, 'Default input'),
       ...devices.map((d) => h('option', { value: d.deviceId }, d.label || `Input ${d.deviceId.slice(0, 6)}`)),
     );
+    deviceSelect.value = activeInput ?? NO_INPUT;
   };
 
   const settingRow = (label: string, key: keyof typeof audio.settings, min: number, max: number) => {
@@ -62,12 +78,9 @@ export function AudioPanel(root: HTMLElement, app: App) {
     h('h2', {}, 'Audio'),
     h('div', { class: 'btn-row' },
       h('button', { onclick: () => fileInput.click(), title: 'Or drag a file onto the canvas' }, 'Open file…'),
-      h('button', { onclick: run(async () => { await audio.useDisplayCapture(); }), title: 'Capture a browser tab or system audio' }, 'Tab audio'),
+      h('button', { onclick: run(async () => { await audio.useDisplayCapture(); activeInput = null; }), title: 'Capture a browser tab or system audio' }, 'Tab audio'),
     ),
-    h('div', { class: 'btn-row' },
-      deviceSelect,
-      h('button', { onclick: run(async () => { await audio.useInput(deviceSelect.value || undefined); await listDevices(); }) }, 'Use input'),
-    ),
+    h('div', { class: 'btn-row' }, deviceSelect),
     fileInput,
     sourceLabel,
     playerSlot,

@@ -1,7 +1,7 @@
 {
   "layers": [
     {
-      "shader": "image",
+      "shader": "flesh",
       "enabled": true,
       "blend": "normal",
       "opacity": {
@@ -9,60 +9,66 @@
         "mods": []
       },
       "params": {
-        "tex": {
-          "value": "Horror_Wall_14-128x128.png",
-          "mods": []
-        },
-        "fit": {
+        "scale": {
           "value": 3,
           "mods": []
         },
-        "zoom": {
-          "value": 0.28,
+        "writhe": {
+          "value": 0.4,
           "mods": []
         },
-        "pulse": {
+        "throb": {
           "value": 0,
           "mods": [
             {
-              "source": "beat",
-              "amount": 0.12,
+              "source": "bass",
+              "amount": 0.3,
               "rate": 0.25,
               "smooth": 0
             }
           ]
         },
-        "rotate": {
+        "flush": {
           "value": 0,
+          "mods": [
+            {
+              "source": "beat",
+              "amount": 0.3,
+              "rate": 0.25,
+              "smooth": 0
+            }
+          ]
+        },
+        "fibers": {
+          "value": 0.5,
           "mods": []
         },
-        "spin": {
-          "value": 0,
+        "fat": {
+          "value": 0.3,
           "mods": []
         },
-        "offset": {
+        "wetness": {
+          "value": 0.7,
+          "mods": []
+        },
+        "speed": {
+          "value": 0.2,
+          "mods": []
+        },
+        "meatColor": {
           "value": [
-            0,
-            0
+            0.55,
+            0.03,
+            0.05,
+            1
           ],
           "mods": []
         },
-        "scroll": {
+        "fatColor": {
           "value": [
-            0,
-            0
-          ],
-          "mods": []
-        },
-        "brightness": {
-          "value": 1,
-          "mods": []
-        },
-        "tint": {
-          "value": [
-            1,
-            1,
-            1,
+            0.95,
+            0.78,
+            0.5,
             1
           ],
           "mods": []
@@ -79,26 +85,42 @@
       },
       "params": {
         "radius": {
-          "value": 0.9,
+          "value": 0.3,
           "mods": [
             {
               "source": "bass",
-              "amount": 0.173,
+              "amount": 0.1731,
               "rate": 0.25,
               "smooth": 0
             }
           ]
         },
+        "scale": {
+          "value": 0.7201,
+          "mods": []
+        },
         "displace": {
-          "value": 0.4744,
+          "value": 0.25,
           "mods": []
         },
         "frequency": {
-          "value": 16.428,
+          "value": 6,
+          "mods": []
+        },
+        "lumpSpeed": {
+          "value": 1,
+          "mods": []
+        },
+        "spectrum": {
+          "value": 0,
+          "mods": []
+        },
+        "rippleCount": {
+          "value": 6,
           "mods": []
         },
         "spin": {
-          "value": 0.956,
+          "value": 0.3,
           "mods": []
         },
         "hue": {
@@ -117,7 +139,7 @@
           ]
         },
         "tex": {
-          "value": "str_bloodvein6.png",
+          "value": "str_bloodvein9.png",
           "mods": []
         },
         "texMix": {
@@ -125,19 +147,62 @@
           "mods": []
         },
         "texScale": {
-          "value": 3.125,
+          "value": 2.3085,
           "mods": []
         },
         "bump": {
-          "value": 1.16,
+          "value": 0.346,
           "mods": []
         },
         "gloss": {
-          "value": 0.628,
+          "value": 2,
           "mods": []
         },
         "fillBackground": {
           "value": false,
+          "mods": []
+        }
+      }
+    },
+    {
+      "shader": "crt",
+      "enabled": true,
+      "blend": "normal",
+      "opacity": {
+        "value": 1,
+        "mods": []
+      },
+      "params": {
+        "curvature": {
+          "value": 0.3,
+          "mods": []
+        },
+        "scanlines": {
+          "value": 0.55,
+          "mods": []
+        },
+        "lineSize": {
+          "value": 3,
+          "mods": []
+        },
+        "mask": {
+          "value": 0.3,
+          "mods": []
+        },
+        "convergence": {
+          "value": 0.5,
+          "mods": []
+        },
+        "hum": {
+          "value": 0.25,
+          "mods": []
+        },
+        "flicker": {
+          "value": 0.2,
+          "mods": []
+        },
+        "vignette": {
+          "value": 0.5,
           "mods": []
         }
       }
