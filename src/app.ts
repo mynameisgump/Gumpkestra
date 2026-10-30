@@ -2,6 +2,7 @@ import type { AudioEngine } from './audio/AudioEngine';
 import type { Library, Preset } from './library';
 import type { Engine } from './render/Engine';
 import type { Layer, LayerJSON } from './render/Layer';
+import { MODEL_SHADER, ModelLayer } from './render/ModelLayer';
 import { h } from './ui/dom';
 
 const AUTOSAVE_KEY = 'gumpkestra:session';
@@ -47,6 +48,7 @@ export class App {
 
   /** Insert a library shader just above the selected layer (or on top). */
   addShader(name: string, json?: Partial<LayerJSON>, index?: number): Layer | null {
+    if (name === MODEL_SHADER) return this.addModel(json?.model ?? '@knot', json, index);
     const entry = this.library.shaders.get(name);
     if (!entry?.parsed) {
       toast(`${name}: ${entry?.error ?? 'not in library'}`, true);
@@ -64,6 +66,53 @@ export class App {
       toast(`${name} failed to compile:\n${(e as Error).message}`, true);
       return null;
     }
+  }
+
+  /** Insert a 3D model layer. The mesh loads asynchronously; the layer renders nothing until then. */
+  addModel(model: string, json?: Partial<LayerJSON>, index?: number): ModelLayer {
+    const at = index ?? (this.selected ? this.engine.layers.indexOf(this.selected) + 1 : this.engine.layers.length);
+    const layer = this.engine.insertLayer(new ModelLayer(this.engine.gl, model), at);
+    if (json) layer.applyJSON(json);
+    if (index === undefined) this.select(layer);
+    void this.setModel(layer, model);
+    return layer;
+  }
+
+  async setModel(layer: ModelLayer, model: string) {
+    layer.modelName = model;
+    layer.status = 'loading…';
+    this.changed();
+    try {
+      const mesh = await this.library.loadMesh(model);
+      // The layer may have been removed, or switched to another model, while loading.
+      if (layer.modelName !== model || !this.engine.layers.includes(layer)) return;
+      layer.setMesh(mesh);
+      layer.status = null;
+    } catch (e) {
+      layer.status = (e as Error).message;
+      toast(`${model}: ${layer.status}`, true);
+    }
+    this.changed();
+  }
+
+  /** Copy a model file into the library, then show it on `target` (or a new layer). */
+  async importModel(file: File, target?: ModelLayer) {
+    try {
+      const name = await this.library.importModel(file);
+      if (target) await this.setModel(target, name);
+      else this.addModel(name);
+      toast(`Imported ${name} into library/models`);
+    } catch (e) {
+      toast(`${file.name}: ${(e as Error).message}`, true);
+    }
+  }
+
+  /** A model file changed on disk (e.g. re-exported from Blender): reload layers showing it. */
+  reloadModel(name: string) {
+    for (const layer of this.engine.layers) {
+      if (layer instanceof ModelLayer && layer.modelName === name) void this.setModel(layer, name);
+    }
+    this.changed();
   }
 
   removeLayer(layer: Layer) {

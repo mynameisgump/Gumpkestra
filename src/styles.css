@@ -101,6 +101,7 @@ input[type='color'] { width: 48px; height: 22px; border: 0; padding: 0; backgrou
 .lib-item { text-align: left; background: transparent; border-color: transparent; font-family: var(--mono); }
 .lib-item:hover { background: var(--panel-2); }
 .lib-item.has-error { color: var(--accent-2); }
+.lib-item.model::before { content: '◆ '; color: #ffb43c; }
 
 /* ---------- stack ---------- */
 .stack { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 3px; }
@@ -117,10 +118,13 @@ input[type='color'] { width: 48px; height: 22px; border: 0; padding: 0; backgrou
 .tag { font: 700 9px var(--mono); padding: 1px 4px; border-radius: 3px; color: #000; }
 .tag.gen { background: var(--accent); }
 .tag.fx { background: var(--fx); }
+.tag.\33 d { background: #ffb43c; }
 
 /* ---------- params ---------- */
 .edit-btn { margin-left: auto; text-transform: none; letter-spacing: 0; font-family: var(--mono); }
 .param { margin: 6px 0; }
+.row.model-row { grid-template-columns: 82px minmax(0, 1fr) auto; }
+.row.model-row select { min-width: 0; }
 .slider-wrap { position: relative; }
 .live-marker {
   position: absolute; top: -3px; bottom: -3px; width: 2px; margin-left: -1px;

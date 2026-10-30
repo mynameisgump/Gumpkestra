@@ -1,4 +1,5 @@
 import { toast, type App } from '../app';
+import { isModelFile } from '../model/load';
 import { fmt, h, slider } from './dom';
 
 const METER_BANDS = ['level', 'bass', 'lowMid', 'mid', 'high', 'beat'] as const;
@@ -79,15 +80,17 @@ export function AudioPanel(root: HTMLElement, app: App) {
   listDevices().catch(() => {});
   navigator.mediaDevices?.addEventListener?.('devicechange', () => listDevices().catch(() => {}));
 
-  // Drag & drop audio onto the stage.
+  // Drag & drop onto the stage: 3D models go to the library, anything else is treated as audio.
   const stage = document.getElementById('stage')!;
   stage.addEventListener('dragover', (e) => { e.preventDefault(); stage.classList.add('dragging'); });
   stage.addEventListener('dragleave', () => stage.classList.remove('dragging'));
   stage.addEventListener('drop', (e) => {
     e.preventDefault();
     stage.classList.remove('dragging');
-    const file = e.dataTransfer?.files[0];
-    if (file) useFile(file);
+    for (const file of e.dataTransfer?.files ?? []) {
+      if (isModelFile(file.name)) void app.importModel(file);
+      else useFile(file);
+    }
   });
 
   return function draw() {

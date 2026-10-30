@@ -18,6 +18,8 @@ export interface ParamState {
 
 export interface LayerJSON {
   shader: string;
+  /** Model layers only: library model file or built-in primitive. */
+  model?: string;
   enabled: boolean;
   blend: BlendMode;
   opacity: ParamState;
@@ -34,6 +36,8 @@ export interface FrameContext {
   audio: AudioFeatures;
   fftTex: WebGLTexture;
   waveTex: WebGLTexture;
+  /** The fullscreen-triangle VAO. Layers that bind their own VAO must rebind this before returning. */
+  quad: WebGLVertexArrayObject;
   blit(src: WebGLTexture, dst: Target): void;
 }
 
@@ -77,18 +81,25 @@ export class Layer {
   live: Record<string, number> = {};
   parsed!: ParsedISF;
   output: Target | null = null;
+  /** Runtime problem to show in the stack (e.g. a model that failed to load). */
+  status: string | null = null;
 
   private program: WebGLProgram | null = null;
   private u!: (name: string) => WebGLUniformLocation | null;
   private passBuffers = new Map<string, PassBuffers>();
   private pendingEvents = new Set<string>();
 
-  constructor(private gl: WebGL2RenderingContext, public shaderName: string, parsed: ParsedISF) {
+  constructor(protected gl: WebGL2RenderingContext, public shaderName: string, parsed: ParsedISF) {
     this.setShader(parsed);
   }
 
   get inputs() {
     return this.parsed.meta.INPUTS;
+  }
+
+  /** Display name in the stack. */
+  get label() {
+    return this.shaderName;
   }
 
   /** Compile a new version of the shader, keeping parameter values whose name and type still match. */
@@ -104,7 +115,12 @@ export class Layer {
     if (this.program) this.gl.deleteProgram(this.program);
     this.program = program;
     this.u = uniformCache(this.gl, program);
+    this.setInputs(parsed);
+    this.freeBuffers();
+  }
 
+  /** Adopt a new input list, keeping parameter values whose name and type still match. */
+  protected setInputs(parsed: ParsedISF) {
     const oldInputs = new Map(this.parsed?.meta.INPUTS.map((i) => [i.NAME, i.TYPE]));
     const params: Record<string, ParamState> = {};
     for (const input of parsed.meta.INPUTS) {
@@ -114,7 +130,6 @@ export class Layer {
     }
     this.params = params;
     this.parsed = parsed;
-    this.freeBuffers();
   }
 
   trigger(name: string) {

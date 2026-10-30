@@ -1,4 +1,5 @@
 import { toast, type App } from '../app';
+import { BUILTIN_MODELS } from '../model/load';
 import { h } from './dom';
 
 const GENERATOR_TEMPLATE = `/*{
@@ -66,9 +67,14 @@ export function LibraryPanel(root: HTMLElement, app: App, openEditor: (name: str
     const gens = entries.filter((s) => s.parsed && !s.parsed.isFilter);
     const fx = entries.filter((s) => s.parsed?.isFilter);
     const broken = entries.filter((s) => !s.parsed);
+    const models = [...BUILTIN_MODELS, ...app.library.models].filter((m) => m.toLowerCase().includes(filter));
+    const modelItem = (m: string) =>
+      h('button', { class: 'lib-item model', title: m.startsWith('@') ? 'Built-in shape' : `library/models/${m}`, onclick: () => app.addModel(m) },
+        m.startsWith('@') ? m.slice(1) : m);
     list.replaceChildren(
       h('h3', {}, `Generators · ${gens.length}`), ...gens.map(item),
       h('h3', {}, `Effects · ${fx.length}`), ...fx.map(item),
+      h('h3', {}, `3D models · ${models.length}`), ...models.map(modelItem),
       ...(broken.length ? [h('h3', {}, 'Broken'), ...broken.map(item)] : []),
     );
   };
@@ -85,9 +91,9 @@ export function LibraryPanel(root: HTMLElement, app: App, openEditor: (name: str
       h('button', { onclick: () => createShader('effect') }, '+ Effect'),
     ),
     list,
-    h('p', { class: 'hint' }, 'Click to add above the selected layer. Shaders live in library/shaders/*.fs (ISF) and hot-reload when edited in any editor.'),
+    h('p', { class: 'hint' }, 'Click to add above the selected layer. Shaders live in library/shaders/*.fs (ISF) and hot-reload when edited in any editor. Drop a .glb/.obj/.stl on the canvas to add a 3D model.'),
   );
   render();
-  app.library.onChange((kind) => kind === 'shaders' && render());
+  app.library.onChange((kind) => kind !== 'presets' && render());
   app.onChange(render);
 }

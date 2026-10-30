@@ -1,7 +1,9 @@
 import type { App } from '../app';
 import { MOD_SOURCES, newModulator, usesRate, type ModSource, type Modulator } from '../audio/Modulators';
 import type { ISFInput } from '../isf/isf';
+import { isModelFile, MODEL_EXTENSIONS, BUILTIN_MODELS } from '../model/load';
 import { BLEND_MODES, floatRange, type Layer, type ParamState } from '../render/Layer';
+import { ModelLayer } from '../render/ModelLayer';
 import { fmt, h, select, slider } from './dom';
 
 const toHex = (c: number[]) => '#' + c.slice(0, 3).map((v) => Math.round(v * 255).toString(16).padStart(2, '0')).join('');
@@ -93,6 +95,31 @@ export function ParamsPanel(root: HTMLElement, app: App, openEditor: (name: stri
     }
   };
 
+  const modelRow = (layer: ModelLayer) => {
+    const names = [...BUILTIN_MODELS, ...app.library.models];
+    if (!names.includes(layer.modelName)) names.push(layer.modelName);
+    const opts = Object.fromEntries(names.map((n) => [n, n.startsWith('@') ? `${n.slice(1)} (built-in)` : n]));
+    const file = h('input', {
+      type: 'file',
+      accept: MODEL_EXTENSIONS.join(','),
+      style: 'display:none',
+      onchange: (e: Event) => {
+        const f = (e.target as HTMLInputElement).files?.[0];
+        if (f && isModelFile(f.name)) void app.importModel(f, layer);
+      },
+    }) as HTMLInputElement;
+    const mesh = layer.mesh;
+    return [
+      h('div', { class: 'param' }, h('div', { class: 'row model-row' },
+        h('span', { class: 'lbl' }, 'Model'),
+        select(opts, layer.modelName, (v) => void app.setModel(layer, v)),
+        h('button', { title: 'Import a .glb/.gltf/.obj/.stl into library/models', onclick: () => file.click() }, 'Load…'),
+        file)),
+      h('p', { class: 'hint' }, layer.status
+        ?? (mesh ? `${(mesh.vertexCount / 3).toLocaleString()} triangles · ${mesh.textures.length} textures · ${mesh.rig.animations.length} animations` : '')),
+    ];
+  };
+
   const render = () => {
     liveMarkers = [];
     const layer = app.selected;
@@ -101,10 +128,12 @@ export function ParamsPanel(root: HTMLElement, app: App, openEditor: (name: stri
       return;
     }
     const meta = layer.parsed.meta;
+    const isModel = layer instanceof ModelLayer;
     root.replaceChildren(...[
-      h('h2', {}, layer.shaderName,
-        h('button', { class: 'edit-btn', onclick: () => openEditor(layer.shaderName) }, '{ } Edit')),
+      h('h2', {}, layer.label,
+        isModel ? null : h('button', { class: 'edit-btn', onclick: () => openEditor(layer.shaderName) }, '{ } Edit')),
       meta.DESCRIPTION ? h('p', { class: 'hint' }, meta.DESCRIPTION) : null,
+      ...(isModel ? modelRow(layer) : []),
       h('div', { class: 'param' }, h('div', { class: 'row' },
         h('span', { class: 'lbl' }, 'Blend'),
         select([...BLEND_MODES], layer.blend, (v) => { layer.blend = v; app.touch(); }))),

@@ -41,6 +41,7 @@ The library is plain files on disk, so you can version it with git, share it, an
 ```
 library/shaders/*.fs     ISF 2 fragment shaders
 library/presets/*.json   layer stacks (shader + blend + opacity + params + modulators)
+library/models/*         3D models (.glb / .gltf / .obj / .stl)
 ```
 
 The Vite dev server serves these through `/api/library/*` and pushes a `library-changed` event when a file changes. Saving in VS Code recompiles every layer that uses the shader, without reloading the page. The built-in editor also recompiles as you type. Errors are mapped back to the file's line numbers, and a broken shader keeps showing its last good version.
@@ -58,10 +59,27 @@ Standard ISF: you can paste in shaders from [editor.isf.video](https://editor.is
 
 For shaders you want to share with other ISF hosts, prefer exposing a float parameter and modulating it over reading `AUDIO_*` directly.
 
+## 3D models
+
+Drop a `.glb`, `.gltf` (embedded), `.obj` or `.stl` onto the canvas, or use **Load…** in a model layer's parameters. The file is copied into `library/models/` and added as a **3D** layer. You can also click a model, or a built-in shape (sphere, cube, torus, knot), in the library list. If you re-export over the same file from Blender, every layer showing it reloads.
+
+A model layer sits in the stack like a generator, so the effects below it and the modulators work on it as usual. It's transparent around the model, so it can overlay other layers. Everything is normalised to unit size, so any model frames the same way.
+
+- **Animation:** glTF skins and node animations play. Pick the clip from the dropdown, and modulate **Anim speed** (for example, a dancer that speeds up with the bass).
+- **Transform:** scale, spin and tumble (integrated, so modulating them makes the model lurch rather than jump), rotation, offset, zoom and FOV.
+- **Deform (GPU):** inflate, writhe (noise along the normals), spectrum spikes (the FFT mapped up the model's height), twist, explode/shatter (per triangle), melt, PSX vertex snap and affine texture warp.
+- **Copies:** a ring of instances, with a radius and its own spin.
+- **Look:** Lit, Flat, Unlit, Normals, X-ray (additive fresnel) or Wireframe shading. There's also tint, wet specular, rim light, light angle, a wire overlay, fog, and a nearest-neighbour texture toggle.
+
+Presets `relic`, `scrapyard` and `spectral` show it off using the built-in shapes.
+
+Not supported yet: Draco/meshopt-compressed files, morph targets, `.gltf` with an external `.bin`, and materials beyond the base colour and texture.
+
 ## Design decisions
 
 - **ISF as the shader format.** Arkestra uses it, there's an existing ecosystem of shaders, and the JSON header gives the UI everything it needs to build controls automatically.
 - **Web stack (Vite + TypeScript + WebGL2), no framework.** It's the fastest loop for a prototype, and hot reload works for free. Rendering and audio sit behind small classes (`Engine`, `AudioEngine`), so the app can later be wrapped in Tauri or Electron for a native window, Syphon/Spout and file-system access without a rewrite.
+- **Models are rendered by a small built-in mesh renderer, not three.js.** It shares the engine's WebGL context, so there's no state juggling between two renderers. Every vertex goes through the same skinning path (a rigid mesh is a mesh with one joint), and meshes are stored as a triangle soup, so per-triangle effects (shatter, wireframe) need no geometry shader.
 - **Modulation lives in the host, not in shaders.** Shaders stay portable, and one shader can be wired to the bass in one preset and to an LFO in another.
 
 ## Roadmap ideas
@@ -71,4 +89,5 @@ For shaders you want to share with other ISF hosts, prefer exposing a float para
 - **Output:** offline render (step frame by frame through an audio file for a perfect-quality export instead of real-time capture), a second output window, and Syphon/NDI via a native shell.
 - **Library:** shader thumbnails, tags and categories from the `CATEGORIES` field, a preset browser with previews, and AI-assisted shader generation from a prompt (Arkestra Studio has this).
 - **Editor:** CodeMirror with GLSL highlighting, and inline error markers.
+- **3D:** an editable mesh-shader format, so the deformers and shading are library files like the ISF effects, plus more lights, a camera path, and the option to use another layer as the model's texture.
 - **Graph mode:** a node graph instead of a linear stack, for routing (for example, feeding one layer's output into another's second image input).

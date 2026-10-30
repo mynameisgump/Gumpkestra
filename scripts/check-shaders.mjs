@@ -52,7 +52,11 @@ try {
     for (const name of presets) {
       await page.evaluate((n) => window.app.loadPreset(window.app.library.presets.get(n)), name);
       await page.waitForTimeout(1500);
-      const errs = await page.evaluate(() => [...window.app.errors.entries()]);
+      const errs = await page.evaluate(() => [
+        ...window.app.errors.entries(),
+        // Layers with a runtime problem, e.g. a 3D model that failed to load.
+        ...window.app.engine.layers.filter((l) => l.status).map((l) => [l.label, l.status]),
+      ]);
       if (errs.length) { failed = true; console.log(`✗ preset ${name}:`, errs); }
       await page.screenshot({ path: `shots/${name}.png` });
       console.log(`📷 shots/${name}.png`);

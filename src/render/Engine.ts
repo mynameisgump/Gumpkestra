@@ -79,7 +79,10 @@ export class Engine {
   }
 
   addLayer(shaderName: string, parsed: ParsedISF, index = this.layers.length) {
-    const layer = new Layer(this.gl, shaderName, parsed);
+    return this.insertLayer(new Layer(this.gl, shaderName, parsed), index);
+  }
+
+  insertLayer<T extends Layer>(layer: T, index = this.layers.length): T {
     if (this.width) layer.resize(this.width, this.height);
     this.layers.splice(index, 0, layer);
     return layer;
@@ -125,7 +128,7 @@ export class Engine {
 
     const ctx: FrameContext = {
       gl, width: this.width, height: this.height, time, dt, frame: this.frame++,
-      audio: audio.features, fftTex: this.fftTex, waveTex: this.waveTex,
+      audio: audio.features, fftTex: this.fftTex, waveTex: this.waveTex, quad: this.vao,
       blit: (src, dst) => this.blit(src, dst),
     };
 

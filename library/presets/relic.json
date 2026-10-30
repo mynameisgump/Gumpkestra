@@ -1,0 +1,28 @@
+{
+  "layers": [
+    {
+      "shader": "veins",
+      "opacity": { "value": 0.55, "mods": [] },
+      "params": { "writhe": { "value": 0.4, "mods": [] } }
+    },
+    {
+      "shader": "@model",
+      "model": "@knot",
+      "params": {
+        "scale": { "value": 0.9, "mods": [{ "source": "beat", "amount": 0.04, "rate": 0.25, "smooth": 0 }] },
+        "spinY": { "value": 0.06, "mods": [] },
+        "spinX": { "value": 0.03, "mods": [] },
+        "writhe": { "value": 0.18, "mods": [{ "source": "bass", "amount": 0.35, "rate": 0.25, "smooth": 0.1 }] },
+        "writheScale": { "value": 3.5, "mods": [] },
+        "inflate": { "value": 0.0, "mods": [{ "source": "beat", "amount": 0.12, "rate": 0.25, "smooth": 0 }] },
+        "tint": { "value": [0.85, 0.36, 0.36, 1], "mods": [] },
+        "wet": { "value": 1.1, "mods": [] },
+        "rim": { "value": 0.8, "mods": [] },
+        "rimColor": { "value": [1, 0.15, 0.1, 1], "mods": [] }
+      }
+    },
+    { "shader": "flesh-warp", "params": { "warp": { "value": 0.012, "mods": [] }, "fleshTint": { "value": 0.1, "mods": [] } } },
+    { "shader": "psx", "params": { "resolution": { "value": 300, "mods": [] }, "fps": { "value": 30, "mods": [] } } },
+    { "shader": "crt", "params": { "curvature": { "value": 0.2, "mods": [] } } }
+  ]
+}

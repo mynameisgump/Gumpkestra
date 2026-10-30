@@ -44,6 +44,9 @@ export function uniformCache(gl: WebGL2RenderingContext, prog: WebGLProgram) {
 }
 
 export function createTarget(gl: WebGL2RenderingContext, width: number, height: number, float = false): Target {
+  // Targets can be created mid-render (pass buffers), so don't clobber whatever
+  // texture the active unit holds — it may be a layer's bound inputImage.
+  const prev = gl.getParameter(gl.TEXTURE_BINDING_2D) as WebGLTexture | null;
   const tex = gl.createTexture()!;
   gl.bindTexture(gl.TEXTURE_2D, tex);
   const canFloat = float && !!gl.getExtension('EXT_color_buffer_float');
@@ -61,6 +64,7 @@ export function createTarget(gl: WebGL2RenderingContext, width: number, height: 
   gl.clearColor(0, 0, 0, 0);
   gl.clear(gl.COLOR_BUFFER_BIT);
   gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+  gl.bindTexture(gl.TEXTURE_2D, prev);
   return { tex, fbo, width, height };
 }
 

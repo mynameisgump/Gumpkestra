@@ -31,6 +31,7 @@ async function main() {
 
   library.onChange((kind, name) => {
     if (kind === 'shaders') app.reloadShader(name);
+    else if (kind === 'models') app.reloadModel(name);
     else Topbar.refreshPresets?.();
   });
 

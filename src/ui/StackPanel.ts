@@ -1,4 +1,5 @@
 import type { App } from '../app';
+import { ModelLayer } from '../render/ModelLayer';
 import { h } from './dom';
 
 export function StackPanel(root: HTMLElement, app: App) {
@@ -12,7 +13,8 @@ export function StackPanel(root: HTMLElement, app: App) {
     const { layers } = app.engine;
     list.replaceChildren(
       ...layers.map((layer, i) => {
-        const error = app.errors.get(layer.shaderName);
+        const error = app.errors.get(layer.shaderName) ?? layer.status;
+        const tag = layer instanceof ModelLayer ? '3d' : layer.parsed.isFilter ? 'fx' : 'gen';
         return h('li', {
           class: `stack-row ${layer === app.selected ? 'selected' : ''} ${layer.enabled ? '' : 'disabled'}`,
           onclick: () => app.select(layer),
@@ -24,8 +26,8 @@ export function StackPanel(root: HTMLElement, app: App) {
             onclick: (e: Event) => e.stopPropagation(),
             onchange: (e: Event) => { layer.enabled = (e.target as HTMLInputElement).checked; app.changed(); },
           }),
-          h('span', { class: `tag ${layer.parsed.isFilter ? 'fx' : 'gen'}` }, layer.parsed.isFilter ? 'FX' : 'GEN'),
-          h('span', { class: 'name', title: error ?? '' }, layer.shaderName, error ? ' ⚠' : ''),
+          h('span', { class: `tag ${tag}` }, tag.toUpperCase()),
+          h('span', { class: 'name', title: error ?? '' }, layer.label, error ? (error === 'loading…' ? ' …' : ' ⚠') : ''),
           h('span', { class: 'row-actions' },
             h('button', { title: 'Move up', disabled: i === 0, onclick: (e: Event) => { e.stopPropagation(); app.moveLayer(layer, -1); } }, '↑'),
             h('button', { title: 'Move down', disabled: i === layers.length - 1, onclick: (e: Event) => { e.stopPropagation(); app.moveLayer(layer, 1); } }, '↓'),
