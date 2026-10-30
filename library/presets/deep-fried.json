@@ -10,20 +10,41 @@
       },
       "params": {
         "scale": {
-          "value": 5,
+          "value": 10,
           "mods": []
         },
         "writhe": {
-          "value": 0.4,
-          "mods": []
+          "value": 0.7035,
+          "mods": [
+            {
+              "source": "mid",
+              "amount": 1.19,
+              "rate": 0.25,
+              "smooth": 0
+            }
+          ]
         },
         "throb": {
           "value": 0,
-          "mods": []
+          "mods": [
+            {
+              "source": "bass",
+              "amount": 0.4,
+              "rate": 0.25,
+              "smooth": 0
+            }
+          ]
         },
         "flush": {
           "value": 0,
-          "mods": []
+          "mods": [
+            {
+              "source": "beat",
+              "amount": 0.28,
+              "rate": 0.25,
+              "smooth": 0
+            }
+          ]
         },
         "fibers": {
           "value": 0.5,
@@ -114,29 +135,29 @@
         },
         "rotate": {
           "value": 0,
-          "mods": []
+          "mods": [
+            {
+              "source": "beat",
+              "amount": 0.01,
+              "rate": 0.25,
+              "smooth": 0
+            }
+          ]
         },
         "size": {
           "value": 0.8,
           "mods": []
         },
         "pupil": {
-          "value": 0.3936,
-          "mods": [
-            {
-              "source": "bass",
-              "amount": 1.56,
-              "rate": 0.25,
-              "smooth": 0
-            }
-          ]
+          "value": 0.2,
+          "mods": []
         },
         "dilate": {
           "value": 0,
           "mods": [
             {
               "source": "bass",
-              "amount": 0.26,
+              "amount": 1,
               "rate": 0.25,
               "smooth": 0
             }
@@ -157,8 +178,8 @@
           "value": 0,
           "mods": [
             {
-              "source": "bass",
-              "amount": 0.5,
+              "source": "random",
+              "amount": 0.24,
               "rate": 0.25,
               "smooth": 0
             }
@@ -222,7 +243,7 @@
           "mods": []
         },
         "posterize": {
-          "value": 16.19,
+          "value": 2,
           "mods": []
         },
         "bulge": {
@@ -423,11 +444,56 @@
         },
         "exposure": {
           "value": 0,
-          "mods": []
+          "mods": [
+            {
+              "source": "beat",
+              "amount": 0.1,
+              "rate": 0.25,
+              "smooth": 0
+            }
+          ]
         },
         "invert": {
           "value": false,
           "mods": []
+        }
+      }
+    },
+    {
+      "shader": "dither",
+      "enabled": true,
+      "blend": "normal",
+      "opacity": {
+        "value": 1,
+        "mods": []
+      },
+      "params": {
+        "palette": {
+          "value": 5,
+          "mods": []
+        },
+        "pixelSize": {
+          "value": 2.505,
+          "mods": []
+        },
+        "strength": {
+          "value": 1,
+          "mods": []
+        },
+        "gamma": {
+          "value": 0.4,
+          "mods": []
+        },
+        "amount": {
+          "value": 0.332,
+          "mods": [
+            {
+              "source": "bass",
+              "amount": 0.18,
+              "rate": 0.25,
+              "smooth": 0
+            }
+          ]
         }
       }
     }
