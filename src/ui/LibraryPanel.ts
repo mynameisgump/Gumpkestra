@@ -55,6 +55,17 @@ export function LibraryPanel(root: HTMLElement, app: App, openEditor: (name: str
     }
   };
 
+  const deleteModel = (name: string) => {
+    const layers = app.modelLayers(name).length;
+    const presets = [...app.library.presets.values()].filter((p) => p.layers.some((l) => l.model === name)).map((p) => p.name);
+    const warnings = [
+      layers && `${layers} layer${layers > 1 ? 's' : ''} showing it will be removed.`,
+      presets.length && `Still used by preset${presets.length > 1 ? 's' : ''}: ${presets.join(', ')}.`,
+    ].filter(Boolean);
+    if (!confirm([`Delete library/models/${name}? This removes the file from disk.`, ...warnings].join('\n\n'))) return;
+    void app.deleteModel(name);
+  };
+
   const render = () => {
     const entries = [...app.library.shaders.values()]
       .filter((s) => s.name.toLowerCase().includes(filter))
@@ -69,9 +80,13 @@ export function LibraryPanel(root: HTMLElement, app: App, openEditor: (name: str
     const fx = entries.filter((s) => s.parsed?.isFilter);
     const broken = entries.filter((s) => !s.parsed);
     const models = [...BUILTIN_MODELS, ...app.library.models].filter((m) => m.toLowerCase().includes(filter));
-    const modelItem = (m: string) =>
-      h('button', { class: 'lib-item model', title: m.startsWith('@') ? 'Built-in shape' : `library/models/${m}`, onclick: () => app.addModel(m) },
+    const modelItem = (m: string) => {
+      const item = h('button', { class: 'lib-item model', title: m.startsWith('@') ? 'Built-in shape' : `library/models/${m}`, onclick: () => app.addModel(m) },
         m.startsWith('@') ? m.slice(1) : m);
+      if (m.startsWith('@')) return item;
+      return h('div', { class: 'lib-row' }, item,
+        h('button', { class: 'lib-del', title: `Delete library/models/${m}`, onclick: () => deleteModel(m) }, '✕'));
+    };
     const textures = [...Object.keys(BUILTIN_TEXTURES), ...app.library.textures].filter((t) => t.toLowerCase().includes(filter));
     const textureItem = (t: string) => {
       const src = thumbnailURL(t);

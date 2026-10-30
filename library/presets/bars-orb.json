@@ -1,6 +1,6 @@
 {
   "layers": [
-    { "shader": "audio-orb", "params": {} },
+    { "shader": "audio-orb", "params": { "texMix": { "value": 0, "mods": [] }, "bump": { "value": 0, "mods": [] }, "gloss": { "value": 0, "mods": [] } } },
     {
       "shader": "spectrum-bars",
       "blend": "screen",

@@ -107,6 +107,22 @@ export class App {
     }
   }
 
+  /** Layers currently showing a library model. */
+  modelLayers(name: string) {
+    return this.engine.layers.filter((l): l is ModelLayer => l instanceof ModelLayer && l.modelName === name);
+  }
+
+  /** Delete a model file from the library, removing the layers that show it first so they don't error on reload. */
+  async deleteModel(name: string) {
+    for (const layer of this.modelLayers(name)) this.removeLayer(layer);
+    try {
+      await this.library.deleteFile('models', name);
+      toast(`Deleted ${name} from library/models`);
+    } catch (e) {
+      toast(`${name}: ${(e as Error).message}`, true);
+    }
+  }
+
   /** Image inputs on a layer that can take a texture (everything except a filter's inputImage). */
   textureInputs(layer: Layer | null) {
     return layer ? layer.inputs.filter((i) => i.TYPE === 'image' && i.NAME !== 'inputImage') : [];

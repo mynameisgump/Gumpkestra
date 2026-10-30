@@ -102,6 +102,11 @@ input[type='color'] { width: 48px; height: 22px; border: 0; padding: 0; backgrou
 .lib-item:hover { background: var(--panel-2); }
 .lib-item.has-error { color: var(--accent-2); }
 .lib-item.model::before { content: '◆ '; color: #ffb43c; }
+.lib-row { display: flex; align-items: center; }
+.lib-row .lib-item { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lib-del { padding: 0 5px; background: transparent; border-color: transparent; color: var(--dim); opacity: 0; }
+.lib-row:hover .lib-del, .lib-del:focus-visible { opacity: 1; }
+.lib-del:hover { color: var(--accent-2); }
 
 /* ---------- stack ---------- */
 .stack { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 3px; }

@@ -141,6 +141,14 @@ export class Library {
     return name;
   }
 
+  /** Delete a file from library/models or library/textures. */
+  async deleteFile(kind: FileKind, name: string) {
+    await api(kind, name, { method: 'DELETE' });
+    if (kind === 'models') this.meshes.delete(name);
+    this.files[kind] = this.files[kind].filter((n) => n !== name);
+    this.emit(kind, name);
+  }
+
   async savePreset(preset: Preset) {
     const { name, ...rest } = preset;
     await api('presets', name, { method: 'PUT', body: JSON.stringify(rest, null, 2) });
