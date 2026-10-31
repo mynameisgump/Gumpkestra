@@ -82,6 +82,7 @@ export class App {
   }
 
   async setModel(layer: ModelLayer, model: string) {
+    if (layer.modelName !== model) layer.hiddenMeshes.clear();
     layer.modelName = model;
     layer.status = 'loading…';
     this.changed();

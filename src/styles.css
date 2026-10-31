@@ -191,6 +191,12 @@ input[type='color'] { width: 48px; height: 22px; border: 0; padding: 0; backgrou
 .param { margin: 6px 0; }
 .row.model-row { grid-template-columns: 82px minmax(0, 1fr) auto; }
 .row.model-row select { min-width: 0; }
+.mesh-visibility { min-width: 0; margin: 10px 0; padding: 8px; border: 1px solid var(--line); border-radius: 4px; }
+.mesh-visibility legend { font-size: 11px; color: var(--dim); padding: 0 4px; }
+.mesh-list { display: grid; gap: 6px; max-height: 200px; overflow-y: auto; }
+.mesh-list label { display: flex; gap: 7px; align-items: center; min-width: 0; cursor: pointer; }
+.mesh-list label > span:first-of-type { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mesh-list input { flex: none; }
 .text-model-input { grid-column: 2 / -1; min-width: 0; font-family: var(--mono); }
 .row.texture-row { grid-template-columns: 82px minmax(0, 1fr); }
 .texture-picker { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px; align-items: center; }

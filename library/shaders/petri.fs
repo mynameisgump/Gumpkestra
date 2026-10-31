@@ -1,8 +1,11 @@
 /*{
-  "DESCRIPTION": "Stained cells under a microscope. Blobs merge and split like mitosis, jitter with the treble and swell with the bass.",
+  "DESCRIPTION": "Stained cells under a microscope. Blobs merge and split like mitosis, jitter with the treble and swell with the bass. Blend an image or video into the cells with Texture amount.",
   "CREDIT": "Gumpkestra",
   "CATEGORIES": ["Generator", "Biological"],
   "INPUTS": [
+    { "NAME": "tex", "TYPE": "image", "DEFAULT": "@meat", "LABEL": "Cell texture" },
+    { "NAME": "textureAmount", "TYPE": "float", "DEFAULT": 0.0, "MIN": 0.0, "MAX": 1.0, "LABEL": "Texture amount" },
+    { "NAME": "textureScale", "TYPE": "float", "DEFAULT": 1.0, "MIN": 0.2, "MAX": 8.0, "LABEL": "Texture scale" },
     { "NAME": "scale", "TYPE": "float", "DEFAULT": 6.0, "MIN": 2.0, "MAX": 16.0, "LABEL": "Zoom out" },
     { "NAME": "density", "TYPE": "float", "DEFAULT": 0.7, "MIN": 0.0, "MAX": 1.0 },
     { "NAME": "size", "TYPE": "float", "DEFAULT": 0.45, "MIN": 0.2, "MAX": 0.8 },
@@ -35,6 +38,9 @@ void main() {
 
   float field = 0.0;
   float nuc = 0.0;
+  vec4 cellTexture = vec4(0.0);
+  vec2 texDx = dFdx(p) * textureScale;
+  vec2 texDy = dFdy(p) * textureScale;
   for (int j = -1; j <= 1; j++)
   for (int i = -1; i <= 1; i++) {
     vec2 g = vec2(float(i), float(j));
@@ -48,7 +54,16 @@ void main() {
     float a = atan(rel.y, rel.x);
     rad *= 1.0 + 0.12 * sin(a * 3.0 + TIME * 2.0 * writhe + h.x * 20.0) * writhe;
     float d = length(rel);
-    field += exp(-d * d / (rad * rad) * 1.5);
+    float weight = exp(-d * d / (rad * rad) * 1.5);
+    field += weight;
+    if (textureAmount > 0.0) {
+      // Local coordinates keep the image upright and attached to each moving cell.
+      // Explicit gradients keep mip selection stable across cell boundaries.
+      float diameter = 2.0 * rad;
+      vec2 cellUV = 0.5 - rel * textureScale / diameter;
+      vec4 sampleColor = textureGrad(tex, cellUV, texDx / diameter, texDy / diameter);
+      cellTexture += vec4(sampleColor.rgb * sampleColor.a, sampleColor.a) * weight;
+    }
     vec2 wob = 0.12 * rad * vec2(sin(h.x * 9.0 + TIME), cos(h.y * 7.0 + TIME));
     nuc = max(nuc, smoothstep(0.3, 0.24, length(rel - wob) / rad));
   }
@@ -59,6 +74,10 @@ void main() {
 
   vec3 col = background.rgb * (0.88 + 0.12 * vnoise(p * 20.0));
   col = mix(col, stain.rgb * (0.75 + 0.5 * gran), body * 0.85);
+  // Blend overlapping cells smoothly; transparent texels retain the original stain.
+  vec3 textureColor = cellTexture.rgb / max(cellTexture.a, 1e-5);
+  float textureAlpha = cellTexture.a / max(field, 1e-5);
+  col = mix(col, textureColor * (0.75 + 0.5 * gran), body * textureAmount * textureAlpha);
   col = mix(col, stain.rgb * 0.35, membrane);
   col = mix(col, nucleusColor.rgb * (0.8 + gran * 0.4), nuc * body);
 

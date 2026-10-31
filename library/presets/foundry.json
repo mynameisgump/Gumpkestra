@@ -11,7 +11,12 @@
       "params": {
         "tex": {
           "value": "store_growth.png",
-          "mods": []
+          "mods": [],
+          "tiles": [
+            "store_eat.png",
+            "store_secure.png",
+            "store_cleanse.png"
+          ]
         },
         "fit": {
           "value": 3,
@@ -22,11 +27,17 @@
           "mods": []
         },
         "pulse": {
-          "value": 0.04,
+          "value": 0.186,
           "mods": [
             {
               "source": "bass",
               "amount": 0.55,
+              "rate": 0.25,
+              "smooth": 0
+            },
+            {
+              "source": "bass",
+              "amount": 0.5,
               "rate": 0.25,
               "smooth": 0
             }
@@ -50,12 +61,12 @@
         "scroll": {
           "value": [
             0,
-            0.02
+            0.2
           ],
           "mods": []
         },
         "brightness": {
-          "value": 0.22,
+          "value": 0.831,
           "mods": []
         },
         "tint": {
@@ -72,6 +83,229 @@
     {
       "shader": "@model",
       "enabled": true,
+      "blend": "normal",
+      "opacity": {
+        "value": 1,
+        "mods": []
+      },
+      "params": {
+        "animation": {
+          "value": 3,
+          "mods": []
+        },
+        "animSpeed": {
+          "value": 1,
+          "mods": [
+            {
+              "source": "bass",
+              "amount": 0.5,
+              "rate": 0.25,
+              "smooth": 0
+            }
+          ]
+        },
+        "scale": {
+          "value": 1,
+          "mods": []
+        },
+        "spinY": {
+          "value": 0.08,
+          "mods": []
+        },
+        "spinX": {
+          "value": 0,
+          "mods": []
+        },
+        "spinZ": {
+          "value": 0,
+          "mods": []
+        },
+        "ratchet": {
+          "value": 0,
+          "mods": []
+        },
+        "rotX": {
+          "value": 0,
+          "mods": [
+            {
+              "source": "bass",
+              "amount": 0.14,
+              "rate": 0.25,
+              "smooth": 0
+            }
+          ]
+        },
+        "rotY": {
+          "value": 0,
+          "mods": []
+        },
+        "rotZ": {
+          "value": 0,
+          "mods": []
+        },
+        "offsetX": {
+          "value": 0,
+          "mods": []
+        },
+        "offsetY": {
+          "value": 0,
+          "mods": []
+        },
+        "pivot": {
+          "value": 0,
+          "mods": []
+        },
+        "zoom": {
+          "value": 1,
+          "mods": []
+        },
+        "fov": {
+          "value": 45,
+          "mods": []
+        },
+        "inflate": {
+          "value": 0,
+          "mods": []
+        },
+        "writhe": {
+          "value": 0.1008,
+          "mods": [
+            {
+              "source": "bass",
+              "amount": 0.02,
+              "rate": 0.25,
+              "smooth": 0
+            }
+          ]
+        },
+        "writheScale": {
+          "value": 2.5,
+          "mods": []
+        },
+        "writheSpeed": {
+          "value": 0.6,
+          "mods": []
+        },
+        "fftDisplace": {
+          "value": 0,
+          "mods": []
+        },
+        "twist": {
+          "value": 0,
+          "mods": []
+        },
+        "explode": {
+          "value": 0,
+          "mods": []
+        },
+        "melt": {
+          "value": 0,
+          "mods": []
+        },
+        "snap": {
+          "value": 0.58,
+          "mods": []
+        },
+        "affine": {
+          "value": 0,
+          "mods": []
+        },
+        "copies": {
+          "value": 3,
+          "mods": []
+        },
+        "spread": {
+          "value": 0.728,
+          "mods": []
+        },
+        "orbit": {
+          "value": -0.016,
+          "mods": []
+        },
+        "shading": {
+          "value": 0,
+          "mods": []
+        },
+        "texture": {
+          "value": "@model",
+          "mods": []
+        },
+        "mapping": {
+          "value": 0,
+          "mods": []
+        },
+        "texScale": {
+          "value": 1,
+          "mods": []
+        },
+        "texScrollX": {
+          "value": 0,
+          "mods": []
+        },
+        "texScrollY": {
+          "value": 0,
+          "mods": []
+        },
+        "tint": {
+          "value": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "mods": []
+        },
+        "wet": {
+          "value": 0.4,
+          "mods": []
+        },
+        "rim": {
+          "value": 0.4,
+          "mods": []
+        },
+        "rimColor": {
+          "value": [
+            1,
+            0.25,
+            0.3,
+            1
+          ],
+          "mods": []
+        },
+        "lightAngle": {
+          "value": 35,
+          "mods": []
+        },
+        "wire": {
+          "value": 0,
+          "mods": []
+        },
+        "wireColor": {
+          "value": [
+            0.7,
+            1,
+            0.3,
+            1
+          ],
+          "mods": []
+        },
+        "fog": {
+          "value": 0,
+          "mods": []
+        },
+        "pixelated": {
+          "value": false,
+          "mods": []
+        }
+      },
+      "model": "evil_egg.glb",
+      "hiddenMeshes": [
+        "node:17"
+      ]
+    },
+    {
+      "shader": "@model",
+      "enabled": false,
       "blend": "normal",
       "opacity": {
         "value": 1,
@@ -112,6 +346,14 @@
             }
           ]
         },
+        "spinZ": {
+          "value": 0,
+          "mods": []
+        },
+        "ratchet": {
+          "value": 0,
+          "mods": []
+        },
         "rotX": {
           "value": 0,
           "mods": []
@@ -129,6 +371,10 @@
           "mods": []
         },
         "offsetY": {
+          "value": 0,
+          "mods": []
+        },
+        "pivot": {
           "value": 0,
           "mods": []
         },
@@ -289,11 +535,12 @@
           "mods": []
         }
       },
-      "model": "@torus"
+      "model": "@torus",
+      "hiddenMeshes": []
     },
     {
       "shader": "siren",
-      "enabled": true,
+      "enabled": false,
       "blend": "add",
       "opacity": {
         "value": 0.6,
@@ -460,6 +707,41 @@
         },
         "radial": {
           "value": true,
+          "mods": []
+        },
+        "angle": {
+          "value": 0,
+          "mods": []
+        }
+      }
+    },
+    {
+      "shader": "dither",
+      "enabled": true,
+      "blend": "normal",
+      "opacity": {
+        "value": 1,
+        "mods": []
+      },
+      "params": {
+        "palette": {
+          "value": 0,
+          "mods": []
+        },
+        "pixelSize": {
+          "value": 2,
+          "mods": []
+        },
+        "strength": {
+          "value": 1,
+          "mods": []
+        },
+        "gamma": {
+          "value": 0.7549,
+          "mods": []
+        },
+        "amount": {
+          "value": 0.404,
           "mods": []
         }
       }

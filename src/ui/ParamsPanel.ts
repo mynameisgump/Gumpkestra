@@ -254,6 +254,30 @@ export function ParamsPanel(root: HTMLElement, app: App, openEditor: (name: stri
     ];
   };
 
+  const meshVisibility = (layer: ModelLayer) => {
+    const meshes = [...new Map(layer.mesh?.groups.map((g) => [g.meshId, g.meshName])).entries()];
+    if (!meshes.length) return null;
+    const visible = meshes.filter(([id]) => !layer.hiddenMeshes.has(id)).length;
+    const all = (show: boolean) => {
+      layer.hiddenMeshes = new Set(show ? [] : meshes.map(([id]) => id));
+      app.touch(); render();
+    };
+    return h('fieldset', { class: 'mesh-visibility' },
+      h('legend', {}, `Visible meshes · ${visible}/${meshes.length}`),
+      h('div', { class: 'btn-row' },
+        h('button', { disabled: visible === meshes.length, onclick: () => all(true) }, 'Show all'),
+        h('button', { disabled: visible === 0, onclick: () => all(false) }, 'Hide all')),
+      h('div', { class: 'mesh-list' }, ...meshes.map(([id, name], i) =>
+        h('label', { title: name },
+          h('input', { type: 'checkbox', checked: !layer.hiddenMeshes.has(id), onchange: (e: Event) => {
+            if ((e.target as HTMLInputElement).checked) layer.hiddenMeshes.delete(id);
+            else layer.hiddenMeshes.add(id);
+            app.touch(); render();
+          } }),
+          h('span', {}, name),
+          h('span', { class: 'hint', 'aria-hidden': 'true' }, String(i + 1))))));
+  };
+
   const modelRow = (layer: ModelLayer) => {
     const isText = isTextModel(layer.modelName);
     // 3D text is one entry; picking it keeps the current text if there is one.
@@ -278,6 +302,7 @@ export function ParamsPanel(root: HTMLElement, app: App, openEditor: (name: stri
         h('button', { title: 'Import a .glb/.gltf/.obj/.stl into library/models', onclick: () => file.click() }, 'Load…'),
         file)),
       ...(isText ? textRows(layer) : []),
+      layer.status ? null : meshVisibility(layer),
       h('p', { class: 'hint' }, layer.status
         ?? (mesh ? `${(mesh.vertexCount / 3).toLocaleString()} triangles · ${mesh.textures.length} textures · ${mesh.rig.animations.length} animations` : '')),
     ];

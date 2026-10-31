@@ -8,6 +8,7 @@
     "build": "tsc --noEmit && vite build",
     "typecheck": "tsc --noEmit",
     "check-shaders": "node scripts/check-shaders.mjs",
+    "check-meshes": "node scripts/check-mesh-visibility.mjs",
     "check-tiles": "node scripts/check-tile-sequence.mjs",
     "check-presets": "node scripts/check-presets.mjs"
   },

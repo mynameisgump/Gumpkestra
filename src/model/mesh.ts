@@ -13,6 +13,9 @@ import { identity } from './math';
 export const STRIDE = 22;
 
 export interface MeshGroup {
+  /** Source mesh instance; all its materials share one visibility control. */
+  meshId: string;
+  meshName: string;
   /** First vertex and vertex count (multiples of 3). */
   start: number;
   count: number;
@@ -56,6 +59,8 @@ export const staticRig = (): Rig => ({
 });
 
 export interface Primitive {
+  meshId?: string;
+  meshName?: string;
   positions: ArrayLike<number>;
   normals?: ArrayLike<number> | null;
   uvs?: ArrayLike<number> | null;
@@ -127,14 +132,17 @@ export class SoupBuilder {
         d[o++] = fx; d[o++] = fy; d[o++] = fz;
       }
     }
+    if (this.count === start) return;
+    const meshId = prim.meshId ?? 'model';
+    const meshName = prim.meshName ?? 'Mesh';
     const color = prim.color ?? [1, 1, 1, 1];
     const texture = prim.texture ?? -1;
     const last = this.groups[this.groups.length - 1];
-    // Merge consecutive primitives that share a material into one draw call.
-    if (last && last.texture === texture && last.color.every((v, i) => v === color[i]) && last.start + last.count === start) {
+    // Merge only within a source mesh so visibility stays independent.
+    if (last && last.meshId === meshId && last.texture === texture && last.color.every((v, i) => v === color[i]) && last.start + last.count === start) {
       last.count += this.count - start;
     } else {
-      this.groups.push({ start, count: this.count - start, color, texture });
+      this.groups.push({ meshId, meshName, start, count: this.count - start, color, texture });
     }
   }
 
@@ -297,6 +305,8 @@ export function parseOBJ(name: string, text: string): MeshData {
   const pos: number[] = [], uv: number[] = [], nrm: number[] = [];
   const posIndex: number[] = [];
   let hasUV = false, hasN = false;
+  let object = '', group = '';
+  const ranges: { start: number; count: number; meshId: string; meshName: string }[] = [];
   const at = (arr: number[], i: string, size: number) => {
     const n = parseInt(i, 10);
     return n < 0 ? arr.length / size + n : n - 1;
@@ -305,10 +315,13 @@ export function parseOBJ(name: string, text: string): MeshData {
     const line = raw.trim();
     const parts = line.split(/\s+/);
     switch (parts[0]) {
+      case 'o': object = parts.slice(1).join(' '); group = ''; break;
+      case 'g': group = parts.slice(1).join(' '); break;
       case 'v': v.push(+parts[1], +parts[2], +parts[3]); break;
       case 'vt': vt.push(+parts[1], 1 - +(parts[2] ?? 0)); break; // OBJ's V points up; glTF/textures point down.
       case 'vn': vn.push(+parts[1], +parts[2], +parts[3]); break;
       case 'f': {
+        const start = pos.length / 3;
         const corners = parts.slice(1).filter(Boolean).map((c) => c.split('/'));
         for (let i = 1; i + 1 < corners.length; i++) {
           for (const c of [corners[0], corners[i], corners[i + 1]]) {
@@ -319,18 +332,28 @@ export function parseOBJ(name: string, text: string): MeshData {
             if (c[2]) { const ni = at(vn, c[2], 3); nrm.push(vn[ni * 3], vn[ni * 3 + 1], vn[ni * 3 + 2]); hasN = true; } else nrm.push(0, 0, 0);
           }
         }
+        const count = pos.length / 3 - start;
+        const meshId = `obj:${JSON.stringify([object, group])}`;
+        const last = ranges[ranges.length - 1];
+        if (count && last?.meshId === meshId) last.count += count;
+        else if (count) ranges.push({ start, count, meshId, meshName: [object, group].filter(Boolean).join(' / ') || 'Mesh' });
         break;
       }
     }
   }
-  let normals: ArrayLike<number> | null = hasN ? nrm : null;
+  let normals: number[] | null = hasN ? nrm : null;
   if (!hasN) {
     // Smooth over shared positions, then expand per corner.
     const smooth = smoothNormals(v, posIndex);
     normals = posIndex.flatMap((pi) => [smooth[pi * 3], smooth[pi * 3 + 1], smooth[pi * 3 + 2]]);
   }
   const b = new SoupBuilder();
-  b.add({ positions: pos, normals, uvs: hasUV ? uv : null });
+  for (const range of ranges) {
+    const { start, count } = range;
+    b.add({ ...range, positions: pos.slice(start * 3, (start + count) * 3),
+      normals: normals ? normals.slice(start * 3, (start + count) * 3) : null,
+      uvs: hasUV ? uv.slice(start * 2, (start + count) * 2) : null });
+  }
   return b.build(name, staticRig());
 }
 

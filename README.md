@@ -5,6 +5,7 @@ A prototype modular audio-visualiser, in the spirit of Arkestra (ISF shader engi
 ```sh
 npm install
 npm run dev            # open http://localhost:5173 in Chrome
+npm run check-meshes   # verify mesh controls, rendering and preset restoration
 npm run check-presets  # verify groups, keyboard navigation and canvas transitions
 npm run check-shaders  # compile every library shader in headless Chrome (add -- --shots for preset screenshots)
 ```
@@ -72,6 +73,8 @@ For shaders you want to share with other ISF hosts, prefer exposing a float para
 { "NAME": "radius", "TYPE": "float", "DEFAULT": 0.9, "MIN": 0.3, "MAX": 1.6, "MODS": [{ "SOURCE": "bass", "AMOUNT": 0.1731 }] }
 ```
 
+The `veins` generator has locally bending vessels, moving capillaries, and blood pulses that dilate the network as they travel. **Writhe** sets how far the vessels bend; **Motion speed** sets how fast they move. **Pulse speed** sets blood travel speed, and **Vessel pulse** sets the swelling from that flow. **Audio response** controls bass swelling and treble activity in the capillaries; **Beat surge** controls outward beat pressure waves separately. Set Motion speed and Pulse speed to 0 for a still network in silence. These controls also appear in existing presets that use `veins`.
+
 ## Textures
 
 Any ISF `image` input other than a filter's `inputImage` becomes a texture slot. Each slot has a picker with a thumbnail, a dropdown and a **Load…** button. A slot can take:
@@ -86,6 +89,7 @@ Shaders built around textures:
 
 - `image`: show a texture with contain, cover, stretch or tile fit, plus zoom, spin, scroll and a beat pulse. In **Tile** mode, use **Add texture…** to build an ordered sequence (including repeated entries); reorder with ↑/↓ or remove with ✕. The sequence advances across both columns and rows, wraps in either scroll direction, and saves with the preset. Tiles share the first texture’s aspect ratio and are resampled up to 1024 pixels per side. The device’s array-texture limit determines the maximum sequence length.
 - `texture-tunnel`: a textured tunnel that lurches forward on each beat.
+- `petri`: blend images or videos into the moving cells using **Cell texture** and **Texture amount**. Amount starts at 0 to preserve the original stain; raise it toward 1 to show the texture. **Texture scale** controls repetition inside each cell (higher values make the texture smaller). Cell membranes, nuclei, and the microscope lens remain visible.
 - `displace-map`: use any texture as a displacement map or stain over the stack.
 
 The presets `gullet` and `foundry` use them. Model layers have a texture slot too, described below.
@@ -95,6 +99,8 @@ In your own shaders, declare `{ "NAME": "tex", "TYPE": "image", "DEFAULT": "@noi
 ## 3D models
 
 Drop a `.glb`, `.gltf` (embedded), `.obj` or `.stl` onto the canvas, or use **Load…** in a model layer's parameters. The file is copied into `library/models/` and added as a **3D** layer. You can also click a model, or a built-in shape (sphere, cube, torus, knot), in the library list. If you re-export over the same file from Blender, every layer showing it reloads.
+
+Use **Visible meshes** in a model layer’s parameters to show or hide individual meshes with checkboxes, or use **Show all / Hide all**. GLB/glTF mesh instances and OBJ objects/groups appear by name; built-in shapes, text and STL files have one mesh. Visibility is saved with presets and kept when the same model reloads. Choosing a different model shows all of its meshes.
 
 A model layer sits in the stack like a generator, so the effects below it and the modulators work on it as usual. It's transparent around the model, so it can overlay other layers. Everything is normalised to unit size, so any model frames the same way.
 

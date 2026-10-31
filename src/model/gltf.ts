@@ -270,6 +270,8 @@ export async function parseGLTF(name: string, data: ArrayBuffer): Promise<MeshDa
         }
         const mat = json.materials?.[prim.material]?.pbrMetallicRoughness ?? {};
         builder.add({
+          meshId: `node:${ni}`,
+          meshName: node.name || json.meshes[node.mesh].name || `Mesh ${ni + 1}`,
           positions,
           normals: A.NORMAL !== undefined ? readAccessor(json, buffers, A.NORMAL) : null,
           uvs: A.TEXCOORD_0 !== undefined ? readAccessor(json, buffers, A.TEXCOORD_0) : null,

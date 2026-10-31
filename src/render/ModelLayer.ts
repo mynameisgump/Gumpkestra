@@ -4,7 +4,7 @@ import { axisAngle, fromTRS, perspective, quatMul } from '../model/math';
 import { STRIDE, type MeshData } from '../model/mesh';
 import { isTextModel, parseTextModel } from '../model/text';
 import { createTarget, deleteTarget, link, uniformCache, type Target } from './gl';
-import { floatRange, Layer, resolveImage, type FrameContext } from './Layer';
+import { floatRange, Layer, resolveImage, type FrameContext, type LayerJSON } from './Layer';
 
 /** The `shader` name model layers use in presets. */
 export const MODEL_SHADER = '@model';
@@ -269,6 +269,7 @@ const DEG = Math.PI / 180;
 
 export class ModelLayer extends Layer {
   mesh: MeshData | null = null;
+  hiddenMeshes = new Set<string>();
   private prog: WebGLProgram;
   private mu: (n: string) => WebGLUniformLocation | null;
   private unpremul: WebGLProgram;
@@ -318,7 +319,12 @@ export class ModelLayer extends Layer {
   }
 
   override toJSON() {
-    return { ...super.toJSON(), model: this.modelName };
+    return { ...super.toJSON(), model: this.modelName, hiddenMeshes: [...this.hiddenMeshes] };
+  }
+
+  override applyJSON(json: Partial<LayerJSON>) {
+    super.applyJSON(json);
+    this.hiddenMeshes = new Set((json.hiddenMeshes ?? []).filter((id) => typeof id === 'string'));
   }
 
   setMesh(mesh: MeshData) {
@@ -505,6 +511,7 @@ export class ModelLayer extends Layer {
       gl.activeTexture(gl.TEXTURE0);
       gl.bindSampler(0, this.v('pixelated') ? this.nearest : null);
       for (const g of mesh.groups) {
+        if (this.hiddenMeshes.has(g.meshId)) continue;
         gl.bindTexture(gl.TEXTURE_2D, override ?? this.textures[g.texture] ?? this.white);
         gl.uniform4fv(u('uBaseColor'), override ? [1, 1, 1, 1] : g.color);
         gl.drawArraysInstanced(gl.TRIANGLES, g.start, g.count, copies);

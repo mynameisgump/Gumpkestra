@@ -24,6 +24,8 @@ export interface LayerJSON {
   shader: string;
   /** Model layers only: library model file or built-in primitive. */
   model?: string;
+  /** Model layers only: hidden source mesh instance IDs. Omitted means all visible. */
+  hiddenMeshes?: string[];
   enabled: boolean;
   blend: BlendMode;
   opacity: ParamState;

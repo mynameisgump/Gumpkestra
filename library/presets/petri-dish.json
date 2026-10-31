@@ -9,9 +9,28 @@
         "mods": []
       },
       "params": {
-        "scale": {
-          "value": 5.5,
+        "tex": {
+          "value": "@meat",
           "mods": []
+        },
+        "textureAmount": {
+          "value": 1,
+          "mods": []
+        },
+        "textureScale": {
+          "value": 1,
+          "mods": []
+        },
+        "scale": {
+          "value": 7.978,
+          "mods": [
+            {
+              "source": "bass",
+              "amount": -0.12,
+              "rate": 0.25,
+              "smooth": 0
+            }
+          ]
         },
         "density": {
           "value": 0.8,
@@ -19,14 +38,21 @@
         },
         "size": {
           "value": 0.4,
-          "mods": []
+          "mods": [
+            {
+              "source": "bass",
+              "amount": 0.08,
+              "rate": 0.25,
+              "smooth": 0
+            }
+          ]
         },
         "writhe": {
           "value": 0,
           "mods": [
             {
-              "source": "bass",
-              "amount": 0.001,
+              "source": "lowMid",
+              "amount": 0.005,
               "rate": 0.25,
               "smooth": 0
             }
@@ -219,7 +245,7 @@
           "mods": []
         },
         "fps": {
-          "value": 0,
+          "value": 240,
           "mods": []
         }
       }
