@@ -1,6 +1,7 @@
 import { parseISF, type ParsedISF } from './isf/isf';
 import { parseModel } from './model/load';
 import type { MeshData } from './model/mesh';
+import { fontFamily, isTextModel, parseTextModel, TEXT_FONTS } from './model/text';
 import type { LayerJSON } from './render/Layer';
 
 export interface ShaderEntry {
@@ -17,7 +18,7 @@ export interface Preset {
 
 type Kind = 'shaders' | 'presets' | FileKind;
 /** Binary kinds, listed by file name (with extension). */
-type FileKind = 'models' | 'textures';
+type FileKind = 'models' | 'textures' | 'fonts';
 
 async function api(kind: Kind, name = '', init?: RequestInit) {
   const res = await fetch(`/api/library/${kind}/${encodeURIComponent(name)}`, init);
@@ -28,10 +29,12 @@ async function api(kind: Kind, name = '', init?: RequestInit) {
 export class Library {
   shaders = new Map<string, ShaderEntry>();
   presets = new Map<string, Preset>();
-  /** File names (with extension) in library/models and library/textures. */
-  files: Record<FileKind, string[]> = { models: [], textures: [] };
+  /** File names (with extension) in library/models, library/textures and library/fonts. */
+  files: Record<FileKind, string[]> = { models: [], textures: [], fonts: [] };
   /** Parsed meshes, shared by every layer showing the same model. */
   private meshes = new Map<string, Promise<MeshData>>();
+  /** Library fonts registered in document.fonts, by file name. */
+  private faces = new Map<string, Promise<FontFace>>();
   private listeners = new Set<(kind: Kind, name: string) => void>();
 
   onChange(fn: (kind: Kind, name: string) => void) {
@@ -61,6 +64,7 @@ export class Library {
       api('presets').then((r) => r.json() as Promise<{ name: string; source: string }[]>),
       this.refreshFiles('models'),
       this.refreshFiles('textures'),
+      this.refreshFiles('fonts'),
     ]);
     for (const s of shaders) this.setShader(s.name, s.source);
     for (const p of presets) {
@@ -73,8 +77,9 @@ export class Library {
 
     // Files edited outside the app (VS Code etc.) hot-reload through here.
     import.meta.hot?.on('library-changed', async ({ kind, name }: { kind: Kind; name: string }) => {
-      if (kind === 'models' || kind === 'textures') {
+      if (kind === 'models' || kind === 'textures' || kind === 'fonts') {
         if (kind === 'models') this.meshes.delete(name);
+        if (kind === 'fonts') this.forgetFont(name);
         await this.refreshFiles(kind).catch(() => {});
         this.emit(kind, name);
         return;
@@ -109,6 +114,10 @@ export class Library {
     return this.files.textures;
   }
 
+  get fonts() {
+    return this.files.fonts;
+  }
+
   private async refreshFiles(kind: FileKind) {
     const items = (await (await api(kind)).json()) as { name: string }[];
     this.files[kind] = items.map((m) => m.name).sort((a, b) => a.localeCompare(b));
@@ -122,29 +131,59 @@ export class Library {
   loadMesh(name: string): Promise<MeshData> {
     let mesh = this.meshes.get(name);
     if (!mesh) {
-      mesh = name.startsWith('@')
-        ? parseModel(name)
-        : api('models', name).then((r) => r.arrayBuffer()).then((buf) => parseModel(name, buf));
+      const font = isTextModel(name) ? parseTextModel(name).font : null;
+      mesh = font && !(font in TEXT_FONTS)
+        ? this.loadFont(font).then(() => parseModel(name))
+        : name.startsWith('@')
+          ? parseModel(name)
+          : api('models', name).then((r) => r.arrayBuffer()).then((buf) => parseModel(name, buf));
       mesh.catch(() => this.meshes.delete(name));
       this.meshes.set(name, mesh);
     }
     return mesh;
   }
 
-  /** Copy a dropped/opened file into library/models or library/textures. Returns its library name. */
+  /** Register a library font in document.fonts so canvas text can use it, cached. */
+  loadFont(name: string): Promise<FontFace> {
+    let face = this.faces.get(name);
+    if (!face) {
+      face = api('fonts', name)
+        .catch(() => { throw new Error(`font ${name} isn't in library/fonts`); })
+        .then((r) => r.arrayBuffer())
+        .then((buf) => new FontFace(fontFamily(name), buf).load()
+          .catch(() => { throw new Error(`font ${name} couldn't be read`); }))
+        .then((f) => { document.fonts.add(f); return f; });
+      face.catch(() => this.faces.delete(name));
+      this.faces.set(name, face);
+    }
+    return face;
+  }
+
+  /** Drop a font (changed or deleted on disk) and the text meshes built with it. */
+  private forgetFont(name: string) {
+    this.faces.get(name)?.then((f) => document.fonts.delete(f), () => {});
+    this.faces.delete(name);
+    for (const key of this.meshes.keys()) {
+      if (isTextModel(key) && parseTextModel(key).font === name) this.meshes.delete(key);
+    }
+  }
+
+  /** Copy a dropped/opened file into library/models, library/textures or library/fonts. Returns its library name. */
   async importFile(kind: FileKind, file: File): Promise<string> {
     const res = await api(kind, file.name, { method: 'PUT', body: await file.arrayBuffer() });
     const { name } = (await res.json()) as { name: string };
     if (kind === 'models') this.meshes.delete(name);
+    if (kind === 'fonts') this.forgetFont(name);
     if (!this.files[kind].includes(name)) this.files[kind] = [...this.files[kind], name].sort((a, b) => a.localeCompare(b));
     this.emit(kind, name);
     return name;
   }
 
-  /** Delete a file from library/models or library/textures. */
+  /** Delete a file from library/models, library/textures or library/fonts. */
   async deleteFile(kind: FileKind, name: string) {
     await api(kind, name, { method: 'DELETE' });
     if (kind === 'models') this.meshes.delete(name);
+    if (kind === 'fonts') this.forgetFont(name);
     this.files[kind] = this.files[kind].filter((n) => n !== name);
     this.emit(kind, name);
   }

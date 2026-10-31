@@ -1,0 +1,1023 @@
+{
+  "layers": [
+    {
+      "shader": "veins",
+      "enabled": true,
+      "blend": "normal",
+      "opacity": {
+        "value": 0.7,
+        "mods": []
+      },
+      "params": {
+        "scale": {
+          "value": 3,
+          "mods": []
+        },
+        "thickness": {
+          "value": 0.05,
+          "mods": []
+        },
+        "capillaries": {
+          "value": 0.5,
+          "mods": []
+        },
+        "spread": {
+          "value": 1,
+          "mods": []
+        },
+        "flow": {
+          "value": 0.6,
+          "mods": []
+        },
+        "surge": {
+          "value": 1,
+          "mods": []
+        },
+        "writhe": {
+          "value": 0.3,
+          "mods": []
+        },
+        "skinColor": {
+          "value": [
+            0.12,
+            0.07,
+            0.07,
+            1
+          ],
+          "mods": []
+        },
+        "veinColor": {
+          "value": [
+            0.3,
+            0.03,
+            0.14,
+            1
+          ],
+          "mods": []
+        },
+        "bloodColor": {
+          "value": [
+            1,
+            0.08,
+            0.04,
+            1
+          ],
+          "mods": []
+        }
+      }
+    },
+    {
+      "shader": "@model",
+      "enabled": true,
+      "blend": "normal",
+      "opacity": {
+        "value": 1,
+        "mods": []
+      },
+      "params": {
+        "animation": {
+          "value": 0,
+          "mods": []
+        },
+        "animSpeed": {
+          "value": 1,
+          "mods": []
+        },
+        "scale": {
+          "value": 1.3246,
+          "mods": []
+        },
+        "spinY": {
+          "value": 0,
+          "mods": []
+        },
+        "spinX": {
+          "value": 0,
+          "mods": []
+        },
+        "spinZ": {
+          "value": 0,
+          "mods": []
+        },
+        "ratchet": {
+          "value": 0,
+          "mods": []
+        },
+        "rotX": {
+          "value": 0,
+          "mods": []
+        },
+        "rotY": {
+          "value": 0,
+          "mods": []
+        },
+        "rotZ": {
+          "value": 0,
+          "mods": []
+        },
+        "offsetX": {
+          "value": 0,
+          "mods": []
+        },
+        "offsetY": {
+          "value": 0.876,
+          "mods": []
+        },
+        "pivot": {
+          "value": 0,
+          "mods": []
+        },
+        "zoom": {
+          "value": 1,
+          "mods": []
+        },
+        "fov": {
+          "value": 45,
+          "mods": []
+        },
+        "inflate": {
+          "value": 0,
+          "mods": []
+        },
+        "writhe": {
+          "value": 0,
+          "mods": []
+        },
+        "writheScale": {
+          "value": 2.5,
+          "mods": []
+        },
+        "writheSpeed": {
+          "value": 0.6,
+          "mods": []
+        },
+        "fftDisplace": {
+          "value": 0,
+          "mods": []
+        },
+        "twist": {
+          "value": 0,
+          "mods": []
+        },
+        "explode": {
+          "value": 0,
+          "mods": []
+        },
+        "melt": {
+          "value": 0,
+          "mods": []
+        },
+        "snap": {
+          "value": 0,
+          "mods": []
+        },
+        "affine": {
+          "value": 0,
+          "mods": []
+        },
+        "copies": {
+          "value": 1,
+          "mods": []
+        },
+        "spread": {
+          "value": 1.8,
+          "mods": []
+        },
+        "orbit": {
+          "value": 0,
+          "mods": []
+        },
+        "shading": {
+          "value": 0,
+          "mods": []
+        },
+        "texture": {
+          "value": "@model",
+          "mods": []
+        },
+        "mapping": {
+          "value": 0,
+          "mods": []
+        },
+        "texScale": {
+          "value": 1,
+          "mods": []
+        },
+        "texScrollX": {
+          "value": 0,
+          "mods": []
+        },
+        "texScrollY": {
+          "value": 0,
+          "mods": []
+        },
+        "tint": {
+          "value": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "mods": []
+        },
+        "wet": {
+          "value": 0.4,
+          "mods": []
+        },
+        "rim": {
+          "value": 0.4,
+          "mods": []
+        },
+        "rimColor": {
+          "value": [
+            1,
+            0.25,
+            0.3,
+            1
+          ],
+          "mods": []
+        },
+        "lightAngle": {
+          "value": 35,
+          "mods": []
+        },
+        "wire": {
+          "value": 0,
+          "mods": []
+        },
+        "wireColor": {
+          "value": [
+            0.7,
+            1,
+            0.3,
+            1
+          ],
+          "mods": []
+        },
+        "fog": {
+          "value": 0,
+          "mods": []
+        },
+        "pixelated": {
+          "value": false,
+          "mods": []
+        }
+      },
+      "model": "@text:DepartureMono-Regular.woff/GUMPOWEEN 3"
+    },
+    {
+      "shader": "@model",
+      "enabled": true,
+      "blend": "normal",
+      "opacity": {
+        "value": 1,
+        "mods": []
+      },
+      "params": {
+        "animation": {
+          "value": 0,
+          "mods": []
+        },
+        "animSpeed": {
+          "value": 1,
+          "mods": []
+        },
+        "scale": {
+          "value": 0.6,
+          "mods": []
+        },
+        "spinY": {
+          "value": 0,
+          "mods": []
+        },
+        "spinX": {
+          "value": 0,
+          "mods": []
+        },
+        "spinZ": {
+          "value": 0.03,
+          "mods": []
+        },
+        "ratchet": {
+          "value": 0.1667,
+          "mods": []
+        },
+        "rotX": {
+          "value": 0,
+          "mods": []
+        },
+        "rotY": {
+          "value": 0,
+          "mods": []
+        },
+        "rotZ": {
+          "value": 0,
+          "mods": []
+        },
+        "offsetX": {
+          "value": -0.713,
+          "mods": []
+        },
+        "offsetY": {
+          "value": 0.0478,
+          "mods": []
+        },
+        "pivot": {
+          "value": 1,
+          "mods": []
+        },
+        "zoom": {
+          "value": 1,
+          "mods": []
+        },
+        "fov": {
+          "value": 45,
+          "mods": []
+        },
+        "inflate": {
+          "value": 0,
+          "mods": [
+            {
+              "source": "beat",
+              "amount": 0.05,
+              "rate": 0.25,
+              "smooth": 0
+            }
+          ]
+        },
+        "writhe": {
+          "value": 0,
+          "mods": []
+        },
+        "writheScale": {
+          "value": 2.5,
+          "mods": []
+        },
+        "writheSpeed": {
+          "value": 0.6,
+          "mods": []
+        },
+        "fftDisplace": {
+          "value": 0,
+          "mods": []
+        },
+        "twist": {
+          "value": 0,
+          "mods": []
+        },
+        "explode": {
+          "value": 0,
+          "mods": []
+        },
+        "melt": {
+          "value": 0,
+          "mods": []
+        },
+        "snap": {
+          "value": 0,
+          "mods": []
+        },
+        "affine": {
+          "value": 0,
+          "mods": []
+        },
+        "copies": {
+          "value": 1,
+          "mods": []
+        },
+        "spread": {
+          "value": 1.8,
+          "mods": []
+        },
+        "orbit": {
+          "value": 0,
+          "mods": []
+        },
+        "shading": {
+          "value": 0,
+          "mods": []
+        },
+        "texture": {
+          "value": "@model",
+          "mods": []
+        },
+        "mapping": {
+          "value": 0,
+          "mods": []
+        },
+        "texScale": {
+          "value": 1,
+          "mods": []
+        },
+        "texScrollX": {
+          "value": 0,
+          "mods": []
+        },
+        "texScrollY": {
+          "value": 0,
+          "mods": []
+        },
+        "tint": {
+          "value": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "mods": []
+        },
+        "wet": {
+          "value": 0.9,
+          "mods": []
+        },
+        "rim": {
+          "value": 0.7,
+          "mods": []
+        },
+        "rimColor": {
+          "value": [
+            1,
+            0.2,
+            0.15,
+            1
+          ],
+          "mods": []
+        },
+        "lightAngle": {
+          "value": 35,
+          "mods": []
+        },
+        "wire": {
+          "value": 0,
+          "mods": []
+        },
+        "wireColor": {
+          "value": [
+            0.7,
+            1,
+            0.3,
+            1
+          ],
+          "mods": []
+        },
+        "fog": {
+          "value": 0,
+          "mods": []
+        },
+        "pixelated": {
+          "value": false,
+          "mods": []
+        }
+      },
+      "model": "LiveSpinner_p_y.glb"
+    },
+    {
+      "shader": "@model",
+      "enabled": true,
+      "blend": "normal",
+      "opacity": {
+        "value": 1,
+        "mods": []
+      },
+      "params": {
+        "animation": {
+          "value": 0,
+          "mods": []
+        },
+        "animSpeed": {
+          "value": 1,
+          "mods": []
+        },
+        "scale": {
+          "value": 0.6,
+          "mods": []
+        },
+        "spinY": {
+          "value": 0,
+          "mods": []
+        },
+        "spinX": {
+          "value": 0,
+          "mods": []
+        },
+        "spinZ": {
+          "value": -0.03,
+          "mods": []
+        },
+        "ratchet": {
+          "value": -0.1667,
+          "mods": []
+        },
+        "rotX": {
+          "value": 0,
+          "mods": []
+        },
+        "rotY": {
+          "value": 0,
+          "mods": []
+        },
+        "rotZ": {
+          "value": 20,
+          "mods": []
+        },
+        "offsetX": {
+          "value": 0.0191,
+          "mods": []
+        },
+        "offsetY": {
+          "value": -0.2187,
+          "mods": []
+        },
+        "pivot": {
+          "value": 1,
+          "mods": []
+        },
+        "zoom": {
+          "value": 1,
+          "mods": []
+        },
+        "fov": {
+          "value": 45,
+          "mods": []
+        },
+        "inflate": {
+          "value": 0,
+          "mods": [
+            {
+              "source": "beat",
+              "amount": 0.05,
+              "rate": 0.25,
+              "smooth": 0
+            }
+          ]
+        },
+        "writhe": {
+          "value": 0,
+          "mods": []
+        },
+        "writheScale": {
+          "value": 2.5,
+          "mods": []
+        },
+        "writheSpeed": {
+          "value": 0.6,
+          "mods": []
+        },
+        "fftDisplace": {
+          "value": 0,
+          "mods": []
+        },
+        "twist": {
+          "value": 0,
+          "mods": []
+        },
+        "explode": {
+          "value": 0,
+          "mods": []
+        },
+        "melt": {
+          "value": 0,
+          "mods": []
+        },
+        "snap": {
+          "value": 0,
+          "mods": []
+        },
+        "affine": {
+          "value": 0,
+          "mods": []
+        },
+        "copies": {
+          "value": 1,
+          "mods": []
+        },
+        "spread": {
+          "value": 1.8,
+          "mods": []
+        },
+        "orbit": {
+          "value": 0,
+          "mods": []
+        },
+        "shading": {
+          "value": 0,
+          "mods": []
+        },
+        "texture": {
+          "value": "@model",
+          "mods": []
+        },
+        "mapping": {
+          "value": 0,
+          "mods": []
+        },
+        "texScale": {
+          "value": 1,
+          "mods": []
+        },
+        "texScrollX": {
+          "value": 0,
+          "mods": []
+        },
+        "texScrollY": {
+          "value": 0,
+          "mods": []
+        },
+        "tint": {
+          "value": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "mods": []
+        },
+        "wet": {
+          "value": 0.9,
+          "mods": []
+        },
+        "rim": {
+          "value": 0.7,
+          "mods": []
+        },
+        "rimColor": {
+          "value": [
+            1,
+            0.2,
+            0.15,
+            1
+          ],
+          "mods": []
+        },
+        "lightAngle": {
+          "value": 35,
+          "mods": []
+        },
+        "wire": {
+          "value": 0,
+          "mods": []
+        },
+        "wireColor": {
+          "value": [
+            0.7,
+            1,
+            0.3,
+            1
+          ],
+          "mods": []
+        },
+        "fog": {
+          "value": 0,
+          "mods": []
+        },
+        "pixelated": {
+          "value": false,
+          "mods": []
+        }
+      },
+      "model": "LiveSpinner_p_y.glb"
+    },
+    {
+      "shader": "@model",
+      "enabled": true,
+      "blend": "normal",
+      "opacity": {
+        "value": 1,
+        "mods": []
+      },
+      "params": {
+        "animation": {
+          "value": 0,
+          "mods": []
+        },
+        "animSpeed": {
+          "value": 1,
+          "mods": []
+        },
+        "scale": {
+          "value": 0.6,
+          "mods": []
+        },
+        "spinY": {
+          "value": 0,
+          "mods": []
+        },
+        "spinX": {
+          "value": 0,
+          "mods": []
+        },
+        "spinZ": {
+          "value": 0.03,
+          "mods": []
+        },
+        "ratchet": {
+          "value": 0.1667,
+          "mods": []
+        },
+        "rotX": {
+          "value": 0,
+          "mods": []
+        },
+        "rotY": {
+          "value": 0,
+          "mods": []
+        },
+        "rotZ": {
+          "value": 100,
+          "mods": []
+        },
+        "offsetX": {
+          "value": 0.6939,
+          "mods": []
+        },
+        "offsetY": {
+          "value": 0.1709,
+          "mods": []
+        },
+        "pivot": {
+          "value": 1,
+          "mods": []
+        },
+        "zoom": {
+          "value": 1,
+          "mods": []
+        },
+        "fov": {
+          "value": 45,
+          "mods": []
+        },
+        "inflate": {
+          "value": 0,
+          "mods": [
+            {
+              "source": "beat",
+              "amount": 0.05,
+              "rate": 0.25,
+              "smooth": 0
+            }
+          ]
+        },
+        "writhe": {
+          "value": 0,
+          "mods": []
+        },
+        "writheScale": {
+          "value": 2.5,
+          "mods": []
+        },
+        "writheSpeed": {
+          "value": 0.6,
+          "mods": []
+        },
+        "fftDisplace": {
+          "value": 0,
+          "mods": []
+        },
+        "twist": {
+          "value": 0,
+          "mods": []
+        },
+        "explode": {
+          "value": 0,
+          "mods": []
+        },
+        "melt": {
+          "value": 0,
+          "mods": []
+        },
+        "snap": {
+          "value": 0,
+          "mods": []
+        },
+        "affine": {
+          "value": 0,
+          "mods": []
+        },
+        "copies": {
+          "value": 1,
+          "mods": []
+        },
+        "spread": {
+          "value": 1.8,
+          "mods": []
+        },
+        "orbit": {
+          "value": 0,
+          "mods": []
+        },
+        "shading": {
+          "value": 0,
+          "mods": []
+        },
+        "texture": {
+          "value": "@model",
+          "mods": []
+        },
+        "mapping": {
+          "value": 0,
+          "mods": []
+        },
+        "texScale": {
+          "value": 1,
+          "mods": []
+        },
+        "texScrollX": {
+          "value": 0,
+          "mods": []
+        },
+        "texScrollY": {
+          "value": 0,
+          "mods": []
+        },
+        "tint": {
+          "value": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "mods": []
+        },
+        "wet": {
+          "value": 0.9,
+          "mods": []
+        },
+        "rim": {
+          "value": 0.7,
+          "mods": []
+        },
+        "rimColor": {
+          "value": [
+            1,
+            0.2,
+            0.15,
+            1
+          ],
+          "mods": []
+        },
+        "lightAngle": {
+          "value": 35,
+          "mods": []
+        },
+        "wire": {
+          "value": 0,
+          "mods": []
+        },
+        "wireColor": {
+          "value": [
+            0.7,
+            1,
+            0.3,
+            1
+          ],
+          "mods": []
+        },
+        "fog": {
+          "value": 0,
+          "mods": []
+        },
+        "pixelated": {
+          "value": false,
+          "mods": []
+        }
+      },
+      "model": "LiveSpinner_p_y.glb"
+    },
+    {
+      "shader": "grime",
+      "enabled": true,
+      "blend": "normal",
+      "opacity": {
+        "value": 1,
+        "mods": []
+      },
+      "params": {
+        "grain": {
+          "value": 0.12,
+          "mods": []
+        },
+        "dust": {
+          "value": 0.3,
+          "mods": []
+        },
+        "smudge": {
+          "value": 0.3,
+          "mods": []
+        },
+        "flicker": {
+          "value": 0.2,
+          "mods": [
+            {
+              "source": "random",
+              "amount": 0.3,
+              "rate": 0.25,
+              "smooth": 0
+            }
+          ]
+        },
+        "crush": {
+          "value": 0.3,
+          "mods": []
+        },
+        "vignette": {
+          "value": 0.6,
+          "mods": []
+        },
+        "tintAmount": {
+          "value": 0.2,
+          "mods": []
+        },
+        "tint": {
+          "value": [
+            1,
+            0.75,
+            0.45,
+            1
+          ],
+          "mods": []
+        }
+      }
+    },
+    {
+      "shader": "psx",
+      "enabled": true,
+      "blend": "normal",
+      "opacity": {
+        "value": 1,
+        "mods": []
+      },
+      "params": {
+        "resolution": {
+          "value": 138.54,
+          "mods": []
+        },
+        "bits": {
+          "value": 3.31,
+          "mods": []
+        },
+        "dither": {
+          "value": 0,
+          "mods": []
+        },
+        "wobble": {
+          "value": 0.3,
+          "mods": []
+        },
+        "fps": {
+          "value": 240,
+          "mods": []
+        }
+      }
+    },
+    {
+      "shader": "crt",
+      "enabled": true,
+      "blend": "normal",
+      "opacity": {
+        "value": 1,
+        "mods": []
+      },
+      "params": {
+        "curvature": {
+          "value": 0.25,
+          "mods": []
+        },
+        "scanlines": {
+          "value": 0.55,
+          "mods": []
+        },
+        "lineSize": {
+          "value": 3,
+          "mods": []
+        },
+        "mask": {
+          "value": 0.3,
+          "mods": []
+        },
+        "convergence": {
+          "value": 0.4,
+          "mods": [
+            {
+              "source": "beat",
+              "amount": 0.15,
+              "rate": 0.25,
+              "smooth": 0
+            }
+          ]
+        },
+        "hum": {
+          "value": 0.25,
+          "mods": []
+        },
+        "flicker": {
+          "value": 0.2,
+          "mods": []
+        },
+        "vignette": {
+          "value": 0.5,
+          "mods": []
+        }
+      }
+    }
+  ]
+}

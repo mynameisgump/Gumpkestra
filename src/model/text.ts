@@ -1,7 +1,7 @@
 import { SoupBuilder, staticRig, type MeshData } from './mesh';
 
 // 3D text is a built-in model named "@text:<font>/<text>", so presets and the model picker treat it
-// like any other model. The text is drawn to a canvas, traced with marching squares and extruded:
+// like any other model. <font> is a built-in font key or a file in library/fonts ("Creepster.ttf"). The text is drawn to a canvas, traced with marching squares and extruded:
 // caps and side walls share the same interpolated contour points, so the mesh is watertight, and the
 // walls get smoothed normals so curves don't look faceted.
 
@@ -14,6 +14,15 @@ export const TEXT_FONTS: Record<string, { label: string; css: (px: number) => st
   impact: { label: 'Impact', css: (px) => `${px}px Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif` },
 };
 
+export const FONT_EXTENSIONS = ['.ttf', '.otf', '.woff', '.woff2'];
+export const isFontFile = (name: string) => FONT_EXTENSIONS.some((ext) => name.toLowerCase().endsWith(ext));
+
+/** CSS family a library font is registered under (see Library.loadFont). */
+export const fontFamily = (file: string) => `gump-font-${file.replace(/[^a-zA-Z0-9]/g, '-')}`;
+/** Picker label for a font key. */
+export const fontLabel = (font: string) => TEXT_FONTS[font]?.label ?? font.replace(/\.[^.]+$/, '');
+const fontCSS = (font: string, px: number) => TEXT_FONTS[font]?.css(px) ?? `${px}px "${fontFamily(font)}"`;
+
 export const isTextModel = (name: string) => name.startsWith(TEXT_PREFIX);
 export const textModelName = (font: string, text: string) => `${TEXT_PREFIX}${font}/${text}`;
 export const DEFAULT_TEXT_MODEL = textModelName('sans', 'GUMP');
@@ -22,7 +31,7 @@ export function parseTextModel(name: string) {
   const rest = name.slice(TEXT_PREFIX.length);
   const slash = rest.indexOf('/');
   const font = slash < 0 ? 'sans' : rest.slice(0, slash);
-  return { font: font in TEXT_FONTS ? font : 'sans', text: slash < 0 ? rest : rest.slice(slash + 1) };
+  return { font: font in TEXT_FONTS || isFontFile(font) ? font : 'sans', text: slash < 0 ? rest : rest.slice(slash + 1) };
 }
 
 /** Glyph raster height in px: enough for smooth curves once the contour is interpolated. */
@@ -33,10 +42,11 @@ const MAX_WIDTH = 1600;
 const DEPTH = 0.3;
 const THRESHOLD = 0.5;
 
+/** A library font must already be in document.fonts (Library.loadMesh loads it first). */
 export function buildTextMesh(name: string): MeshData {
   const { font, text } = parseTextModel(name);
   if (!text.trim()) throw new Error('type some text');
-  const css = TEXT_FONTS[font].css;
+  const css = (px: number) => fontCSS(font, px);
 
   const canvas = document.createElement('canvas');
   const ctx = canvas.getContext('2d', { willReadFrequently: true })!;

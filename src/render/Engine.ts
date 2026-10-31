@@ -44,6 +44,9 @@ export class Engine {
   layers: Layer[] = [];
   /** Render resolution as a fraction of the canvas' device pixels. */
   scale = 1;
+  /** Exact output pixels, independent of viewport size and device pixel ratio. */
+  private resolution: { width: number; height: number } | null = null;
+  readonly maxResolution: { width: number; height: number };
   width = 0;
   height = 0;
   frame = 0;
@@ -60,6 +63,9 @@ export class Engine {
     const gl = canvas.getContext('webgl2', { antialias: false, alpha: false, preserveDrawingBuffer: false });
     if (!gl) throw new Error('WebGL2 is not available in this browser.');
     this.gl = gl;
+    const maxTexture = Math.min(gl.getParameter(gl.MAX_TEXTURE_SIZE), gl.getParameter(gl.MAX_RENDERBUFFER_SIZE));
+    const maxViewport = gl.getParameter(gl.MAX_VIEWPORT_DIMS) as Int32Array;
+    this.maxResolution = { width: Math.min(maxTexture, maxViewport[0]), height: Math.min(maxTexture, maxViewport[1]) };
     this.vao = createFullscreenTriangle(gl);
     this.composite = link(gl, VERTEX_SHADER, COMPOSITE_FS);
     this.cu = uniformCache(gl, this.composite);
@@ -69,10 +75,22 @@ export class Engine {
     this.textures = new TextureStore(gl);
   }
 
+  get fixedResolution() { return this.resolution; }
+
+  setResolution(size: { width: number; height: number } | null) {
+    if (size && (!Number.isInteger(size.width) || !Number.isInteger(size.height)
+      || size.width < 1 || size.height < 1
+      || size.width > this.maxResolution.width || size.height > this.maxResolution.height)) {
+      throw new Error(`Resolution must be whole pixels from 1×1 to ${this.maxResolution.width}×${this.maxResolution.height}.`);
+    }
+    this.resolution = size ? { ...size } : null;
+    this.canvas.style.objectFit = size ? 'contain' : 'fill';
+  }
+
   private ensureSize() {
     const dpr = window.devicePixelRatio || 1;
-    const w = Math.max(1, Math.round(this.canvas.clientWidth * dpr * this.scale));
-    const h = Math.max(1, Math.round(this.canvas.clientHeight * dpr * this.scale));
+    const w = this.resolution?.width ?? Math.min(this.maxResolution.width, Math.max(1, Math.round(this.canvas.clientWidth * dpr * this.scale)));
+    const h = this.resolution?.height ?? Math.min(this.maxResolution.height, Math.max(1, Math.round(this.canvas.clientHeight * dpr * this.scale)));
     if (w === this.width && h === this.height && this.acc) return;
     this.width = this.canvas.width = w;
     this.height = this.canvas.height = h;

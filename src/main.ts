@@ -11,6 +11,7 @@ import { ParamsPanel } from './ui/ParamsPanel';
 import { PresetPicker } from './ui/PresetPicker';
 import { PresetsPanel } from './ui/PresetsPanel';
 import { StackPanel } from './ui/StackPanel';
+import { ResolutionControl } from './ui/ResolutionControl';
 
 const $ = (id: string) => document.getElementById(id)!;
 
@@ -37,6 +38,7 @@ async function main() {
   library.onChange((kind, name) => {
     if (kind === 'shaders') app.reloadShader(name);
     else if (kind === 'models') app.reloadModel(name);
+    else if (kind === 'fonts') app.reloadFont(name);
     else if (kind === 'textures') {
       engine.textures.invalidate(name);
       app.changed();
@@ -204,9 +206,7 @@ function Topbar(app: App) {
     saveBtn,
     h('button', { title: 'Save under a new name', onclick: () => saveAs() }, 'Save as…'),
     h('span', { class: 'spacer' }),
-    h('label', { class: 'res', title: 'Render resolution' }, 'res ',
-      h('select', { onchange: (e: Event) => (app.engine.scale = Number((e.target as HTMLSelectElement).value)) },
-        ...[1, 0.75, 0.5, 0.35].map((s) => h('option', { value: s, selected: s === app.engine.scale }, `${s * 100}%`)))),
+    ResolutionControl(app.engine),
     recBtn,
     h('button', { onclick: () => $('stage').requestFullscreen?.(), title: 'F' }, 'Fullscreen'),
     h('button', { onclick: () => document.body.classList.toggle('perform'), title: 'H' }, 'Hide UI'),

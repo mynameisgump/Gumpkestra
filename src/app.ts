@@ -1,5 +1,6 @@
 import type { AudioEngine } from './audio/AudioEngine';
 import type { Library, Preset } from './library';
+import { DEFAULT_TEXT_MODEL, isTextModel, parseTextModel, textModelName } from './model/text';
 import type { Engine } from './render/Engine';
 import { defaultValue, type Layer, type LayerJSON } from './render/Layer';
 import { MODEL_SHADER, ModelLayer } from './render/ModelLayer';
@@ -89,6 +90,8 @@ export class App {
       layer.setMesh(mesh);
       layer.status = null;
     } catch (e) {
+      // Same as above: a stale load failing mustn't overwrite the model shown now.
+      if (layer.modelName !== model) return;
       layer.status = (e as Error).message;
       toast(`${model}: ${layer.status}`, true);
     }
@@ -182,6 +185,49 @@ export class App {
     } catch (e) {
       toast(`${file.name}: ${(e as Error).message}`, true);
     }
+  }
+
+  /** 3D text layers drawn in a font. */
+  fontLayers(font: string) {
+    return this.engine.layers.filter((l): l is ModelLayer =>
+      l instanceof ModelLayer && isTextModel(l.modelName) && parseTextModel(l.modelName).font === font);
+  }
+
+  /** Use a font: on the selected 3D text layer if there is one, otherwise on a new 3D text layer. */
+  useFont(font: string) {
+    const sel = this.selected;
+    if (sel instanceof ModelLayer && isTextModel(sel.modelName)) void this.setModel(sel, textModelName(font, parseTextModel(sel.modelName).text));
+    else this.addModel(textModelName(font, parseTextModel(DEFAULT_TEXT_MODEL).text));
+  }
+
+  /** Copy a font file into library/fonts, then use it (on `layer` if given). */
+  async importFont(file: File, layer?: ModelLayer) {
+    try {
+      const name = await this.library.importFile('fonts', file);
+      if (layer) await this.setModel(layer, textModelName(name, parseTextModel(layer.modelName).text));
+      else this.useFont(name);
+      toast(`Imported ${name} into library/fonts`);
+    } catch (e) {
+      toast(`${file.name}: ${(e as Error).message}`, true);
+    }
+  }
+
+  /** Delete a font file from the library, putting text layers that use it back to the default font. */
+  async deleteFont(name: string) {
+    const layers = this.fontLayers(name);
+    try {
+      await this.library.deleteFile('fonts', name);
+      for (const layer of layers) void this.setModel(layer, textModelName('sans', parseTextModel(layer.modelName).text));
+      toast(`Deleted ${name} from library/fonts`);
+    } catch (e) {
+      toast(`${name}: ${(e as Error).message}`, true);
+    }
+  }
+
+  /** A font file changed on disk: rebuild the text drawn in it. */
+  reloadFont(name: string) {
+    for (const layer of this.fontLayers(name)) void this.setModel(layer, layer.modelName);
+    this.changed();
   }
 
   /** A model file changed on disk (e.g. re-exported from Blender): reload layers showing it. */

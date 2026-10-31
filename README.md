@@ -12,6 +12,8 @@ Drop an audio file on the canvas, use **Use input** to pick a mic or loopback de
 
 Keys: `space` play/pause · `h` hide UI · `f` fullscreen · `⌘S` save the shader in the editor.
 
+Use **res** in the top bar to scale with the window (**Auto**) or lock the output to an exact resolution, from 640×360 to 3840×2160. Choose **Custom…** (or click **…**) to enter a width and height in pixels. Fixed output keeps its resolution in fullscreen and recordings, with the preview fitted to the stage without stretching. This setting is remembered in your browser across reloads and preset changes.
+
 ## How it fits together
 
 ```
@@ -43,6 +45,7 @@ library/shaders/*.fs     ISF 2 fragment shaders
 library/presets/*.json   layer stacks (shader + blend + opacity + params + modulators)
 library/models/*         3D models (.glb / .gltf / .obj / .stl)
 library/textures/*       images (.png .jpg .webp .gif .bmp) and looping videos (.mp4 .webm .mov)
+library/fonts/*          fonts for 3D text (.ttf .otf .woff .woff2)
 ```
 
 The Vite dev server serves these through `/api/library/*` and pushes a `library-changed` event when a file changes. Saving in VS Code recompiles every layer that uses the shader, without reloading the page. The built-in editor also recompiles as you type. Errors are mapped back to the file's line numbers, and a broken shader keeps showing its last good version.
@@ -91,13 +94,17 @@ Drop a `.glb`, `.gltf` (embedded), `.obj` or `.stl` onto the canvas, or use **Lo
 A model layer sits in the stack like a generator, so the effects below it and the modulators work on it as usual. It's transparent around the model, so it can overlay other layers. Everything is normalised to unit size, so any model frames the same way.
 
 - **Animation:** glTF skins and node animations play. Pick the clip from the dropdown, and modulate **Anim speed** (for example, a dancer that speeds up with the bass).
-- **Transform:** scale, spin and tumble (integrated, so modulating them makes the model lurch rather than jump), rotation, offset, zoom and FOV.
+- **Transform:** scale, spin, tumble and roll (integrated, so modulating them makes the model lurch rather than jump), a roll ratchet that clicks the model round by a set amount on each beat, rotation, offset, zoom and FOV. The pivot is the centre of the model's bounds, or its origin for things built to turn about it, like a spinner's hub. The `fidget-mill` preset meshes three spinners like gears: neighbours roll in opposite directions with matching ratchets, so they stay in phase.
 - **Deform (GPU):** inflate, writhe (noise along the normals), spectrum spikes (the FFT mapped up the model's height), twist, explode/shatter (per triangle), melt, PSX vertex snap and affine texture warp.
 - **Copies:** a ring of instances, with a radius and its own spin.
 - **Texture:** keep the model's own materials, or override them with any texture, including the layers below (for example, a model wrapped in the live `flesh` generator). Choose model UVs or box (triplanar) mapping (box mapping is for STL files and other models without UVs), and set scale and scroll.
 - **Look:** Lit, Flat, Unlit, Normals, X-ray (additive fresnel) or Wireframe shading. There's also tint, wet specular, rim light, light angle, a wire overlay, fog, and a nearest-neighbour texture toggle.
 
 Presets `relic`, `scrapyard` and `spectral` show it off using the built-in shapes.
+
+### 3D text
+
+**3D text** in the library list adds a text layer. Set the text and the font in its parameters. Besides the built-in fonts (heavy sans, serif, mono, Impact), any font in `library/fonts/` can be used. To add one, use **Load…** next to the font picker, drop a `.ttf`, `.otf`, `.woff` or `.woff2` on the canvas, or copy it into the folder. Clicking a font in the library list puts it on the selected text layer, or adds a new text layer in it. Presets refer to a library font by its file name, and replacing the file on disk rebuilds the text that uses it.
 
 Not supported yet: Draco/meshopt-compressed files, morph targets, `.gltf` with an external `.bin`, and materials beyond the base colour and texture.
 

@@ -63,6 +63,12 @@ body {
 .dirty-dot.on { visibility: visible; }
 #fps { font: 11px var(--mono); color: var(--dim); min-width: 150px; text-align: right; }
 .rec.on { background: var(--accent-2); color: #000; border-color: var(--accent-2); }
+.resolution-control { position: relative; display: flex; align-items: center; gap: 4px; flex: none; }
+.resolution-pop { position: absolute; top: calc(100% + 8px); right: 0; z-index: 40; width: 280px; padding: 12px; background: var(--panel); border: 1px solid var(--line); border-radius: 6px; box-shadow: 0 12px 32px #0009; }
+.resolution-fields { display: flex; align-items: center; gap: 8px; margin: 10px 0; }
+.resolution-fields input { width: 90px; min-width: 0; }
+.resolution-actions { display: flex; justify-content: flex-end; gap: 6px; }
+.resolution-error { color: var(--accent-2); margin-bottom: 8px; }
 
 /* ---------- side panels ---------- */
 #left, #right { overflow-y: auto; background: var(--panel); }
@@ -144,6 +150,7 @@ input[type='color'] { width: 48px; height: 22px; border: 0; padding: 0; backgrou
 .lib-item:hover { background: var(--panel-2); }
 .lib-item.has-error { color: var(--accent-2); }
 .lib-item.model::before { content: '◆ '; color: #ffb43c; }
+.lib-item.font::before { content: 'Aa '; color: #7cc8ff; }
 .lib-row { display: flex; align-items: center; }
 .lib-row .lib-item { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .lib-del { padding: 0 5px; background: transparent; border-color: transparent; color: var(--dim); opacity: 0; }

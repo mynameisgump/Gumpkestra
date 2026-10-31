@@ -4,7 +4,7 @@ import type { ISFInput } from '../isf/isf';
 import { isModelFile, MODEL_EXTENSIONS, BUILTIN_MODELS } from '../model/load';
 import { BLEND_MODES, floatRange, type Layer, type ParamState } from '../render/Layer';
 import { MODEL_TEXTURE, ModelLayer } from '../render/ModelLayer';
-import { DEFAULT_TEXT_MODEL, isTextModel, parseTextModel, TEXT_FONTS, textModelName } from '../model/text';
+import { DEFAULT_TEXT_MODEL, FONT_EXTENSIONS, fontLabel, isFontFile, isTextModel, parseTextModel, TEXT_FONTS, textModelName } from '../model/text';
 import { BUILTIN_TEXTURES, INPUT_IMAGE, isTextureFile, isVideoTexture, TEXTURE_EXTENSIONS, thumbnailURL } from '../render/Textures';
 import { h, numberField, select, slider, type NumberField } from './dom';
 
@@ -202,10 +202,25 @@ export function ParamsPanel(root: HTMLElement, app: App, openEditor: (name: stri
       onchange: (e: Event) => apply(font, (e.target as HTMLInputElement).value),
       onkeydown: (e: KeyboardEvent) => { if (e.key === 'Enter') (e.target as HTMLInputElement).blur(); },
     });
+    // Built-in fonts, then library/fonts (plus the current one if its file is missing).
+    const fonts = [...Object.keys(TEXT_FONTS), ...app.library.fonts];
+    if (!fonts.includes(font)) fonts.push(font);
+    const opts = Object.fromEntries(fonts.map((f) => [f, f in TEXT_FONTS ? fontLabel(f) : `${fontLabel(f)} (${f.slice(f.lastIndexOf('.') + 1)})`]));
+    const file = h('input', {
+      type: 'file',
+      accept: FONT_EXTENSIONS.join(','),
+      style: 'display:none',
+      onchange: (e: Event) => {
+        const f = (e.target as HTMLInputElement).files?.[0];
+        if (f && isFontFile(f.name)) void app.importFont(f, layer);
+      },
+    }) as HTMLInputElement;
     return [
       h('div', { class: 'param' }, h('div', { class: 'row model-row' }, h('span', { class: 'lbl' }, 'Text'), input)),
       h('div', { class: 'param' }, h('div', { class: 'row model-row' }, h('span', { class: 'lbl' }, 'Font'),
-        select(Object.fromEntries(Object.entries(TEXT_FONTS).map(([k, v]) => [k, v.label])), font, (f) => apply(f, (input as HTMLInputElement).value)))),
+        select(opts, font, (f) => apply(f, (input as HTMLInputElement).value)),
+        h('button', { title: 'Import a .ttf/.otf/.woff/.woff2 into library/fonts', onclick: () => file.click() }, 'Load…'),
+        file)),
     ];
   };
 

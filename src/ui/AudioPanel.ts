@@ -1,5 +1,6 @@
 import { toast, type App } from '../app';
 import { isModelFile } from '../model/load';
+import { isFontFile } from '../model/text';
 import { isTextureFile } from '../render/Textures';
 import { h, numberField, slider } from './dom';
 
@@ -93,7 +94,7 @@ export function AudioPanel(root: HTMLElement, app: App) {
   listDevices().catch(() => {});
   navigator.mediaDevices?.addEventListener?.('devicechange', () => listDevices().catch(() => {}));
 
-  // Drag & drop onto the stage: 3D models and images/videos go to the library, anything else is treated as audio.
+  // Drag & drop onto the stage: 3D models, images/videos and fonts go to the library, anything else is treated as audio.
   const stage = document.getElementById('stage')!;
   stage.addEventListener('dragover', (e) => { e.preventDefault(); stage.classList.add('dragging'); });
   stage.addEventListener('dragleave', () => stage.classList.remove('dragging'));
@@ -103,6 +104,7 @@ export function AudioPanel(root: HTMLElement, app: App) {
     for (const file of e.dataTransfer?.files ?? []) {
       if (isModelFile(file.name)) void app.importModel(file);
       else if (isTextureFile(file.name)) void app.importTexture(file);
+      else if (isFontFile(file.name)) void app.importFont(file);
       else useFile(file);
     }
   });

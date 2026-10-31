@@ -1,6 +1,6 @@
 import { toast, type App } from '../app';
 import { BUILTIN_MODELS } from '../model/load';
-import { DEFAULT_TEXT_MODEL, isTextModel } from '../model/text';
+import { DEFAULT_TEXT_MODEL, fontLabel, isTextModel, parseTextModel } from '../model/text';
 import { BUILTIN_TEXTURES, isVideoTexture, thumbnailURL } from '../render/Textures';
 import { h, isCollapsed, setCollapsed } from './dom';
 
@@ -80,6 +80,19 @@ export function LibraryPanel(root: HTMLElement, app: App, openEditor: (name: str
     void app.deleteTexture(name);
   };
 
+  const deleteFont = (name: string) => {
+    const layers = app.fontLayers(name).length;
+    const presets = [...app.library.presets.values()]
+      .filter((p) => p.layers.some((l) => l.model && isTextModel(l.model) && parseTextModel(l.model).font === name))
+      .map((p) => p.name);
+    const warnings = [
+      layers && `${layers} 3D text layer${layers > 1 ? 's' : ''} using it will go back to the default font.`,
+      presets.length && `Still used by preset${presets.length > 1 ? 's' : ''}: ${presets.join(', ')}.`,
+    ].filter(Boolean);
+    if (!confirm([`Delete library/fonts/${name}? This removes the file from disk.`, ...warnings].join('\n\n'))) return;
+    void app.deleteFont(name);
+  };
+
   const render = () => {
     const entries = [...app.library.shaders.values()]
       .filter((s) => s.name.toLowerCase().includes(filter))
@@ -119,6 +132,14 @@ export function LibraryPanel(root: HTMLElement, app: App, openEditor: (name: str
         }, src ? h('img', { src, alt: name, loading: 'lazy' }) : h('span', { class: 'thumb' }, isVideoTexture(t) ? '🎞' : '')),
         t.startsWith('@') ? null : h('button', { class: 'lib-del', title: `Delete library/textures/${t}`, onclick: () => deleteTexture(t) }, '✕'));
     };
+    const fonts = app.library.fonts.filter((f) => f.toLowerCase().includes(filter));
+    const fontItem = (f: string) => h('div', { class: 'lib-row' },
+      h('button', {
+        class: 'lib-item font',
+        title: `library/fonts/${f}\nClick: use on the selected 3D text layer, or add a 3D text layer`,
+        onclick: () => app.useFont(f),
+      }, fontLabel(f)),
+      h('button', { class: 'lib-del', title: `Delete library/fonts/${f}`, onclick: () => deleteFont(f) }, '✕'));
     /** A heading that folds its items away (remembered). Everything shows while filtering. */
     const section = (id: string, title: string, items: Node[], cls = 'lib-section'): (HTMLElement | null)[] => {
       const key = `lib:${id}`;
@@ -134,6 +155,7 @@ export function LibraryPanel(root: HTMLElement, app: App, openEditor: (name: str
       ...section('effects', 'Effects', fx.map(item)),
       ...section('models', '3D models', models.map(modelItem)),
       ...section('textures', 'Textures', textures.map(textureItem), 'tex-grid'),
+      ...section('fonts', 'Fonts', fonts.map(fontItem)),
       ...(broken.length ? section('broken', 'Broken', broken.map(item)) : []),
     ].filter((n): n is HTMLElement => !!n));
   };
@@ -150,7 +172,7 @@ export function LibraryPanel(root: HTMLElement, app: App, openEditor: (name: str
       h('button', { onclick: () => createShader('effect') }, '+ Effect'),
     ),
     list,
-    h('p', { class: 'hint' }, 'Click to add above the selected layer. Shaders live in library/shaders/*.fs (ISF) and hot-reload when edited in any editor. Drop a .glb/.obj/.stl on the canvas to add a 3D model, or an image/video to add a texture. Clicking a texture puts it on the selected layer if it has a texture slot, otherwise adds an image layer.'),
+    h('p', { class: 'hint' }, 'Click to add above the selected layer. Shaders live in library/shaders/*.fs (ISF) and hot-reload when edited in any editor. Drop a .glb/.obj/.stl on the canvas to add a 3D model, an image/video to add a texture, or a .ttf/.otf/.woff font for 3D text. Clicking a texture puts it on the selected layer if it has a texture slot, otherwise adds an image layer.'),
   );
   render();
   app.library.onChange((kind) => kind !== 'presets' && render());

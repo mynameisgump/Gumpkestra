@@ -220,11 +220,14 @@ const BASE_INPUTS: ISFInput[] = [
   f('scale', 1, 0.1, 4),
   f('spinY', 0.08, -1, 1, 'Spin (rev/s)'),
   f('spinX', 0, -1, 1, 'Tumble (rev/s)'),
+  f('spinZ', 0, -2, 2, 'Roll (rev/s)'),
+  f('ratchet', 0, -1, 1, 'Roll ratchet (rev/beat)'),
   f('rotX', 0, -180, 180, 'Rotate X°'),
   f('rotY', 0, -180, 180, 'Rotate Y°'),
   f('rotZ', 0, -180, 180, 'Rotate Z°'),
   f('offsetX', 0, -2, 2, 'Offset X'),
   f('offsetY', 0, -2, 2, 'Offset Y'),
+  { NAME: 'pivot', TYPE: 'long', DEFAULT: 0, VALUES: [0, 1], LABELS: ['Bounds centre', 'Model origin'] },
   f('zoom', 1, 0.3, 4),
   f('fov', 45, 10, 120, 'FOV°'),
   f('inflate', 0, -0.3, 0.6),
@@ -280,7 +283,7 @@ export class ModelLayer extends Layer {
   private nearest: WebGLSampler;
   private msaa: { fbo: WebGLFramebuffer; color: WebGLRenderbuffer; depth: WebGLRenderbuffer } | null = null;
   private resolved: Target | null = null;
-  private spin = { x: 0, y: 0, orbit: 0 };
+  private spin = { x: 0, y: 0, z: 0, orbit: 0 };
   private texOffset = [0, 0];
   private animTime = 0;
   private model = new Float32Array(16);
@@ -408,6 +411,7 @@ export class ModelLayer extends Layer {
     // lurches the model forward instead of making it jump around.
     this.spin.y += this.f('spinY', ctx) * TAU * ctx.dt;
     this.spin.x += this.f('spinX', ctx) * TAU * ctx.dt;
+    this.spin.z += this.f('spinZ', ctx) * TAU * ctx.dt;
     this.spin.orbit += this.f('orbit', ctx) * TAU * ctx.dt;
     this.animTime += this.f('animSpeed', ctx) * ctx.dt;
     this.texOffset[0] = (this.texOffset[0] + this.f('texScrollX', ctx) * ctx.dt) % 1;
@@ -433,10 +437,14 @@ export class ModelLayer extends Layer {
       gl.bindTexture(gl.TEXTURE_2D, ctx.fftTex);
       gl.uniform1i(u('AUDIO_FFT'), 2);
 
+      // Ratchet: like the machinery gears, beatCount jumps by 1 while beat jumps to 1,
+      // so the roll eases forward after each beat. It's derived from the beat count
+      // rather than integrated, so layers with matching ratchets stay in phase.
+      const click = (ctx.audio.beatCount - ctx.audio.beat) * this.f('ratchet', ctx) * TAU;
       const q = quatMul(quatMul(
         axisAngle(0, 1, 0, this.f('rotY', ctx) * DEG + this.spin.y),
         axisAngle(1, 0, 0, this.f('rotX', ctx) * DEG + this.spin.x)),
-        axisAngle(0, 0, 1, this.f('rotZ', ctx) * DEG));
+        axisAngle(0, 0, 1, this.f('rotZ', ctx) * DEG + this.spin.z + click));
       const s = this.f('scale', ctx);
       fromTRS([this.f('offsetX', ctx), this.f('offsetY', ctx), 0], q, [s, s, s], this.model);
       const dist = 3.2 / this.f('zoom', ctx);
@@ -445,7 +453,8 @@ export class ModelLayer extends Layer {
       gl.uniformMatrix4fv(u('uModel'), false, this.model);
       gl.uniformMatrix4fv(u('uView'), false, this.view);
       gl.uniformMatrix4fv(u('uProj'), false, this.proj);
-      gl.uniform3fv(u('uCenter'), mesh.center);
+      // Model origin suits things built to turn about their origin, e.g. a spinner's hub.
+      gl.uniform3fv(u('uCenter'), Number(this.v('pivot')) === 1 ? [0, 0, 0] : mesh.center);
       gl.uniform1f(u('uNormScale'), 1 / mesh.radius);
       gl.uniform1f(u('TIME'), ctx.time);
       gl.uniform1f(u('uAspect'), W / H);
