@@ -6,6 +6,7 @@ import { defaultValue, type Layer, type LayerJSON } from './render/Layer';
 import { MODEL_SHADER, ModelLayer } from './render/ModelLayer';
 import { h } from './ui/dom';
 import { PresetGroups } from './presetGroups';
+import { PresetTimer } from './presetTimer';
 
 const AUTOSAVE_KEY = 'gumpkestra:session';
 
@@ -14,11 +15,14 @@ export class App {
   selected: Layer | null = null;
   presetName = 'untitled';
   readonly presetGroups = new PresetGroups();
+  readonly presetTimer: PresetTimer;
   /** Per-shader compile errors from the most recent (re)load. */
   errors = new Map<string, string>();
   private listeners = new Set<() => void>();
 
-  constructor(readonly engine: Engine, readonly audio: AudioEngine, readonly library: Library) {}
+  constructor(readonly engine: Engine, readonly audio: AudioEngine, readonly library: Library) {
+    this.presetTimer = new PresetTimer(this);
+  }
 
   onChange(fn: () => void) {
     this.listeners.add(fn);
@@ -315,11 +319,13 @@ export class App {
     this.presetName = preset.name;
     this.selected = this.engine.layers[this.engine.layers.length - 1] ?? null;
     this.baseline = this.layersJSON();
+    this.presetTimer.reset();
     this.changed();
   }
 
   /** Start over with an empty, unsaved stack. */
   newPreset() {
+    this.presetTimer.stop();
     this.loadPreset({ name: 'untitled', layers: [] });
   }
 

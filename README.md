@@ -7,7 +7,9 @@ npm install
 npm run dev            # open http://localhost:5173 in Chrome
 npm run check-meshes   # verify mesh controls, rendering and preset restoration
 npm run check-presets  # verify groups, keyboard navigation and canvas transitions
+npm run check-timer    # verify automatic transitions, timing and edit protection
 npm run check-shaders  # compile every library shader in headless Chrome (add -- --shots for preset screenshots)
+npm run check-hdr      # verify HDR pixels, output controls, fallback and model targets (add -- --native to test experimental display APIs)
 ```
 
 Drop an audio file on the canvas, use **Use input** to pick a mic or loopback device (for example BlackHole, to get DAW or system audio), or use **Tab audio** to capture a browser tab.
@@ -19,6 +21,20 @@ Use **← / →** (or **[ / ]**) to step backward/forward through the active pre
 Each group remembers a **Transition** (Cut, Crossfade, Wipe, Slide, Dip to black, Rust Dissolve, Signal Tear, Steel Shutters, Doom Melt, or VHS Tracking) and a duration from **0.1–10 seconds**. Wipe, Slide, Signal Tear, and Steel Shutters follow the navigation direction. **Rust Dissolve** corrodes the image with pitted noise and burnt edges. **Signal Tear** uses displaced horizontal bands, separated colour channels, and dirty scan lines. **Steel Shutters** retracts staggered, scarred slats. **Doom Melt** drops the outgoing image in uneven vertical strips with stepped retro motion, revealing the new preset from the top down (inspired by the [original Doom screen wipe](https://github.com/id-Software/DOOM/blob/master/linuxdoom-1.10/f_wipe.c)). **VHS Tracking** rolls through a noisy tracking band with horizontal wobble, colour bleed, scan lines, and tape dropouts before settling onto the next preset. Transitions animate from a snapshot of the outgoing image into the live incoming preset, including in fullscreen and recordings. Switching again mid-transition starts from the currently displayed image. Arrow keys stay with text fields, dropdowns, and the preset picker when editing. Unsaved layer changes still ask before switching. Groups, ordering, the active group, and transition settings are saved in this browser, independently of preset files.
 
 Use **res** in the top bar to scale with the window (**Auto**) or lock the output to an exact resolution, from 640×360 to 3840×2160. Choose **Custom…** (or click **…**) to enter a width and height in pixels. Fixed output keeps its resolution in fullscreen and recordings, with the preview fitted to the stage without stretching. This setting is remembered in your browser across reloads and preset changes.
+
+For automatic preset changes, choose a group in **Presets**, set **Hold seconds** (1–3600, default 30), and click **Start auto**. The timer advances through that group's order, wraps at the end, and uses its selected transition and transition duration. Each hold starts after the previous transition finishes. A countdown shows when the next preset is due; **Stop auto** stops playback. Manual navigation, group changes and returning to a backgrounded tab restart the hold without rapid catch-up changes. Editing the current preset stops the timer to preserve unsaved changes. Hold times are remembered per group; automatic playback starts off after a reload. The timer continues in fullscreen and while the UI is hidden.
+
+Every five minutes after opening the app, **mitch was here** flashes three times in distressed red lettering. The brief cameo appears in the canvas, fullscreen and recordings, keeps its schedule across preset changes, and leaves feedback and transition snapshots untouched. Reloading starts a new five-minute countdown; missed flashes while the tab is inactive are not replayed. The HDR brightness test hides the message to keep its reference patches accurate.
+
+## HDR output
+
+Open **HDR** in the top bar and enable **HDR rendering**. Layers, effect passes, feedback, transitions and 3D models then use 16-bit floating-point targets, preserving highlights above standard white. **Exposure** adjusts the final image in stops; add a `glow` layer to bloom those highlights. Output preferences are remembered in this browser across preset changes. HDR is off by default, and unavailable devices keep using SDR.
+
+Use **Show brightness test** in the HDR menu to compare three white patches: 1×, 2× and 4× normal white, left to right. On an HDR display the middle and right patches should exceed the reference white. On the SDR output path all three deliberately show the same white. The test bypasses exposure, leaves the preset untouched, ends when the menu closes, and is disabled during recording. The output status confirms that the browser accepted HDR settings; the patches help check what the physical screen actually displays.
+
+The status shows the actual output path. Native HDR display output requires an HDR display and the browser's experimental WebGL `drawingBufferStorage` and `drawingBufferToneMapping` APIs. If those are unavailable, the renderer compresses highlights smoothly for an SDR display. The existing shaders and textures retain their sRGB colour conventions; exposure and highlight compression run in linear light at presentation. This adds HDR rendering and conditional HDR display output; it does not add HDR image formats or HDR video decoding.
+
+WebM recordings remain SDR and use the same highlight compression. Native HDR display output is temporarily suspended while recording and resumes afterward. HDR recording/export is not implemented. Floating-point buffers use more GPU memory than SDR, especially with feedback effects and large output sizes.
 
 ## How it fits together
 

@@ -3,6 +3,7 @@ export interface Target {
   fbo: WebGLFramebuffer;
   width: number;
   height: number;
+  float: boolean;
 }
 
 export function compile(gl: WebGL2RenderingContext, type: number, source: string) {
@@ -65,7 +66,7 @@ export function createTarget(gl: WebGL2RenderingContext, width: number, height: 
   gl.clear(gl.COLOR_BUFFER_BIT);
   gl.bindFramebuffer(gl.FRAMEBUFFER, null);
   gl.bindTexture(gl.TEXTURE_2D, prev);
-  return { tex, fbo, width, height };
+  return { tex, fbo, width, height, float: canFloat };
 }
 
 export function deleteTarget(gl: WebGL2RenderingContext, t: Target) {

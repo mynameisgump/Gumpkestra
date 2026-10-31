@@ -383,14 +383,17 @@ export class ModelLayer extends Layer {
     return this.params[name].value as T;
   }
 
-  override resize(width: number, height: number) {
-    super.resize(width, height);
+  override resize(width: number, height: number, hdr = false) {
+    super.resize(width, height, hdr);
     const gl = this.gl;
     this.freeTargets();
-    const samples = Math.min(4, gl.getParameter(gl.MAX_SAMPLES) as number);
+    const format = this.output!.float ? gl.RGBA16F : gl.RGBA8;
+    const colorSamples = gl.getInternalformatParameter(gl.RENDERBUFFER, format, gl.SAMPLES) as Int32Array;
+    const depthSamples = gl.getInternalformatParameter(gl.RENDERBUFFER, gl.DEPTH_COMPONENT24, gl.SAMPLES) as Int32Array;
+    const samples = Math.max(0, ...Array.from(colorSamples).filter((s) => s <= 4 && depthSamples.includes(s)));
     const color = gl.createRenderbuffer()!;
     gl.bindRenderbuffer(gl.RENDERBUFFER, color);
-    gl.renderbufferStorageMultisample(gl.RENDERBUFFER, samples, gl.RGBA8, width, height);
+    gl.renderbufferStorageMultisample(gl.RENDERBUFFER, samples, format, width, height);
     const depth = gl.createRenderbuffer()!;
     gl.bindRenderbuffer(gl.RENDERBUFFER, depth);
     gl.renderbufferStorageMultisample(gl.RENDERBUFFER, samples, gl.DEPTH_COMPONENT24, width, height);
@@ -400,7 +403,7 @@ export class ModelLayer extends Layer {
     gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, depth);
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
     this.msaa = { fbo, color, depth };
-    this.resolved = createTarget(gl, width, height);
+    this.resolved = createTarget(gl, width, height, hdr);
   }
 
   override render(ctx: FrameContext, input: WebGLTexture) {

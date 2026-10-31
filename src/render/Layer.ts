@@ -113,6 +113,7 @@ export class Layer {
   private program: WebGLProgram | null = null;
   private u!: (name: string) => WebGLUniformLocation | null;
   private passBuffers = new Map<string, PassBuffers>();
+  protected hdr = false;
   private tileSequences = new Map<string, TileSequence>();
   private pendingEvents = new Set<string>();
 
@@ -190,9 +191,10 @@ export class Layer {
     return Math.min(max, Math.max(min, v));
   }
 
-  resize(width: number, height: number) {
+  resize(width: number, height: number, hdr = false) {
+    this.hdr = hdr;
     if (this.output) deleteTarget(this.gl, this.output);
-    this.output = createTarget(this.gl, width, height);
+    this.output = createTarget(this.gl, width, height, hdr);
     this.freeBuffers();
   }
 
@@ -207,7 +209,7 @@ export class Layer {
     let pb = this.passBuffers.get(pass.TARGET!);
     if (!pb || pb.bufs[0].width !== w || pb.bufs[0].height !== h) {
       pb?.bufs.forEach((t) => deleteTarget(this.gl, t));
-      pb = { pass, bufs: [createTarget(this.gl, w, h, pass.FLOAT), createTarget(this.gl, w, h, pass.FLOAT)], read: 0 };
+      pb = { pass, bufs: [createTarget(this.gl, w, h, this.hdr || pass.FLOAT), createTarget(this.gl, w, h, this.hdr || pass.FLOAT)], read: 0 };
       this.passBuffers.set(pass.TARGET!, pb);
     }
     return pb;

@@ -9,7 +9,20 @@ export function PresetsPanel(root: HTMLElement, app: App, load: (name: string) =
   const groups = app.presetGroups;
   let dot: HTMLElement | null = null;
   let shown = '';
-  const updateDirty = () => dot?.classList.toggle('on', app.dirty);
+  const timerStatus = h('div', { class: 'hint preset-timer-status', 'aria-label': 'Auto transition status' });
+  const timerButton = h('button', { type: 'button', 'aria-pressed': 'false', onclick: () => {
+    if (app.presetTimer.running) app.presetTimer.stop();
+    else app.presetTimer.start();
+    updateDirty();
+  } }, 'Start auto');
+  const updateDirty = () => {
+    dot?.classList.toggle('on', app.dirty);
+    timerButton.textContent = app.presetTimer.running ? 'Stop auto' : 'Start auto';
+    timerButton.setAttribute('aria-pressed', String(app.presetTimer.running));
+    const enough = groups.names(app.library.presets).length >= 2;
+    timerButton.disabled = !enough && !app.presetTimer.running;
+    timerStatus.textContent = !enough ? 'Add at least two presets to use the timer.' : app.presetTimer.message;
+  };
 
   const render = () => {
     const group = groups.active;
@@ -52,6 +65,15 @@ export function PresetsPanel(root: HTMLElement, app: App, load: (name: string) =
             if (Number.isFinite(value) && value >= 0.1 && value <= 10) { group.duration = value; groups.changed(); }
             else input.value = String(group.duration);
           } }))),
+      h('div', { class: 'preset-group-row' },
+        h('label', {}, 'Hold seconds ', h('input', { type: 'number', min: 1, max: 3600, step: 1,
+          value: group.holdSeconds, 'aria-label': 'Auto transition hold seconds',
+          onchange: (e: Event) => {
+            const input = e.target as HTMLInputElement;
+            const value = Number(input.value);
+            if (Number.isFinite(value) && value >= 1 && value <= 3600) { group.holdSeconds = value; groups.changed(); }
+            else input.value = String(group.holdSeconds);
+          } })), timerButton), timerStatus,
     );
     if (custom) {
       const available = [...app.library.presets.keys()].filter((n) => !group.presets.includes(n)).sort((a, b) => a.localeCompare(b));

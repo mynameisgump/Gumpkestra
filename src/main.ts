@@ -12,6 +12,7 @@ import { PresetPicker } from './ui/PresetPicker';
 import { PresetsPanel } from './ui/PresetsPanel';
 import { StackPanel } from './ui/StackPanel';
 import { ResolutionControl } from './ui/ResolutionControl';
+import { HDRControl } from './ui/HDRControl';
 
 const $ = (id: string) => document.getElementById(id)!;
 
@@ -60,6 +61,7 @@ async function main() {
     last = now;
     const time = now / 1000;
     audio.update(dt, time);
+    app.presetTimer.tick(time);
     engine.render(time, dt, audio);
     if (!document.body.classList.contains('perform')) {
       drawMeters();
@@ -113,6 +115,7 @@ async function main() {
 }
 
 function Topbar(app: App) {
+  const hdr = HDRControl(app.engine);
   const names = () => app.presetGroups.names(app.library.presets);
   const confirmDiscard = () => !app.dirty || confirm(`Discard unsaved changes to "${app.presetName}"?`);
 
@@ -122,6 +125,7 @@ function Topbar(app: App) {
   const saveBtn = h('button', { title: 'Save over the current preset (⌘S)', onclick: () => save() }, 'Save') as HTMLButtonElement;
 
   const updateDirty = () => {
+    hdr.update();
     const dirty = app.dirty;
     dirtyDot.classList.toggle('on', dirty);
     saveBtn.disabled = app.presetSaved && !dirty;
@@ -180,22 +184,36 @@ function Topbar(app: App) {
       recorder.stop();
       return;
     }
-    const stream = app.engine.canvas.captureStream(60);
-    app.audio.recordDest.stream.getAudioTracks().forEach((t) => stream.addTrack(t));
-    const mimeType = ['video/webm;codecs=vp9,opus', 'video/webm'].find((m) => MediaRecorder.isTypeSupported(m));
-    const chunks: Blob[] = [];
-    recorder = new MediaRecorder(stream, { mimeType, videoBitsPerSecond: 16_000_000 });
-    recorder.ondataavailable = (e) => chunks.push(e.data);
-    recorder.onstop = () => {
-      const url = URL.createObjectURL(new Blob(chunks, { type: 'video/webm' }));
-      h('a', { href: url, download: `gumpkestra-${Date.now()}.webm` }).click();
+    let stream: MediaStream | undefined;
+    try {
+      // MediaRecorder's WebM path is SDR. Present the tone-mapped image during
+      // recording rather than promising HDR metadata the encoder cannot preserve.
+      app.engine.colorOutput.recordingSDR = true;
+      app.engine.colorOutput.configure(app.engine.width, app.engine.height);
+      stream = app.engine.canvas.captureStream(60);
+      for (const track of app.audio.recordDest.stream.getAudioTracks()) stream.addTrack(track);
+      const mimeType = ['video/webm;codecs=vp9,opus', 'video/webm'].find((m) => MediaRecorder.isTypeSupported(m));
+      const chunks: Blob[] = [];
+      recorder = new MediaRecorder(stream, { mimeType, videoBitsPerSecond: 16_000_000 });
+      recorder.ondataavailable = (e) => chunks.push(e.data);
+      recorder.onstop = () => {
+        const url = URL.createObjectURL(new Blob(chunks, { type: 'video/webm' }));
+        h('a', { href: url, download: `gumpkestra-${Date.now()}.webm` }).click();
+        recorder = null;
+        app.engine.colorOutput.recordingSDR = false;
+        stream?.getVideoTracks().forEach((t) => t.stop());
+        recBtn.classList.remove('on');
+        recBtn.textContent = '● Rec';
+      };
+      recorder.start(250);
+      recBtn.classList.add('on');
+      recBtn.textContent = '■ Stop';
+    } catch (e) {
       recorder = null;
-      recBtn.classList.remove('on');
-      recBtn.textContent = '● Rec';
-    };
-    recorder.start(250);
-    recBtn.classList.add('on');
-    recBtn.textContent = '■ Stop';
+      app.engine.colorOutput.recordingSDR = false;
+      stream?.getVideoTracks().forEach((t) => t.stop());
+      toast(`Recording could not start: ${(e as Error).message}`, true);
+    }
   });
 
   $('topbar').append(
@@ -210,6 +228,7 @@ function Topbar(app: App) {
     h('button', { title: 'Save under a new name', onclick: () => saveAs() }, 'Save as…'),
     h('span', { class: 'spacer' }),
     ResolutionControl(app.engine),
+    hdr.el,
     recBtn,
     h('button', { onclick: () => $('stage').requestFullscreen?.(), title: 'F' }, 'Fullscreen'),
     h('button', { onclick: () => document.body.classList.toggle('perform'), title: 'H' }, 'Hide UI'),

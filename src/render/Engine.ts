@@ -4,6 +4,7 @@ import { VERTEX_SHADER, type ParsedISF } from '../isf/isf';
 import { createDataTexture, createFullscreenTriangle, createTarget, deleteTarget, link, uniformCache, type Target } from './gl';
 import { BLEND_MODES, Layer, type FrameContext } from './Layer';
 import { TextureStore } from './Textures';
+import { ColorOutput } from './ColorOutput';
 
 const COMPOSITE_FS = `#version 300 es
 precision highp float;
@@ -20,11 +21,11 @@ void main() {
   vec3 r;
   if (mode == 0) r = t;
   else if (mode == 1) r = b + t;
-  else if (mode == 2) r = 1.0 - (1.0 - b) * (1.0 - t);
+  else if (mode == 2) r = max(max(b, t), 1.0 - (1.0 - b) * (1.0 - t));
   else if (mode == 3) r = b * t;
   else if (mode == 4) r = abs(b - t);
   else r = max(b, t);
-  color = vec4(mix(b, r, opacity * t4.a), 1.0);
+  color = vec4(mix(b, r, opacity * clamp(t4.a, 0.0, 1.0)), 1.0);
 }`;
 
 const BLIT_FS = `#version 300 es
@@ -155,7 +156,7 @@ void main() {
     image = image * mix(1.0, scan, envelope) + (grain - 0.5) * 0.16 * envelope;
     image = mix(image, vec3(grain * 0.8), tracking * 0.75 * envelope);
     image += vec3(dropout * grain * 0.3 * envelope);
-    color = vec4(clamp(image, 0.0, 1.0), 1.0);
+    color = vec4(max(image, 0.0), 1.0);
   } else color = mix(a, b, p);
   color.a = 1.0;
 }`;
@@ -168,6 +169,8 @@ void main() {
 export class Engine {
   readonly gl: WebGL2RenderingContext;
   readonly textures: TextureStore;
+  readonly colorOutput: ColorOutput;
+  private allocatedHDR = false;
   layers: Layer[] = [];
   /** Render resolution as a fraction of the canvas' device pixels. */
   scale = 1;
@@ -193,9 +196,11 @@ export class Engine {
   private waveTex: WebGLTexture;
 
   constructor(readonly canvas: HTMLCanvasElement) {
-    const gl = canvas.getContext('webgl2', { antialias: false, alpha: false, preserveDrawingBuffer: false });
+    // Floating-point drawing buffers require alpha:true. Presentation is always opaque.
+    const gl = canvas.getContext('webgl2', { antialias: false, alpha: true, preserveDrawingBuffer: false });
     if (!gl) throw new Error('WebGL2 is not available in this browser.');
     this.gl = gl;
+    this.colorOutput = new ColorOutput(gl);
     const maxTexture = Math.min(gl.getParameter(gl.MAX_TEXTURE_SIZE), gl.getParameter(gl.MAX_RENDERBUFFER_SIZE));
     const maxViewport = gl.getParameter(gl.MAX_VIEWPORT_DIMS) as Int32Array;
     this.maxResolution = { width: Math.min(maxTexture, maxViewport[0]), height: Math.min(maxTexture, maxViewport[1]) };
@@ -212,6 +217,14 @@ export class Engine {
 
   get fixedResolution() { return this.resolution; }
 
+  transitionRemaining(time: number) {
+    return this.transition ? Math.max(0, this.transition.start + this.transition.duration - time) : 0;
+  }
+
+  setHDR(enabled: boolean) {
+    this.colorOutput.enabled = enabled && this.colorOutput.supported;
+  }
+
   setResolution(size: { width: number; height: number } | null) {
     if (size && (!Number.isInteger(size.width) || !Number.isInteger(size.height)
       || size.width < 1 || size.height < 1
@@ -226,18 +239,20 @@ export class Engine {
     const dpr = window.devicePixelRatio || 1;
     const w = this.resolution?.width ?? Math.min(this.maxResolution.width, Math.max(1, Math.round(this.canvas.clientWidth * dpr * this.scale)));
     const h = this.resolution?.height ?? Math.min(this.maxResolution.height, Math.max(1, Math.round(this.canvas.clientHeight * dpr * this.scale)));
-    if (w === this.width && h === this.height && this.acc) return;
+    const hdr = this.colorOutput.enabled;
+    if (w === this.width && h === this.height && this.acc && hdr === this.allocatedHDR) return;
+    this.allocatedHDR = hdr;
     this.width = this.canvas.width = w;
     this.height = this.canvas.height = h;
     this.acc?.forEach((t) => deleteTarget(this.gl, t));
     if (this.presented) deleteTarget(this.gl, this.presented);
     if (this.outgoing) deleteTarget(this.gl, this.outgoing);
-    this.presented = createTarget(this.gl, w, h);
+    this.presented = createTarget(this.gl, w, h, hdr);
     this.outgoing = null;
     this.transition = null;
     this.hasFrame = false;
-    this.acc = [createTarget(this.gl, w, h), createTarget(this.gl, w, h)];
-    for (const l of this.layers) l.resize(w, h);
+    this.acc = [createTarget(this.gl, w, h, hdr), createTarget(this.gl, w, h, hdr)];
+    for (const l of this.layers) l.resize(w, h, hdr);
   }
 
   /** Capture the displayed composite, including an interrupted transition. */
@@ -247,7 +262,7 @@ export class Engine {
     this.outgoing = null;
     this.transition = null;
     if (style === 'cut' || !this.presented || !this.hasFrame) return;
-    this.outgoing = createTarget(gl, this.width, this.height);
+    this.outgoing = createTarget(gl, this.width, this.height, this.allocatedHDR);
     gl.bindVertexArray(this.vao);
     this.blit(this.presented.tex, this.outgoing);
     this.transition = { style, duration, direction, start: performance.now() / 1000 };
@@ -258,7 +273,7 @@ export class Engine {
   }
 
   insertLayer<T extends Layer>(layer: T, index = this.layers.length): T {
-    if (this.width) layer.resize(this.width, this.height);
+    if (this.width) layer.resize(this.width, this.height, this.allocatedHDR);
     this.layers.splice(index, 0, layer);
     return layer;
   }
@@ -292,6 +307,7 @@ export class Engine {
 
   render(time: number, dt: number, audio: AudioEngine) {
     this.ensureSize();
+    this.colorOutput.configure(this.width, this.height);
     const gl = this.gl;
     const acc = this.acc!;
     gl.bindVertexArray(this.vao);
@@ -361,7 +377,7 @@ export class Engine {
         this.blit(acc[cur].tex, this.presented);
       }
     } else this.blit(acc[cur].tex, this.presented);
-    this.blit(this.presented!.tex, null);
+    this.colorOutput.present(this.presented!.tex, this.width, this.height, time);
     this.hasFrame = true;
   }
 }

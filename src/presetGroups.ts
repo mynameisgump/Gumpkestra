@@ -7,9 +7,9 @@ export type Transition = keyof typeof TRANSITIONS;
 export const TRANSITION_IDS: Record<Transition, number> = {
   cut: -1, fade: 0, wipe: 1, slide: 2, dip: 3, rust: 4, tear: 5, shutters: 6, melt: 7, vhs: 8,
 };
-export interface PresetGroup { id: string; name: string; presets: string[]; transition: Transition; duration: number }
+export interface PresetGroup { id: string; name: string; presets: string[]; transition: Transition; duration: number; holdSeconds: number }
 const KEY = 'gumpkestra:preset-groups';
-const allGroup = (): PresetGroup => ({ id: 'all', name: 'All presets', presets: [], transition: 'fade', duration: 0.8 });
+const allGroup = (): PresetGroup => ({ id: 'all', name: 'All presets', presets: [], transition: 'fade', duration: 0.8, holdSeconds: 30 });
 
 /** Browser-local performance sets; missing library entries are skipped, not forgotten. */
 export class PresetGroups {
@@ -30,6 +30,9 @@ export class PresetGroups {
           return true;
         }) as PresetGroup[];
         this.groups = [valid.find((g) => g.id === 'all') ?? allGroup(), ...valid.filter((g) => g.id !== 'all')];
+        this.groups.forEach((g) => {
+          if (!Number.isFinite(g.holdSeconds) || g.holdSeconds < 1 || g.holdSeconds > 3600) g.holdSeconds = 30;
+        });
         this.groups.forEach((g) => g.presets = [...new Set(g.presets)]);
         if (this.groups.some((g) => g.id === saved.activeId)) this.activeId = saved.activeId;
       }
@@ -47,7 +50,7 @@ export class PresetGroups {
     this.listeners.forEach((fn) => fn());
   }
   create(name: string) {
-    const group: PresetGroup = { id: crypto.randomUUID(), name, presets: [], transition: this.active.transition, duration: this.active.duration };
+    const group: PresetGroup = { id: crypto.randomUUID(), name, presets: [], transition: this.active.transition, duration: this.active.duration, holdSeconds: this.active.holdSeconds };
     this.groups.push(group);
     this.activeId = group.id;
     this.changed();
