@@ -35,7 +35,7 @@ try {
   await page.keyboard.press('ArrowRight');
   assert.equal(await page.evaluate(() => window.app.presetName), ordered[2], 'Input keeps arrow keys');
   await page.getByTitle(`Remove ${ordered[1]} from group`, { exact: true }).click();
-  await page.getByLabel('Preset transition', { exact: true }).selectOption('slide');
+  await page.getByLabel('Preset transition', { exact: true }).selectOption('melt');
   await page.getByLabel('Transition seconds').fill('1.2');
   await page.getByLabel('Transition seconds').press('Tab');
   await page.reload();
@@ -43,7 +43,7 @@ try {
   assert.deepEqual(await page.evaluate(() => {
     const g = window.app.presetGroups.active;
     return [g.name, g.presets, g.transition, g.duration];
-  }), ['Live set', [ordered[0], ordered[2]], 'slide', 1.2]);
+  }), ['Live set', [ordered[0], ordered[2]], 'melt', 1.2]);
   // A rejected unsaved-changes prompt leaves the preset intact.
   await page.evaluate(() => { window.app.engine.layers[0].enabled = !window.app.engine.layers[0].enabled; });
   const before = await page.evaluate(() => window.app.presetName);
@@ -71,7 +71,7 @@ try {
       return [...data];
     };
     const results = [];
-    for (const style of ['fade', 'wipe', 'slide', 'dip', 'cut']) {
+    for (const style of ['fade', 'wipe', 'slide', 'dip', 'cut', 'rust', 'tear', 'shutters', 'melt']) {
       app.loadPreset(preset('test-red'));
       await frame();
       const red = read();
@@ -83,9 +83,19 @@ try {
       if (app.engine.transition) app.engine.transition.start = performance.now() / 1000 - 1;
       await frame();
       const middle = read();
+      const gl = app.engine.gl;
+      const full = new Uint8Array(64 * 64 * 4);
+      gl.readPixels(0, 0, 64, 64, gl.RGBA, gl.UNSIGNED_BYTE, full);
+      let oldPixels = 0, newPixels = 0;
+      for (let i = 0; i < full.length; i += 4) {
+        if (full[i] > full[i + 2] + 30) oldPixels++;
+        if (full[i + 2] > full[i] + 30) newPixels++;
+      }
+      const top = [...full.slice((60 * 64 + 32) * 4, (60 * 64 + 32) * 4 + 4)];
+      const bottom = [...full.slice((3 * 64 + 32) * 4, (3 * 64 + 32) * 4 + 4)];
       if (app.engine.transition) app.engine.transition.start = performance.now() / 1000 - 3;
       await frame();
-      results.push({ style, red, initial, middle, end: read(), error: app.engine.gl.getError() });
+      results.push({ style, red, initial, middle, oldPixels, newPixels, top, bottom, end: read(), error: app.engine.gl.getError() });
     }
     // Interrupting a transition captures the composite currently on screen.
     app.presetGroups.active.transition = 'fade';
@@ -103,10 +113,16 @@ try {
     assert.ok(p.end[0] < 10 && p.end[2] > 240, `${p.style}: ends blue`);
     if (p.style === 'fade') assert.ok(p.middle[0] > 60 && p.middle[2] > 60, 'Crossfade mixes images');
     if (p.style === 'dip') assert.ok(p.middle[0] < 30 && p.middle[2] < 30, 'Dip passes through black');
+    if (['rust', 'tear', 'shutters', 'melt'].includes(p.style)) {
+      assert.ok(p.oldPixels > 100 && p.newPixels > 100, `${p.style}: reveals both presets during transition`);
+    }
+    if (p.style === 'melt') {
+      assert.ok(p.top[2] > 240 && p.bottom[0] > 240, 'Doom Melt falls downward, revealing the top first');
+    }
     if (p.style === 'cut') assert.ok(p.initial[2] > 240, 'Cut is immediate');
   }
   assert.deepEqual(errors, []);
-  console.log('Passed: group editing, ordering, persistence, keyboard scope, wraparound, unsaved protection, five GPU transitions, interruption and resize.');
+  console.log('Passed: group editing, ordering, persistence, keyboard scope, wraparound, unsaved protection, nine GPU transitions (including industrial effects and downward Doom Melt), interruption and resize.');
 } finally {
   await browser?.close();
   await server.close();

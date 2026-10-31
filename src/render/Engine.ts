@@ -1,4 +1,4 @@
-import { type Transition } from '../presetGroups';
+import { TRANSITION_IDS, type Transition } from '../presetGroups';
 import { TEX_WIDTH, type AudioEngine } from '../audio/AudioEngine';
 import { VERTEX_SHADER, type ParsedISF } from '../isf/isf';
 import { createDataTexture, createFullscreenTriangle, createTarget, deleteTarget, link, uniformCache, type Target } from './gl';
@@ -43,11 +43,23 @@ uniform sampler2D next;
 uniform float progress;
 uniform float direction;
 uniform int style;
+uniform float seed;
+float hash(vec2 v) {
+  return fract(sin(dot(v, vec2(127.1, 311.7)) + seed) * 43758.5453);
+}
+float noise(vec2 v) {
+  vec2 i = floor(v), f = fract(v);
+  f = f * f * (3.0 - 2.0 * f);
+  return mix(mix(hash(i), hash(i + vec2(1, 0)), f.x),
+             mix(hash(i + vec2(0, 1)), hash(i + vec2(1, 1)), f.x), f.y);
+}
 void main() {
   vec2 uv = isf_FragNormCoord;
   float p = smoothstep(0.0, 1.0, progress);
   vec4 a = texture(previous, uv);
   vec4 b = texture(next, uv);
+  if (progress <= 0.0) { color = a; return; }
+  if (progress >= 1.0) { color = b; return; }
   if (style == 1) {
     float x = direction > 0.0 ? uv.x : 1.0 - uv.x;
     color = mix(a, b, 1.0 - smoothstep(p - 0.01, p + 0.01, x));
@@ -57,6 +69,59 @@ void main() {
     color = oldUV.x >= 0.0 && oldUV.x <= 1.0 ? texture(previous, oldUV) : texture(next, newUV);
   } else if (style == 3) {
     color = p < 0.5 ? a * (1.0 - p * 2.0) : b * (p * 2.0 - 1.0);
+  } else if (style == 4) {
+    // Pitted, multiscale corrosion eats through the old picture.
+    vec2 grid = uv * vec2(180.0, 110.0);
+    float pits = 0.55 * noise(grid * 0.18) + 0.3 * noise(grid * 0.65) + 0.15 * hash(floor(grid));
+    float threshold = mix(-0.15, 1.15, p);
+    float reveal = 1.0 - smoothstep(threshold - 0.025, threshold + 0.025, pits);
+    float edge = 1.0 - smoothstep(0.015, 0.09, abs(pits - threshold));
+    vec3 image = mix(a.rgb, b.rgb, reveal);
+    color = vec4(mix(image, vec3(0.24, 0.075, 0.018) * (0.4 + pits), edge * 0.9), 1.0);
+  } else if (style == 5) {
+    // Torn horizontal signal bands, channel separation and dirty scan lines.
+    float envelope = sin(progress * 3.14159265);
+    float tick = floor(progress * 32.0);
+    float band = floor(uv.y * 48.0);
+    float jitter = (hash(vec2(band, tick)) - 0.5) * 0.42 * envelope;
+    vec2 torn = vec2(fract(uv.x + jitter * direction), uv.y);
+    float reveal = step(hash(vec2(band, 91.0)), p);
+    float split = 0.018 * envelope;
+    vec3 oldRGB = vec3(texture(previous, torn + vec2(split, 0)).r,
+      texture(previous, torn).g, texture(previous, torn - vec2(split, 0)).b);
+    vec3 newRGB = vec3(texture(next, torn - vec2(split, 0)).r,
+      texture(next, torn).g, texture(next, torn + vec2(split, 0)).b);
+    float grit = hash(floor(uv * vec2(640, 400)) + vec2(tick, 0));
+    float scan = mod(floor(uv.y * 400.0), 3.0) == 0.0 ? 0.45 : 1.0;
+    color = vec4(mix(oldRGB, newRGB, reveal) * mix(1.0, scan, envelope)
+      + (grit - 0.5) * 0.2 * envelope, 1.0);
+  } else if (style == 6) {
+    // Heavy staggered metal slats retract with a scarred leading edge.
+    float slat = floor(uv.y * 12.0);
+    float delay = hash(vec2(slat, 7.0)) * 0.22;
+    float travel = clamp((progress - delay) / (1.0 - delay), 0.0, 1.0);
+    travel = travel * travel * (3.0 - 2.0 * travel);
+    float x = direction > 0.0 ? uv.x : 1.0 - uv.x;
+    float scar = (noise(uv * vec2(90.0, 260.0)) - 0.5) * 0.035 * sin(travel * 3.14159265);
+    float distance = x - travel + scar;
+    float reveal = 1.0 - smoothstep(-0.002, 0.002, distance);
+    vec2 dragged = vec2(clamp(uv.x - travel * direction, 0.0, 1.0), uv.y);
+    vec3 plate = texture(previous, dragged).rgb;
+    float edge = 1.0 - smoothstep(0.0, 0.035, abs(distance));
+    float seam = step(0.95, fract(uv.y * 12.0));
+    vec3 image = mix(plate * (1.0 - seam * 0.6 * sin(progress * 3.14159265)), b.rgb, reveal);
+    color = vec4(mix(image, vec3(0.09, 0.10, 0.105), edge * sin(travel * 3.14159265)), 1.0);
+  } else if (style == 7) {
+    // Retro melt: neighbouring strips start at related times, then fall down.
+    // Motion is stepped on a 200-line grid; the old image moves, not stretches.
+    float column = floor(uv.x * 160.0);
+    float delay = 0.22 * (0.7 * noise(vec2(column * 0.065, 13.0))
+      + 0.3 * noise(vec2(column * 0.28, 41.0)));
+    float fall = clamp((progress - delay) / (1.0 - delay), 0.0, 1.0);
+    fall = fall * fall * (2.0 - fall);
+    float drop = floor(fall * 200.0) / 200.0;
+    vec2 oldUV = uv + vec2(0, drop);
+    color = oldUV.y >= 1.0 ? b : texture(previous, oldUV);
   } else color = mix(a, b, p);
   color.a = 1.0;
 }`;
@@ -250,7 +315,8 @@ export class Engine {
         gl.uniform1i(this.tu('next'), 1);
         gl.uniform1f(this.tu('progress'), progress);
         gl.uniform1f(this.tu('direction'), direction);
-        gl.uniform1i(this.tu('style'), ['fade', 'wipe', 'slide', 'dip'].indexOf(style));
+        gl.uniform1f(this.tu('seed'), (start % 1000) * 13.37);
+        gl.uniform1i(this.tu('style'), TRANSITION_IDS[style]);
         gl.bindFramebuffer(gl.FRAMEBUFFER, this.presented!.fbo);
         gl.viewport(0, 0, this.width, this.height);
         gl.drawArrays(gl.TRIANGLES, 0, 3);
