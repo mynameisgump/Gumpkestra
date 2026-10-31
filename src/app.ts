@@ -131,19 +131,24 @@ export class App {
   /** Texture slots currently showing a library texture. */
   textureUses(name: string) {
     return this.engine.layers.flatMap((layer) =>
-      this.textureInputs(layer).filter((i) => layer.params[i.NAME]?.value === name).map((input) => ({ layer, input })));
+      this.textureInputs(layer).filter((i) => (layer.params[i.NAME]?.value === name || layer.params[i.NAME]?.tiles?.includes(name))).map((input) => ({ layer, input })));
   }
 
   /** Delete a texture file from the library, putting slots that show it back to their default. */
   async deleteTexture(name: string) {
     // Reset first: deleting re-renders the panels, which would otherwise fetch the gone file's thumbnail.
     const uses = this.textureUses(name);
-    for (const { layer, input } of uses) layer.params[input.NAME].value = defaultValue(input);
+    const previous = uses.map(({ layer, input }) => ({ layer, input, state: { ...layer.params[input.NAME] } }));
+    for (const { layer, input } of uses) {
+      const state = layer.params[input.NAME];
+      if (state.value === name) state.value = defaultValue(input);
+      if (state.tiles) state.tiles = state.tiles.filter((tile) => tile !== name);
+    }
     try {
       await this.library.deleteFile('textures', name);
       toast(`Deleted ${name} from library/textures`);
     } catch (e) {
-      for (const { layer, input } of uses) layer.params[input.NAME].value = name;
+      for (const { layer, input, state } of previous) layer.params[input.NAME] = state;
       toast(`${name}: ${(e as Error).message}`, true);
     }
     this.changed();

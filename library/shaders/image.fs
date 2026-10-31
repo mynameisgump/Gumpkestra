@@ -2,7 +2,7 @@
   "DESCRIPTION": "Shows a texture: an image or looping video from library/textures, a built-in, or the layers below. Fit, tile, scroll, spin, and pulse on the beat. Transparent outside the picture in Contain mode.",
   "CATEGORIES": ["Generator", "Texture"],
   "INPUTS": [
-    { "NAME": "tex", "TYPE": "image", "DEFAULT": "@meat", "LABEL": "Texture" },
+    { "NAME": "tex", "TYPE": "image", "DEFAULT": "@meat", "LABEL": "Texture", "TILE_SEQUENCE": true },
     { "NAME": "fit", "TYPE": "long", "DEFAULT": 1, "VALUES": [0, 1, 2, 3], "LABELS": ["Contain", "Cover", "Stretch", "Tile"] },
     { "NAME": "zoom", "TYPE": "float", "DEFAULT": 1.0, "MIN": 0.25, "MAX": 4.0 },
     { "NAME": "pulse", "TYPE": "float", "DEFAULT": 0.0, "MIN": 0.0, "MAX": 0.5, "LABEL": "Pulse", "MODS": [{ "SOURCE": "beat", "AMOUNT": 0.12 }] },
@@ -36,5 +36,18 @@ void main() {
   vec2 uv = p / size + 0.5 - offset - TIME * scroll;
   float inside = fit == 0 ? step(0.0, uv.x) * step(uv.x, 1.0) * step(0.0, uv.y) * step(uv.y, 1.0) : 1.0;
   vec4 c = IMG_NORM_PIXEL(tex, fract(uv));
+  if (fit == 3 && tex_tileCount > 0) {
+    // Advance across columns and rows; positive modulo also handles backwards scrolling.
+    float tile = mod(floor(uv.x) + floor(uv.y), float(tex_tileCount));
+    vec2 local = fract(uv);
+    vec2 tileSize = vec2(textureSize(tex_tiles, 0).xy);
+    // Wrap the four bilinear taps within this tile, avoiding seams at repeated edges.
+    vec2 pixel = local * tileSize - 0.5;
+    vec2 base = floor(pixel), f = fract(pixel);
+    vec2 a = (mod(base, tileSize) + 0.5) / tileSize;
+    vec2 b = (mod(base + 1.0, tileSize) + 0.5) / tileSize;
+    c = mix(mix(texture(tex_tiles, vec3(a, tile)), texture(tex_tiles, vec3(b.x, a.y, tile)), f.x),
+            mix(texture(tex_tiles, vec3(a.x, b.y, tile)), texture(tex_tiles, vec3(b, tile)), f.x), f.y);
+  }
   gl_FragColor = vec4(c.rgb * tint.rgb * brightness, c.a * inside);
 }

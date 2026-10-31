@@ -3,33 +3,337 @@
     {
       "shader": "tunnel",
       "params": {
-        "push": { "value": 0, "mods": [{ "source": "bass", "amount": 0.25, "rate": 0.25, "smooth": 0.05 }] },
-        "twist": { "value": 0.3, "mods": [{ "source": "lfoSine", "amount": 0.2, "rate": 0.03, "smooth": 0 }] }
+        "push": {
+          "value": 0.05,
+          "mods": [
+            {
+              "source": "bass",
+              "amount": 0.42,
+              "rate": 0.25,
+              "smooth": 0.025
+            }
+          ]
+        },
+        "twist": {
+          "value": 0.3,
+          "mods": [
+            {
+              "source": "lfoSine",
+              "amount": 0.2,
+              "rate": 0.03,
+              "smooth": 0
+            }
+          ]
+        },
+        "colorA": {
+          "value": [
+            0.28,
+            0.65,
+            0.09,
+            1
+          ],
+          "mods": []
+        },
+        "colorB": {
+          "value": [
+            0.65,
+            0.06,
+            0.2,
+            1
+          ],
+          "mods": []
+        },
+        "speed": {
+          "value": 0.3,
+          "mods": []
+        },
+        "rings": {
+          "value": 6,
+          "mods": []
+        }
       }
     },
     {
       "shader": "waveform-scope",
       "blend": "add",
-      "params": {}
+      "params": {
+        "color": {
+          "value": [
+            0.8,
+            1,
+            0.16,
+            1
+          ],
+          "mods": []
+        },
+        "brightness": {
+          "value": 0.5,
+          "mods": []
+        },
+        "glow": {
+          "value": 4,
+          "mods": []
+        }
+      },
+      "opacity": {
+        "value": 0.35,
+        "mods": [
+          {
+            "source": "high",
+            "amount": 0.25,
+            "rate": 0.25,
+            "smooth": 0.05
+          }
+        ]
+      }
     },
     {
       "shader": "kaleidoscope",
-      "opacity": { "value": 1, "mods": [] },
+      "opacity": {
+        "value": 1,
+        "mods": []
+      },
       "params": {
-        "rotation": { "value": 0, "mods": [{ "source": "lfoSaw", "amount": 1, "rate": 0.02, "smooth": 0 }] },
-        "segments": { "value": 6, "mods": [{ "source": "random", "amount": 0.3, "rate": 0.25, "smooth": 0 }] }
+        "rotation": {
+          "value": 0,
+          "mods": [
+            {
+              "source": "lfoSaw",
+              "amount": 1,
+              "rate": 0.02,
+              "smooth": 0
+            }
+          ]
+        },
+        "segments": {
+          "value": 6,
+          "mods": [
+            {
+              "source": "random",
+              "amount": 0.3,
+              "rate": 0.25,
+              "smooth": 0
+            }
+          ]
+        }
       }
     },
     {
       "shader": "glitch-mosh",
       "params": {
-        "amount": { "value": 0.05, "mods": [{ "source": "beat", "amount": 0.4, "rate": 0.25, "smooth": 0 }] },
-        "smear": { "value": 0.1, "mods": [{ "source": "high", "amount": 0.4, "rate": 0.25, "smooth": 0.1 }] }
+        "amount": {
+          "value": 0.08,
+          "mods": [
+            {
+              "source": "beat",
+              "amount": 0.35,
+              "rate": 0.25,
+              "smooth": 0
+            }
+          ]
+        },
+        "smear": {
+          "value": 0.08,
+          "mods": [
+            {
+              "source": "high",
+              "amount": 0.32,
+              "rate": 0.25,
+              "smooth": 0.05
+            }
+          ]
+        },
+        "colorGlitch": {
+          "value": 0.15,
+          "mods": []
+        },
+        "jitter": {
+          "value": 0,
+          "mods": [
+            {
+              "source": "mid",
+              "amount": 0.12,
+              "rate": 0.25,
+              "smooth": 0.04
+            }
+          ]
+        }
       }
     },
     {
       "shader": "beat-flash",
-      "params": { "invertEvery": { "value": 4, "mods": [] } }
+      "params": {
+        "invertEvery": {
+          "value": 0,
+          "mods": []
+        },
+        "flash": {
+          "value": 0,
+          "mods": [
+            {
+              "source": "beat",
+              "amount": 0.17,
+              "rate": 0.25,
+              "smooth": 0
+            }
+          ]
+        },
+        "punch": {
+          "value": 0,
+          "mods": [
+            {
+              "source": "beat",
+              "amount": 0.26,
+              "rate": 0.25,
+              "smooth": 0
+            }
+          ]
+        },
+        "flashColor": {
+          "value": [
+            0.75,
+            0.15,
+            0.04,
+            1
+          ],
+          "mods": []
+        }
+      }
+    },
+    {
+      "shader": "grime",
+      "enabled": true,
+      "blend": "normal",
+      "opacity": {
+        "value": 1,
+        "mods": []
+      },
+      "params": {
+        "grain": {
+          "value": 0.1,
+          "mods": [
+            {
+              "source": "high",
+              "amount": 0.12,
+              "rate": 0.25,
+              "smooth": 0.05
+            }
+          ]
+        },
+        "dust": {
+          "value": 0.3,
+          "mods": []
+        },
+        "smudge": {
+          "value": 0.24,
+          "mods": []
+        },
+        "flicker": {
+          "value": 0.18,
+          "mods": [
+            {
+              "source": "beat",
+              "amount": 0.12,
+              "rate": 0.25,
+              "smooth": 0
+            }
+          ]
+        },
+        "crush": {
+          "value": 0.22,
+          "mods": []
+        },
+        "vignette": {
+          "value": 0.35,
+          "mods": []
+        },
+        "tintAmount": {
+          "value": 0.22,
+          "mods": []
+        },
+        "tint": {
+          "value": [
+            1,
+            0.85,
+            0.6,
+            1
+          ],
+          "mods": []
+        }
+      }
+    },
+    {
+      "shader": "psx",
+      "enabled": true,
+      "blend": "normal",
+      "opacity": {
+        "value": 1,
+        "mods": []
+      },
+      "params": {
+        "resolution": {
+          "value": 180,
+          "mods": []
+        },
+        "bits": {
+          "value": 3.9,
+          "mods": []
+        },
+        "dither": {
+          "value": 0.85,
+          "mods": []
+        },
+        "wobble": {
+          "value": 0.3,
+          "mods": []
+        },
+        "fps": {
+          "value": 0,
+          "mods": []
+        }
+      }
+    },
+    {
+      "shader": "vhs",
+      "enabled": true,
+      "blend": "normal",
+      "opacity": {
+        "value": 1,
+        "mods": []
+      },
+      "params": {
+        "tracking": {
+          "value": 0.19,
+          "mods": []
+        },
+        "beatTear": {
+          "value": 0,
+          "mods": [
+            {
+              "source": "beat",
+              "amount": 0.24,
+              "rate": 0.25,
+              "smooth": 0
+            }
+          ]
+        },
+        "chroma": {
+          "value": 0.48,
+          "mods": []
+        },
+        "tapeNoise": {
+          "value": 0.25,
+          "mods": []
+        },
+        "saturation": {
+          "value": 0.95,
+          "mods": []
+        },
+        "headSwitch": {
+          "value": true,
+          "mods": []
+        }
+      }
     }
   ]
 }

@@ -105,7 +105,7 @@ export function ParamsPanel(root: HTMLElement, app: App, openEditor: (name: stri
         const values = inp.VALUES ?? [0, 1, 2, 3];
         const labels = inp.LABELS ?? values.map(String);
         const opts = Object.fromEntries(values.map((v, i) => [String(v), labels[i] ?? String(v)]));
-        return row(select(opts, String(state.value), (v) => { state.value = Number(v); app.touch(); }));
+        return row(select(opts, String(state.value), (v) => { state.value = Number(v); app.touch(); render(); }));
       }
       case 'color': {
         const c = state.value as number[];
@@ -124,7 +124,8 @@ export function ParamsPanel(root: HTMLElement, app: App, openEditor: (name: stri
         return h('div', { class: 'param' }, h('div', { class: 'row texture-row' },
           h('span', { class: 'lbl' }, label),
           texturePicker(layer, inp.NAME, open)),
-          open ? textureGrid(layer, inp.NAME) : null);
+          open ? textureGrid(layer, inp.NAME) : null,
+          inp.TILE_SEQUENCE && layer.params.fit?.value === 3 ? tileSequence(layer, inp.NAME) : null);
       }
       case 'event':
         return row(h('div', { class: 'btn-row' },
@@ -171,6 +172,35 @@ export function ParamsPanel(root: HTMLElement, app: App, openEditor: (name: stri
         title: name,
         onclick: () => { openGrid = null; app.setTexture(layer, input, key); },
       }, preview(key, 'tile-preview'), h('span', { class: 'cap' }, name))));
+  };
+
+  /** The primary texture remains compatible with existing presets and texture imports. */
+  const tileSequence = (layer: Layer, input: string) => {
+    const state = layer.params[input];
+    const names = [String(state.value), ...(state.tiles ?? [])];
+    const max = app.engine.gl.getParameter(app.engine.gl.MAX_ARRAY_TEXTURE_LAYERS) as number;
+    const apply = (next: string[]) => {
+      state.value = next[0]; state.tiles = next.slice(1);
+      app.touch(); render();
+    };
+    const move = (i: number, step: number) => {
+      const next = [...names];
+      [next[i], next[i + step]] = [next[i + step], next[i]];
+      apply(next);
+    };
+    return h('div', { class: 'tile-sequence' },
+      h('p', { class: 'hint' }, 'Tile sequence · repeats across columns and rows in this order. All tiles use the first texture’s shape.'),
+      ...names.map((name, i) => h('div', { class: 'tile-sequence-row' },
+        h('span', {}, String(i + 1)), preview(name, 'thumb'),
+        select(textureOptions(layer, name), name, (value) => { const next = [...names]; next[i] = value; apply(next); }),
+        h('button', { title: `Move tile ${i + 1} up`, disabled: i === 0, onclick: () => move(i, -1) }, '↑'),
+        h('button', { title: `Move tile ${i + 1} down`, disabled: i === names.length - 1, onclick: () => move(i, 1) }, '↓'),
+        h('button', { title: `Remove tile ${i + 1}`, disabled: names.length === 1, onclick: () => apply(names.filter((_, j) => j !== i)) }, '✕'))),
+      h('label', {}, h('span', { class: 'hint' }, 'Add to sequence'),
+        select({ '': 'Add texture…', ...textureOptions(layer, names[0]) }, '', (value) => {
+          if (value && names.length < max) apply([...names, value]);
+        })),
+      names.length >= max ? h('p', { class: 'hint' }, `This device supports ${max} tiles.`) : null);
   };
 
   /** Current texture (click to open the thumbnail grid) + Load… for one image input. */

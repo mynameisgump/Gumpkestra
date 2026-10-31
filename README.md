@@ -84,7 +84,7 @@ To add a texture, drop an image or video on the canvas, or click one in the libr
 
 Shaders built around textures:
 
-- `image`: show a texture with contain, cover, stretch or tile fit, plus zoom, spin, scroll and a beat pulse.
+- `image`: show a texture with contain, cover, stretch or tile fit, plus zoom, spin, scroll and a beat pulse. In **Tile** mode, use **Add texture…** to build an ordered sequence (including repeated entries); reorder with ↑/↓ or remove with ✕. The sequence advances across both columns and rows, wraps in either scroll direction, and saves with the preset. Tiles share the first texture’s aspect ratio and are resampled up to 1024 pixels per side. The device’s array-texture limit determines the maximum sequence length.
 - `texture-tunnel`: a textured tunnel that lurches forward on each beat.
 - `displace-map`: use any texture as a displacement map or stain over the stack.
 

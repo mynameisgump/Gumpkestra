@@ -1,36 +1,341 @@
 {
   "layers": [
     {
+      "shader": "image",
+      "enabled": true,
+      "blend": "normal",
+      "opacity": {
+        "value": 1,
+        "mods": []
+      },
+      "params": {
+        "tex": {
+          "value": "@rust",
+          "mods": []
+        },
+        "fit": {
+          "value": 3,
+          "mods": []
+        },
+        "zoom": {
+          "value": 0.7,
+          "mods": []
+        },
+        "brightness": {
+          "value": 0.28,
+          "mods": []
+        },
+        "pulse": {
+          "value": 0,
+          "mods": [
+            {
+              "source": "bass",
+              "amount": 0.4,
+              "rate": 0.25,
+              "smooth": 0
+            }
+          ]
+        }
+      }
+    },
+    {
       "shader": "siren",
       "blend": "add",
-      "opacity": { "value": 0.7, "mods": [] },
-      "params": { "position": { "value": [0.5, 0.95], "mods": [] } }
+      "opacity": {
+        "value": 0.7,
+        "mods": []
+      },
+      "params": {
+        "position": {
+          "value": [
+            0.5,
+            0.95
+          ],
+          "mods": []
+        },
+        "strobe": {
+          "value": 0,
+          "mods": [
+            {
+              "source": "beat",
+              "amount": 0.7,
+              "rate": 0.25,
+              "smooth": 0
+            }
+          ]
+        },
+        "lampColor": {
+          "value": [
+            1,
+            0.22,
+            0.025,
+            1
+          ],
+          "mods": []
+        }
+      }
     },
     {
       "shader": "@model",
       "model": "@cube",
       "params": {
-        "copies": { "value": 6, "mods": [] },
-        "spread": { "value": 1.05, "mods": [] },
-        "orbit": { "value": 0.04, "mods": [] },
-        "scale": { "value": 0.5, "mods": [] },
-        "zoom": { "value": 0.8, "mods": [] },
-        "spinY": { "value": 0.15, "mods": [] },
-        "spinX": { "value": 0.1, "mods": [] },
-        "explode": { "value": 0.0, "mods": [{ "source": "beat", "amount": 0.3, "rate": 0.25, "smooth": 0 }] },
-        "twist": { "value": 0.0, "mods": [{ "source": "lfoSine", "amount": 0.15, "rate": 0.1, "smooth": 0 }] },
-        "snap": { "value": 0.45, "mods": [] },
-        "shading": { "value": 1, "mods": [] },
-        "tint": { "value": [0.62, 0.4, 0.26, 1], "mods": [] },
-        "wet": { "value": 0.25, "mods": [] },
-        "rim": { "value": 0.3, "mods": [] },
-        "rimColor": { "value": [1, 0.55, 0.1, 1], "mods": [] },
-        "wire": { "value": 0.0, "mods": [{ "source": "beat", "amount": 0.9, "rate": 0.25, "smooth": 0 }] },
-        "wireColor": { "value": [1, 0.75, 0.1, 1], "mods": [] },
-        "fog": { "value": 0.5, "mods": [] }
+        "copies": {
+          "value": 6,
+          "mods": []
+        },
+        "spread": {
+          "value": 1.05,
+          "mods": []
+        },
+        "orbit": {
+          "value": 0.04,
+          "mods": []
+        },
+        "scale": {
+          "value": 0.42,
+          "mods": [
+            {
+              "source": "bass",
+              "amount": 0.06,
+              "rate": 0.25,
+              "smooth": 0.04
+            }
+          ]
+        },
+        "zoom": {
+          "value": 0.8,
+          "mods": []
+        },
+        "spinY": {
+          "value": 0.15,
+          "mods": []
+        },
+        "spinX": {
+          "value": 0.1,
+          "mods": []
+        },
+        "explode": {
+          "value": 0.02,
+          "mods": [
+            {
+              "source": "beat",
+              "amount": 0.25,
+              "rate": 0.25,
+              "smooth": 0
+            }
+          ]
+        },
+        "twist": {
+          "value": 0.0,
+          "mods": [
+            {
+              "source": "lfoSine",
+              "amount": 0.15,
+              "rate": 0.1,
+              "smooth": 0
+            }
+          ]
+        },
+        "snap": {
+          "value": 0.45,
+          "mods": []
+        },
+        "shading": {
+          "value": 1,
+          "mods": []
+        },
+        "tint": {
+          "value": [
+            1,
+            0.78,
+            0.45,
+            1
+          ],
+          "mods": []
+        },
+        "wet": {
+          "value": 0.25,
+          "mods": []
+        },
+        "rim": {
+          "value": 0.3,
+          "mods": []
+        },
+        "rimColor": {
+          "value": [
+            1,
+            0.55,
+            0.1,
+            1
+          ],
+          "mods": []
+        },
+        "wire": {
+          "value": 0.03,
+          "mods": [
+            {
+              "source": "beat",
+              "amount": 0.32,
+              "rate": 0.25,
+              "smooth": 0
+            }
+          ]
+        },
+        "wireColor": {
+          "value": [
+            1,
+            0.75,
+            0.1,
+            1
+          ],
+          "mods": []
+        },
+        "fog": {
+          "value": 0.18,
+          "mods": []
+        },
+        "texture": {
+          "value": "horror_floor.png",
+          "mods": []
+        },
+        "mapping": {
+          "value": 1,
+          "mods": []
+        },
+        "pixelated": {
+          "value": true,
+          "mods": []
+        },
+        "texScale": {
+          "value": 1.7,
+          "mods": []
+        },
+        "ratchet": {
+          "value": 0.0833,
+          "mods": []
+        },
+        "affine": {
+          "value": 0.6,
+          "mods": []
+        }
       }
     },
-    { "shader": "grime", "params": { "crush": { "value": 0.35, "mods": [] } } },
-    { "shader": "vhs", "params": { "tracking": { "value": 0.3, "mods": [] } } }
+    {
+      "shader": "grime",
+      "enabled": true,
+      "blend": "normal",
+      "opacity": {
+        "value": 1,
+        "mods": []
+      },
+      "params": {
+        "grain": {
+          "value": 0.1,
+          "mods": [
+            {
+              "source": "high",
+              "amount": 0.12,
+              "rate": 0.25,
+              "smooth": 0.05
+            }
+          ]
+        },
+        "dust": {
+          "value": 0.3,
+          "mods": []
+        },
+        "smudge": {
+          "value": 0.24,
+          "mods": []
+        },
+        "flicker": {
+          "value": 0.18,
+          "mods": [
+            {
+              "source": "beat",
+              "amount": 0.12,
+              "rate": 0.25,
+              "smooth": 0
+            }
+          ]
+        },
+        "crush": {
+          "value": 0.25,
+          "mods": []
+        },
+        "vignette": {
+          "value": 0.35,
+          "mods": []
+        },
+        "tintAmount": {
+          "value": 0.22,
+          "mods": []
+        },
+        "tint": {
+          "value": [
+            1,
+            0.8,
+            0.5,
+            1
+          ],
+          "mods": []
+        }
+      }
+    },
+    {
+      "shader": "psx",
+      "enabled": true,
+      "blend": "normal",
+      "opacity": {
+        "value": 1,
+        "mods": []
+      },
+      "params": {
+        "resolution": {
+          "value": 158,
+          "mods": []
+        },
+        "bits": {
+          "value": 3.8,
+          "mods": []
+        },
+        "dither": {
+          "value": 0.85,
+          "mods": []
+        },
+        "wobble": {
+          "value": 0.3,
+          "mods": []
+        },
+        "fps": {
+          "value": 0,
+          "mods": []
+        }
+      }
+    },
+    {
+      "shader": "vhs",
+      "params": {
+        "tracking": {
+          "value": 0.22,
+          "mods": []
+        },
+        "beatTear": {
+          "value": 0,
+          "mods": [
+            {
+              "source": "beat",
+              "amount": 0.28,
+              "rate": 0.25,
+              "smooth": 0
+            }
+          ]
+        },
+        "saturation": {
+          "value": 1,
+          "mods": []
+        }
+      }
+    }
   ]
 }

@@ -16,6 +16,8 @@ export const INPUT_IMAGE = '@input';
 
 interface Entry {
   tex: WebGLTexture;
+  width: number;
+  height: number;
   video?: HTMLVideoElement;
   url?: string;
   /** A new video frame is ready to upload. */
@@ -51,6 +53,9 @@ export class TextureStore {
     return null;
   }
 
+  /** Dimensions and motion status for resampling a tile sequence. */
+  info(name: string) { return this.entries.get(name); }
+
   /** Drop a texture (its file changed or was deleted); the next get() reloads it. */
   invalidate(name: string) {
     const e = this.entries.get(name);
@@ -72,6 +77,7 @@ export class TextureStore {
       if (++e.idle > 90) { e.video.pause(); continue; }
       if (!e.dirty || e.video.readyState < 2) continue;
       e.dirty = false;
+      e.width = e.video.videoWidth; e.height = e.video.videoHeight;
       gl.bindTexture(gl.TEXTURE_2D, e.tex);
       gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
       gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, e.video);
@@ -111,7 +117,7 @@ export class TextureStore {
     gl.bindTexture(gl.TEXTURE_2D, tex);
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA8, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array([0, 0, 0, 255]));
     setParams(gl, false);
-    const entry: Entry = { tex, video, url, dirty: true, idle: 0 };
+    const entry: Entry = { tex, width: 1, height: 1, video, url, dirty: true, idle: 0 };
     // Only re-upload when the decoder actually produced a new frame.
     const onFrame = () => { entry.dirty = true; video.requestVideoFrameCallback(onFrame); };
     if ('requestVideoFrameCallback' in video) video.requestVideoFrameCallback(onFrame);
@@ -127,8 +133,9 @@ export class TextureStore {
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, source);
     gl.generateMipmap(gl.TEXTURE_2D);
     setParams(gl, true);
+    const { width, height } = source as ImageBitmap | ImageData;
     if (source instanceof ImageBitmap) source.close();
-    return { tex, dirty: false, idle: 0 };
+    return { tex, width, height, dirty: false, idle: 0 };
   }
 }
 

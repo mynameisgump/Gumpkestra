@@ -10,6 +10,8 @@ export interface ISFInput {
   NAME: string;
   TYPE: ISFInputType;
   LABEL?: string;
+  /** Image input supports an ordered, spatial tile sequence. */
+  TILE_SEQUENCE?: boolean;
   DEFAULT?: unknown;
   MIN?: unknown;
   MAX?: unknown;
@@ -109,6 +111,10 @@ export function buildFragment(parsed: ParsedISF): { source: string; lineOffset: 
     '#define IMG_THIS_PIXEL(img) texture(img, isf_FragNormCoord)',
     '#define IMG_THIS_NORM_PIXEL(img) texture(img, isf_FragNormCoord)',
     ...meta.INPUTS.map((i) => `uniform ${UNIFORM_TYPES[i.TYPE] ?? 'float'} ${i.NAME};`),
+    ...meta.INPUTS.filter((i) => i.TYPE === 'image' && i.TILE_SEQUENCE).flatMap((i) => [
+      `uniform highp sampler2DArray ${i.NAME}_tiles;`,
+      `uniform int ${i.NAME}_tileCount;`,
+    ]),
     ...meta.PASSES.filter((p) => p.TARGET).map((p) => `uniform sampler2D ${p.TARGET};`),
   ];
   // GLSL 1.x idioms common in ISF files → GLSL ES 3.00.

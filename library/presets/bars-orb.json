@@ -226,6 +226,14 @@
           "value": 0,
           "mods": []
         },
+        "spinZ": {
+          "value": 0,
+          "mods": []
+        },
+        "ratchet": {
+          "value": 0,
+          "mods": []
+        },
         "rotX": {
           "value": 0,
           "mods": []
@@ -244,6 +252,10 @@
         },
         "offsetY": {
           "value": 0.848,
+          "mods": []
+        },
+        "pivot": {
+          "value": 0,
           "mods": []
         },
         "zoom": {
@@ -420,6 +432,14 @@
           "value": 0,
           "mods": []
         },
+        "spinZ": {
+          "value": 0,
+          "mods": []
+        },
+        "ratchet": {
+          "value": 0,
+          "mods": []
+        },
         "rotX": {
           "value": 0,
           "mods": []
@@ -438,6 +458,10 @@
         },
         "offsetY": {
           "value": -0.708,
+          "mods": []
+        },
+        "pivot": {
+          "value": 0,
           "mods": []
         },
         "zoom": {
@@ -611,6 +635,14 @@
           "mods": []
         },
         "spinX": {
+          "value": 0,
+          "mods": []
+        },
+        "spinZ": {
+          "value": 0,
+          "mods": []
+        },
+        "ratchet": {
           "value": 0,
           "mods": []
         },
@@ -634,6 +666,10 @@
           "value": 0.9,
           "mods": []
         },
+        "pivot": {
+          "value": 0,
+          "mods": []
+        },
         "zoom": {
           "value": 1,
           "mods": []
@@ -808,6 +844,14 @@
           "value": 0,
           "mods": []
         },
+        "spinZ": {
+          "value": 0,
+          "mods": []
+        },
+        "ratchet": {
+          "value": 0,
+          "mods": []
+        },
         "rotX": {
           "value": 0,
           "mods": []
@@ -826,6 +870,10 @@
         },
         "offsetY": {
           "value": -0.656,
+          "mods": []
+        },
+        "pivot": {
+          "value": 0,
           "mods": []
         },
         "zoom": {

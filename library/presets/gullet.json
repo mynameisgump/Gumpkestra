@@ -18,7 +18,7 @@
           "mods": []
         },
         "kick": {
-          "value": 0.3,
+          "value": 0.42,
           "mods": []
         },
         "twist": {
@@ -49,26 +49,26 @@
           "mods": []
         },
         "swell": {
-          "value": 0,
+          "value": 0.05,
           "mods": [
             {
               "source": "bass",
-              "amount": 0.25,
+              "amount": 0.6,
               "rate": 0.25,
-              "smooth": 0
+              "smooth": 0.03
             }
           ]
         },
         "darkness": {
-          "value": 1.5,
+          "value": 0.85,
           "mods": []
         },
         "flash": {
-          "value": 0,
+          "value": 0.08,
           "mods": [
             {
               "source": "beat",
-              "amount": 0.15,
+              "amount": 0.34,
               "rate": 0.25,
               "smooth": 0
             }
@@ -76,9 +76,9 @@
         },
         "tint": {
           "value": [
+            1.15,
             1,
-            0.85,
-            0.85,
+            0.86,
             1
           ],
           "mods": []
@@ -99,15 +99,22 @@
           "mods": []
         },
         "amount": {
-          "value": 0.02,
-          "mods": []
+          "value": 0.012,
+          "mods": [
+            {
+              "source": "mid",
+              "amount": 0.08,
+              "rate": 0.25,
+              "smooth": 0.08
+            }
+          ]
         },
         "beatKick": {
-          "value": 0,
+          "value": 0.02,
           "mods": [
             {
               "source": "beat",
-              "amount": 0.16,
+              "amount": 0.2,
               "rate": 0.25,
               "smooth": 0
             }
@@ -144,11 +151,18 @@
       },
       "params": {
         "pour": {
-          "value": 0.4,
-          "mods": []
+          "value": 0.28,
+          "mods": [
+            {
+              "source": "beat",
+              "amount": 0.35,
+              "rate": 0.25,
+              "smooth": 0
+            }
+          ]
         },
         "bleed": {
-          "value": 0,
+          "value": 0.08,
           "mods": []
         },
         "threshold": {
@@ -164,7 +178,7 @@
           "mods": []
         },
         "dry": {
-          "value": 0.15,
+          "value": 0.3,
           "mods": []
         },
         "gloss": {
@@ -178,6 +192,125 @@
             0.02,
             1
           ],
+          "mods": []
+        }
+      }
+    },
+    {
+      "shader": "grime",
+      "enabled": true,
+      "blend": "normal",
+      "opacity": {
+        "value": 1,
+        "mods": []
+      },
+      "params": {
+        "grain": {
+          "value": 0.1,
+          "mods": [
+            {
+              "source": "high",
+              "amount": 0.12,
+              "rate": 0.25,
+              "smooth": 0.05
+            }
+          ]
+        },
+        "dust": {
+          "value": 0.3,
+          "mods": []
+        },
+        "smudge": {
+          "value": 0.24,
+          "mods": []
+        },
+        "flicker": {
+          "value": 0.18,
+          "mods": [
+            {
+              "source": "beat",
+              "amount": 0.12,
+              "rate": 0.25,
+              "smooth": 0
+            }
+          ]
+        },
+        "crush": {
+          "value": 0.16,
+          "mods": []
+        },
+        "vignette": {
+          "value": 0.35,
+          "mods": []
+        },
+        "tintAmount": {
+          "value": 0.22,
+          "mods": []
+        },
+        "tint": {
+          "value": [
+            1,
+            0.7,
+            0.65,
+            1
+          ],
+          "mods": []
+        }
+      }
+    },
+    {
+      "shader": "psx",
+      "enabled": true,
+      "blend": "normal",
+      "opacity": {
+        "value": 1,
+        "mods": []
+      },
+      "params": {
+        "resolution": {
+          "value": 190,
+          "mods": []
+        },
+        "bits": {
+          "value": 4.3,
+          "mods": []
+        },
+        "dither": {
+          "value": 0.85,
+          "mods": []
+        },
+        "wobble": {
+          "value": 0.3,
+          "mods": []
+        },
+        "fps": {
+          "value": 0,
+          "mods": []
+        }
+      }
+    },
+    {
+      "shader": "rgb-split",
+      "enabled": true,
+      "blend": "normal",
+      "opacity": {
+        "value": 1,
+        "mods": []
+      },
+      "params": {
+        "amount": {
+          "value": 0.004,
+          "mods": [
+            {
+              "source": "high",
+              "amount": 0.16,
+              "rate": 0.25,
+              "smooth": 0.08
+            }
+          ]
+        },
+        "radial": {
+          "value": true,
           "mods": []
         }
       }

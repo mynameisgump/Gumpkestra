@@ -10,7 +10,7 @@
       },
       "params": {
         "count": {
-          "value": 1,
+          "value": 2,
           "mods": []
         },
         "size": {
@@ -33,8 +33,15 @@
           ]
         },
         "look": {
-          "value": 0.7,
-          "mods": []
+          "value": 0.2,
+          "mods": [
+            {
+              "source": "high",
+              "amount": 0.55,
+              "rate": 0.25,
+              "smooth": 0.07
+            }
+          ]
         },
         "blink": {
           "value": 0,
@@ -48,15 +55,15 @@
           ]
         },
         "bloodshot": {
-          "value": 0.6,
+          "value": 0.8,
           "mods": []
         },
         "veinFlush": {
-          "value": 0,
+          "value": 0.1,
           "mods": [
             {
               "source": "beat",
-              "amount": 0.5,
+              "amount": 0.65,
               "rate": 0.25,
               "smooth": 0
             }
@@ -64,9 +71,9 @@
         },
         "irisColor": {
           "value": [
-            0.4,
-            0.55,
-            0.2,
+            0.8,
+            0.75,
+            0.08,
             1
           ],
           "mods": []
@@ -83,6 +90,17 @@
         "fillBackground": {
           "value": true,
           "mods": []
+        },
+        "zoom": {
+          "value": 0.95,
+          "mods": [
+            {
+              "source": "bass",
+              "amount": 0.07,
+              "rate": 0.25,
+              "smooth": 0.08
+            }
+          ]
         }
       }
     },
@@ -96,13 +114,13 @@
       },
       "params": {
         "doubleVision": {
-          "value": 0.015,
+          "value": 0.008,
           "mods": [
             {
               "source": "bass",
-              "amount": 0.2,
+              "amount": 0.3,
               "rate": 0.25,
-              "smooth": 0.1
+              "smooth": 0.08
             }
           ]
         },
@@ -111,7 +129,7 @@
           "mods": [
             {
               "source": "beat",
-              "amount": 0.15,
+              "amount": 0.22,
               "rate": 0.25,
               "smooth": 0
             }
@@ -130,7 +148,7 @@
           "mods": []
         },
         "sick": {
-          "value": 0.35,
+          "value": 0.22,
           "mods": []
         },
         "tunnelVision": {
@@ -160,15 +178,15 @@
       },
       "params": {
         "resolution": {
-          "value": 180,
+          "value": 166,
           "mods": []
         },
         "bits": {
-          "value": 4,
+          "value": 3.8,
           "mods": []
         },
         "dither": {
-          "value": 0.8,
+          "value": 0.9,
           "mods": []
         },
         "wobble": {
@@ -176,7 +194,7 @@
           "mods": []
         },
         "fps": {
-          "value": 240,
+          "value": 0,
           "mods": []
         }
       }
@@ -233,8 +251,15 @@
       },
       "params": {
         "grain": {
-          "value": 0.12,
-          "mods": []
+          "value": 0.1,
+          "mods": [
+            {
+              "source": "high",
+              "amount": 0.15,
+              "rate": 0.25,
+              "smooth": 0
+            }
+          ]
         },
         "dust": {
           "value": 0.3,
@@ -245,15 +270,22 @@
           "mods": []
         },
         "flicker": {
-          "value": 0.4,
-          "mods": []
+          "value": 0.17,
+          "mods": [
+            {
+              "source": "beat",
+              "amount": 0.18,
+              "rate": 0.25,
+              "smooth": 0
+            }
+          ]
         },
         "crush": {
           "value": 0.25,
           "mods": []
         },
         "vignette": {
-          "value": 0.6,
+          "value": 0.35,
           "mods": []
         },
         "tintAmount": {
@@ -268,6 +300,47 @@
             1
           ],
           "mods": []
+        }
+      }
+    },
+    {
+      "shader": "color-grade",
+      "enabled": true,
+      "blend": "normal",
+      "opacity": {
+        "value": 1,
+        "mods": []
+      },
+      "params": {
+        "hue": {
+          "value": 0,
+          "mods": [
+            {
+              "source": "lfoSaw",
+              "amount": 0.28,
+              "rate": 0.035,
+              "smooth": 0
+            }
+          ]
+        },
+        "saturation": {
+          "value": 1.3,
+          "mods": []
+        },
+        "contrast": {
+          "value": 1.1,
+          "mods": []
+        },
+        "exposure": {
+          "value": 0.04,
+          "mods": [
+            {
+              "source": "beat",
+              "amount": 0.025,
+              "rate": 0.25,
+              "smooth": 0
+            }
+          ]
         }
       }
     }

@@ -272,3 +272,8 @@ body.perform #topbar, body.perform #left, body.perform #right, body.perform #edi
 .preset-row { display: flex; gap: 2px; align-items: center; }
 .preset-row .preset-item { flex: 1; min-width: 0; }
 .preset-row > button { padding: 4px; }
+
+.tile-sequence { display: grid; gap: 6px; margin-top: 8px; }
+.tile-sequence-row { display: grid; grid-template-columns: 16px 26px minmax(0, 1fr) auto auto auto; gap: 4px; align-items: center; }
+.tile-sequence-row select { min-width: 0; width: 100%; }
+.tile-sequence-row button { padding: 3px 5px; }

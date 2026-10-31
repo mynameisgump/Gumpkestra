@@ -5,6 +5,7 @@ import {
   type ISFInput, type ISFPass, type ParsedISF,
 } from '../isf/isf';
 import { createTarget, deleteTarget, link, uniformCache, type Target } from './gl';
+import { TileSequence } from './TileSequence';
 import { INPUT_IMAGE, type TextureStore } from './Textures';
 
 export const BLEND_MODES = ['normal', 'add', 'screen', 'multiply', 'difference', 'lighten'] as const;
@@ -15,6 +16,8 @@ export interface ParamState {
   mods: Modulator[];
   /** `event` inputs only: fire automatically on each detected beat. */
   onBeat?: boolean;
+  /** Additional textures after value, in tile order. */
+  tiles?: string[];
 }
 
 export interface LayerJSON {
@@ -108,6 +111,7 @@ export class Layer {
   private program: WebGLProgram | null = null;
   private u!: (name: string) => WebGLUniformLocation | null;
   private passBuffers = new Map<string, PassBuffers>();
+  private tileSequences = new Map<string, TileSequence>();
   private pendingEvents = new Set<string>();
 
   constructor(protected gl: WebGL2RenderingContext, public shaderName: string, parsed: ParsedISF) {
@@ -191,6 +195,8 @@ export class Layer {
   }
 
   private freeBuffers() {
+    for (const sequence of this.tileSequences.values()) sequence.dispose();
+    this.tileSequences.clear();
     for (const pb of this.passBuffers.values()) pb.bufs.forEach((t) => deleteTarget(this.gl, t));
     this.passBuffers.clear();
   }
@@ -209,6 +215,18 @@ export class Layer {
     const { gl } = ctx;
     const u = this.u;
     if (!this.program || !this.output) return;
+    // Prepare arrays before binding shader inputs; preparation uses framebuffer bindings.
+    for (const inp of this.inputs.filter((i) => i.TILE_SEQUENCE)) {
+      const p = this.params[inp.NAME];
+      if (p.tiles?.length && this.params.fit?.value === 3) {
+        let sequence = this.tileSequences.get(inp.NAME);
+        if (!sequence) { sequence = new TileSequence(gl); this.tileSequences.set(inp.NAME, sequence); }
+        sequence.update([String(p.value), ...p.tiles], ctx, input);
+      } else {
+        this.tileSequences.get(inp.NAME)?.dispose();
+        this.tileSequences.delete(inp.NAME);
+      }
+    }
     gl.useProgram(this.program);
 
     // Built-ins
@@ -236,7 +254,17 @@ export class Layer {
       const p = this.params[inp.NAME];
       const loc = u(inp.NAME);
       switch (inp.TYPE) {
-        case 'image': bindTex(inp.NAME, isInputImage(inp) ? input : resolveImage(p.value, input, ctx)); break;
+        case 'image': {
+          bindTex(inp.NAME, isInputImage(inp) ? input : resolveImage(p.value, input, ctx));
+          if (inp.TILE_SEQUENCE) {
+            const sequence = this.tileSequences.get(inp.NAME);
+            gl.uniform1i(u(`${inp.NAME}_tileCount`), sequence?.count ?? 0);
+            gl.activeTexture(gl.TEXTURE0 + unit);
+            gl.bindTexture(gl.TEXTURE_2D_ARRAY, sequence?.texture ?? null);
+            gl.uniform1i(u(`${inp.NAME}_tiles`), unit++);
+          }
+          break;
+        }
         case 'audio': bindTex(inp.NAME, ctx.waveTex); break;
         case 'audioFFT': bindTex(inp.NAME, ctx.fftTex); break;
         case 'float': {
