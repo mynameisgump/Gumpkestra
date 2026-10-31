@@ -5,12 +5,17 @@ A prototype modular audio-visualiser, in the spirit of Arkestra (ISF shader engi
 ```sh
 npm install
 npm run dev            # open http://localhost:5173 in Chrome
+npm run check-presets  # verify groups, keyboard navigation and canvas transitions
 npm run check-shaders  # compile every library shader in headless Chrome (add -- --shots for preset screenshots)
 ```
 
 Drop an audio file on the canvas, use **Use input** to pick a mic or loopback device (for example BlackHole, to get DAW or system audio), or use **Tab audio** to capture a browser tab.
 
 Keys: `space` play/pause · `h` hide UI · `f` fullscreen · `⌘S` save the shader in the editor.
+
+Use **← / →** (or **[ / ]**) to step backward/forward through the active preset group, wrapping at the ends. In **Presets**, choose **+ Group**, add saved presets, and use **↑ / ↓** to arrange their playback order. **×** removes a preset from the group; it remains in the library. A preset can belong to several groups. **All presets** browses the full library alphabetically. An empty group does not switch presets.
+
+Each group remembers a **Transition** (Cut, Crossfade, Wipe, Slide, or Dip to black) and a duration from **0.1–10 seconds**. Wipe and Slide follow the navigation direction. Transitions animate from a snapshot of the outgoing image into the live incoming preset, including in fullscreen and recordings. Switching again mid-transition starts from the currently displayed image. Arrow keys stay with text fields, dropdowns, and the preset picker when editing. Unsaved layer changes still ask before switching. Groups, ordering, the active group, and transition settings are saved in this browser, independently of preset files.
 
 Use **res** in the top bar to scale with the window (**Auto**) or lock the output to an exact resolution, from 640×360 to 3840×2160. Choose **Custom…** (or click **…**) to enter a width and height in pixels. Fixed output keeps its resolution in fullscreen and recordings, with the preview fitted to the stage without stretching. This setting is remembered in your browser across reloads and preset changes.
 

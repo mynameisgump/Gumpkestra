@@ -5,6 +5,7 @@ import type { Engine } from './render/Engine';
 import { defaultValue, type Layer, type LayerJSON } from './render/Layer';
 import { MODEL_SHADER, ModelLayer } from './render/ModelLayer';
 import { h } from './ui/dom';
+import { PresetGroups } from './presetGroups';
 
 const AUTOSAVE_KEY = 'gumpkestra:session';
 
@@ -12,6 +13,7 @@ const AUTOSAVE_KEY = 'gumpkestra:session';
 export class App {
   selected: Layer | null = null;
   presetName = 'untitled';
+  readonly presetGroups = new PresetGroups();
   /** Per-shader compile errors from the most recent (re)load. */
   errors = new Map<string, string>();
   private listeners = new Set<() => void>();
@@ -298,7 +300,9 @@ export class App {
     return this.library.presets.has(this.presetName);
   }
 
-  loadPreset(preset: Preset) {
+  loadPreset(preset: Preset, animate = false, direction: 1 | -1 = 1) {
+    const group = this.presetGroups.active;
+    this.engine.beginTransition(animate ? group.transition : 'cut', group.duration, direction);
     this.engine.clear();
     this.selected = null;
     for (const json of preset.layers) this.addShader(json.shader, json, this.engine.layers.length);

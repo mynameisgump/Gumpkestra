@@ -1,3 +1,4 @@
+import { type Transition } from '../presetGroups';
 import { TEX_WIDTH, type AudioEngine } from '../audio/AudioEngine';
 import { VERTEX_SHADER, type ParsedISF } from '../isf/isf';
 import { createDataTexture, createFullscreenTriangle, createTarget, deleteTarget, link, uniformCache, type Target } from './gl';
@@ -33,6 +34,33 @@ out vec4 color;
 uniform sampler2D src;
 void main() { color = texture(src, isf_FragNormCoord); }`;
 
+const TRANSITION_FS = `#version 300 es
+precision highp float;
+in vec2 isf_FragNormCoord;
+out vec4 color;
+uniform sampler2D previous;
+uniform sampler2D next;
+uniform float progress;
+uniform float direction;
+uniform int style;
+void main() {
+  vec2 uv = isf_FragNormCoord;
+  float p = smoothstep(0.0, 1.0, progress);
+  vec4 a = texture(previous, uv);
+  vec4 b = texture(next, uv);
+  if (style == 1) {
+    float x = direction > 0.0 ? uv.x : 1.0 - uv.x;
+    color = mix(a, b, 1.0 - smoothstep(p - 0.01, p + 0.01, x));
+  } else if (style == 2) {
+    vec2 oldUV = uv + vec2(p * direction, 0.0);
+    vec2 newUV = uv - vec2((1.0 - p) * direction, 0.0);
+    color = oldUV.x >= 0.0 && oldUV.x <= 1.0 ? texture(previous, oldUV) : texture(next, newUV);
+  } else if (style == 3) {
+    color = p < 0.5 ? a * (1.0 - p * 2.0) : b * (p * 2.0 - 1.0);
+  } else color = mix(a, b, p);
+  color.a = 1.0;
+}`;
+
 /**
  * Renders the layer stack. Layers are processed in order (index 0 = bottom):
  * generators are drawn and blended over what's below; filters receive what's
@@ -56,6 +84,12 @@ export class Engine {
   private composite: WebGLProgram;
   private cu: (n: string) => WebGLUniformLocation | null;
   private blitProg: WebGLProgram;
+  private transitionProg: WebGLProgram;
+  private tu: (n: string) => WebGLUniformLocation | null;
+  private presented: Target | null = null;
+  private outgoing: Target | null = null;
+  private transition: { style: Transition; duration: number; direction: number; start: number } | null = null;
+  private hasFrame = false;
   private fftTex: WebGLTexture;
   private waveTex: WebGLTexture;
 
@@ -70,6 +104,8 @@ export class Engine {
     this.composite = link(gl, VERTEX_SHADER, COMPOSITE_FS);
     this.cu = uniformCache(gl, this.composite);
     this.blitProg = link(gl, VERTEX_SHADER, BLIT_FS);
+    this.transitionProg = link(gl, VERTEX_SHADER, TRANSITION_FS);
+    this.tu = uniformCache(gl, this.transitionProg);
     this.fftTex = createDataTexture(gl, TEX_WIDTH);
     this.waveTex = createDataTexture(gl, TEX_WIDTH);
     this.textures = new TextureStore(gl);
@@ -95,8 +131,27 @@ export class Engine {
     this.width = this.canvas.width = w;
     this.height = this.canvas.height = h;
     this.acc?.forEach((t) => deleteTarget(this.gl, t));
+    if (this.presented) deleteTarget(this.gl, this.presented);
+    if (this.outgoing) deleteTarget(this.gl, this.outgoing);
+    this.presented = createTarget(this.gl, w, h);
+    this.outgoing = null;
+    this.transition = null;
+    this.hasFrame = false;
     this.acc = [createTarget(this.gl, w, h), createTarget(this.gl, w, h)];
     for (const l of this.layers) l.resize(w, h);
+  }
+
+  /** Capture the displayed composite, including an interrupted transition. */
+  beginTransition(style: Transition, duration: number, direction: 1 | -1) {
+    const gl = this.gl;
+    if (this.outgoing) deleteTarget(gl, this.outgoing);
+    this.outgoing = null;
+    this.transition = null;
+    if (style === 'cut' || !this.presented || !this.hasFrame) return;
+    this.outgoing = createTarget(gl, this.width, this.height);
+    gl.bindVertexArray(this.vao);
+    this.blit(this.presented.tex, this.outgoing);
+    this.transition = { style, duration, direction, start: performance.now() / 1000 };
   }
 
   addLayer(shaderName: string, parsed: ParsedISF, index = this.layers.length) {
@@ -182,6 +237,31 @@ export class Engine {
       gl.drawArrays(gl.TRIANGLES, 0, 3);
     }
 
-    this.blit(acc[cur].tex, null);
+    if (this.transition && this.outgoing) {
+      const { style, duration, direction, start } = this.transition;
+      const progress = Math.min(1, Math.max(0, (time - start) / duration));
+      if (progress < 1) {
+        gl.useProgram(this.transitionProg);
+        gl.activeTexture(gl.TEXTURE0);
+        gl.bindTexture(gl.TEXTURE_2D, this.outgoing.tex);
+        gl.uniform1i(this.tu('previous'), 0);
+        gl.activeTexture(gl.TEXTURE1);
+        gl.bindTexture(gl.TEXTURE_2D, acc[cur].tex);
+        gl.uniform1i(this.tu('next'), 1);
+        gl.uniform1f(this.tu('progress'), progress);
+        gl.uniform1f(this.tu('direction'), direction);
+        gl.uniform1i(this.tu('style'), ['fade', 'wipe', 'slide', 'dip'].indexOf(style));
+        gl.bindFramebuffer(gl.FRAMEBUFFER, this.presented!.fbo);
+        gl.viewport(0, 0, this.width, this.height);
+        gl.drawArrays(gl.TRIANGLES, 0, 3);
+      } else {
+        deleteTarget(gl, this.outgoing);
+        this.outgoing = null;
+        this.transition = null;
+        this.blit(acc[cur].tex, this.presented);
+      }
+    } else this.blit(acc[cur].tex, this.presented);
+    this.blit(this.presented!.tex, null);
+    this.hasFrame = true;
   }
 }

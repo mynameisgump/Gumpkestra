@@ -262,3 +262,13 @@ body.perform #topbar, body.perform #left, body.perform #right, body.perform #edi
 .toast.error { border-color: var(--accent-2); color: #ffc2d6; }
 .toast.out { opacity: 0; }
 .fatal { position: fixed; inset: 40px; background: #200; color: #fbb; padding: 20px; overflow: auto; z-index: 20; }
+
+/* Performance preset groups */
+.preset-group-controls { display: flex; flex-direction: column; gap: 6px; margin-bottom: 6px; }
+.preset-group-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.preset-group-row > select { flex: 1; min-width: 0; }
+.preset-group-row label { display: flex; align-items: center; gap: 4px; font-size: 11px; color: var(--dim); }
+.preset-group-row input { width: 54px; }
+.preset-row { display: flex; gap: 2px; align-items: center; }
+.preset-row .preset-item { flex: 1; min-width: 0; }
+.preset-row > button { padding: 4px; }

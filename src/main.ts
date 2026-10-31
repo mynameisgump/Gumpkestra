@@ -91,9 +91,12 @@ async function main() {
       if (app.selected) app.duplicateLayer(app.selected);
       return;
     }
-    if (t.matches('input, textarea, select')) return;
-    if (e.key === '[') topbar.step(-1);
-    if (e.key === ']') topbar.step(1);
+    if (e.defaultPrevented || e.metaKey || e.ctrlKey || e.altKey || t.closest('input, textarea, select, [contenteditable]')) return;
+    if (['ArrowLeft', 'ArrowRight', '[', ']'].includes(e.key)) {
+      e.preventDefault();
+      if (!e.repeat) topbar.step(e.key === 'ArrowLeft' || e.key === '[' ? -1 : 1);
+      return;
+    }
     if (e.key === 'p') {
       e.preventDefault();
       topbar.openPicker();
@@ -110,7 +113,7 @@ async function main() {
 }
 
 function Topbar(app: App) {
-  const names = () => [...app.library.presets.keys()].sort((a, b) => a.localeCompare(b));
+  const names = () => app.presetGroups.names(app.library.presets);
   const confirmDiscard = () => !app.dirty || confirm(`Discard unsaved changes to "${app.presetName}"?`);
 
   // `load` is defined below; the wrapper defers the lookup until a tile is clicked.
@@ -129,9 +132,9 @@ function Topbar(app: App) {
     updateDirty();
   };
 
-  const load = (name: string) => {
+  const load = (name: string, direction: 1 | -1 = 1) => {
     const p = app.library.presets.get(name);
-    if (p && name !== app.presetName && confirmDiscard()) app.loadPreset(p);
+    if (p && name !== app.presetName && confirmDiscard()) app.loadPreset(p, true, direction);
     refresh();
   };
 
@@ -140,7 +143,7 @@ function Topbar(app: App) {
     const list = names();
     if (!list.length) return;
     const i = list.indexOf(app.presetName);
-    load(list[i < 0 ? (dir > 0 ? 0 : list.length - 1) : (i + dir + list.length) % list.length]);
+    load(list[i < 0 ? (dir > 0 ? 0 : list.length - 1) : (i + dir + list.length) % list.length], dir);
   };
 
   const newPreset = () => {
@@ -198,10 +201,10 @@ function Topbar(app: App) {
   $('topbar').append(
     h('div', { class: 'brand' }, 'GUMPKESTRA'),
     h('div', { class: 'preset-nav' },
-      h('button', { title: 'Previous preset ([)', onclick: () => step(-1) }, '◀'),
+      h('button', { title: 'Previous in active group (← or [)', onclick: () => step(-1) }, '◀'),
       picker.el,
       dirtyDot,
-      h('button', { title: 'Next preset (])', onclick: () => step(1) }, '▶')),
+      h('button', { title: 'Next in active group (→ or ])', onclick: () => step(1) }, '▶')),
     h('button', { title: 'Start a new, empty preset', onclick: newPreset }, 'New'),
     saveBtn,
     h('button', { title: 'Save under a new name', onclick: () => saveAs() }, 'Save as…'),
