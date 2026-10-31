@@ -1,11 +1,11 @@
 export const TRANSITIONS = {
   cut: 'Cut', fade: 'Crossfade', wipe: 'Wipe', slide: 'Slide', dip: 'Dip to black',
-  rust: 'Rust Dissolve', tear: 'Signal Tear', shutters: 'Steel Shutters', melt: 'Doom Melt',
+  rust: 'Rust Dissolve', tear: 'Signal Tear', shutters: 'Steel Shutters', melt: 'Doom Melt', vhs: 'VHS Tracking',
 };
 export type Transition = keyof typeof TRANSITIONS;
 /** Explicit shader IDs keep saved names independent of dropdown ordering. */
 export const TRANSITION_IDS: Record<Transition, number> = {
-  cut: -1, fade: 0, wipe: 1, slide: 2, dip: 3, rust: 4, tear: 5, shutters: 6, melt: 7,
+  cut: -1, fade: 0, wipe: 1, slide: 2, dip: 3, rust: 4, tear: 5, shutters: 6, melt: 7, vhs: 8,
 };
 export interface PresetGroup { id: string; name: string; presets: string[]; transition: Transition; duration: number }
 const KEY = 'gumpkestra:preset-groups';

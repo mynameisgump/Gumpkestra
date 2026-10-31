@@ -496,6 +496,48 @@
           ]
         }
       }
+    },
+    {
+      "shader": "vhs",
+      "enabled": true,
+      "blend": "normal",
+      "opacity": {
+        "value": 1,
+        "mods": []
+      },
+      "params": {
+        "tracking": {
+          "value": 0.2,
+          "mods": []
+        },
+        "beatTear": {
+          "value": 0,
+          "mods": [
+            {
+              "source": "beat",
+              "amount": 0.3,
+              "rate": 0.25,
+              "smooth": 0
+            }
+          ]
+        },
+        "chroma": {
+          "value": 0.5,
+          "mods": []
+        },
+        "tapeNoise": {
+          "value": 0.35,
+          "mods": []
+        },
+        "saturation": {
+          "value": 0.8,
+          "mods": []
+        },
+        "headSwitch": {
+          "value": true,
+          "mods": []
+        }
+      }
     }
   ]
 }

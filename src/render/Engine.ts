@@ -122,6 +122,40 @@ void main() {
     float drop = floor(fall * 200.0) / 200.0;
     vec2 oldUV = uv + vec2(0, drop);
     color = oldUV.y >= 1.0 ? b : texture(previous, oldUV);
+  } else if (style == 8) {
+    // A tape change loses tracking, rolls through a noisy head-switch band,
+    // and locks onto the incoming picture. Distortion eases away at both ends.
+    float envelope = pow(sin(progress * 3.14159265), 2.0);
+    float tick = floor(progress * 60.0);
+    float line = floor(uv.y * 480.0);
+    float bandY = fract(1.15 - progress * 1.4);
+    float bandDistance = abs(uv.y - bandY);
+    bandDistance = min(bandDistance, 1.0 - bandDistance);
+    float tracking = 1.0 - smoothstep(0.015, 0.11, bandDistance);
+    float flutter = sin(uv.y * 35.0 + progress * 24.0) * 0.005
+      + (hash(vec2(line, tick)) - 0.5) * 0.009;
+    float skew = (noise(vec2(uv.y * 18.0, tick)) - 0.5) * tracking * 0.22;
+    float headSwitch = (1.0 - smoothstep(0.0, 0.07, uv.y)) * 0.065
+      * sin(progress * 95.0 + uv.y * 170.0);
+    vec2 tapeUV = vec2(clamp(uv.x + (flutter + skew + headSwitch) * envelope * direction, 0.0, 1.0),
+      fract(uv.y + sin(progress * 6.2831853) * 0.07 * envelope));
+    float bleed = 0.012 * envelope;
+    vec2 offset = vec2(bleed, 0.0);
+    vec3 oldRGB = vec3(texture(previous, tapeUV - offset).r, texture(previous, tapeUV).g,
+      texture(previous, tapeUV + offset).b);
+    vec3 newRGB = vec3(texture(next, tapeUV - offset).r, texture(next, tapeUV).g,
+      texture(next, tapeUV + offset).b);
+    float reveal = smoothstep(0.2, 0.8, progress);
+    vec3 image = mix(oldRGB, newRGB, reveal);
+    float luma = dot(image, vec3(0.299, 0.587, 0.114));
+    image = mix(image, vec3(luma), 0.25 * envelope);
+    float grain = hash(vec2(floor(uv.x * 640.0), line) + vec2(tick, tick * 7.0));
+    float scan = 0.94 + 0.06 * sin(uv.y * 480.0 * 3.14159265);
+    float dropout = step(0.985, hash(vec2(line, tick + 31.0)));
+    image = image * mix(1.0, scan, envelope) + (grain - 0.5) * 0.16 * envelope;
+    image = mix(image, vec3(grain * 0.8), tracking * 0.75 * envelope);
+    image += vec3(dropout * grain * 0.3 * envelope);
+    color = vec4(clamp(image, 0.0, 1.0), 1.0);
   } else color = mix(a, b, p);
   color.a = 1.0;
 }`;
