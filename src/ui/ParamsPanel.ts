@@ -343,9 +343,22 @@ export function ParamsPanel(root: HTMLElement, app: App, openEditor: (name: stri
     const isText = isTextModel(layer.modelName);
     // 3D text is one entry; picking it keeps the current text if there is one.
     const textOption = isText ? layer.modelName : DEFAULT_TEXT_MODEL;
-    const names = [...BUILTIN_MODELS, textOption, ...app.library.models];
-    if (!names.includes(layer.modelName)) names.push(layer.modelName);
-    const opts = Object.fromEntries(names.map((n) => [n, isTextModel(n) ? '3D text (built-in)' : n.startsWith('@') ? `${n.slice(1)} (built-in)` : n]));
+    const builtinNames = [...BUILTIN_MODELS, textOption];
+    const fileNames = [...app.library.models];
+    const isMissing = !builtinNames.includes(layer.modelName) && !fileNames.includes(layer.modelName);
+    const makeOption = (v: string, label: string) => h('option', { value: v, selected: v === layer.modelName }, label);
+    const modelSelect = h('select', {
+      onchange: (e: Event) => void app.setModel(layer, (e.target as HTMLSelectElement).value),
+    },
+      fileNames.length
+        ? h('optgroup', { label: '3D models' }, ...fileNames.map((n) => makeOption(n, n)))
+        : null,
+      h('optgroup', { label: 'Built-in primitives' },
+        ...builtinNames.map((n) => makeOption(n, isTextModel(n) ? '3D text' : n.slice(1)))),
+      isMissing
+        ? h('optgroup', { label: 'Missing' }, makeOption(layer.modelName, `${layer.modelName} (missing)`))
+        : null,
+    );
     const file = h('input', {
       type: 'file',
       accept: MODEL_EXTENSIONS.join(','),
@@ -359,7 +372,7 @@ export function ParamsPanel(root: HTMLElement, app: App, openEditor: (name: stri
     return [
       h('div', { class: 'param' }, h('div', { class: 'row model-row' },
         labelEl('Model', '3D mesh file or built-in shape', true),
-        select(opts, layer.modelName, (v) => void app.setModel(layer, v)),
+        modelSelect,
         h('button', { title: 'Import a .glb/.gltf/.obj/.stl into library/models', onclick: () => file.click() }, 'Load…'),
         file)),
       ...(isText ? textRows(layer) : []),

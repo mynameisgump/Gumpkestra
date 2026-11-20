@@ -111,18 +111,30 @@ export function LibraryPanel(root: HTMLElement, app: App, openEditor: (name: str
     const gens = entries.filter((s) => s.parsed && !s.parsed.isFilter);
     const fx = entries.filter((s) => s.parsed?.isFilter);
     const broken = entries.filter((s) => !s.parsed);
-    const modelLabel = (m: string) => (isTextModel(m) ? '3D text' : m.startsWith('@') ? m.slice(1) : m);
-    const models = [...BUILTIN_MODELS, DEFAULT_TEXT_MODEL, ...app.library.models].filter((m) => modelLabel(m).toLowerCase().includes(filter));
-    const modelItem = (m: string) => {
-      const item = h('button', {
-        class: 'lib-item model',
-        title: isTextModel(m) ? 'Extruded 3D text: set the text and font in the layer settings' : m.startsWith('@') ? 'Built-in shape' : `library/models/${m}`,
-        onclick: () => app.addModel(m),
-      }, modelLabel(m));
-      if (m.startsWith('@')) return item;
-      return h('div', { class: 'lib-row' }, item,
+    const splitExt = (name: string): [string, string] => {
+      const dot = name.lastIndexOf('.');
+      return dot > 0 ? [name.slice(0, dot), name.slice(dot + 1)] : [name, ''];
+    };
+    const modelFiles = app.library.models.filter((m) => m.toLowerCase().includes(filter));
+    const modelFileItem = (m: string) => {
+      const [stem, ext] = splitExt(m);
+      return h('div', { class: 'lib-row' },
+        h('button', {
+          class: 'lib-item model-file',
+          title: `library/models/${m}`,
+          onclick: () => app.addModel(m),
+        },
+          h('span', { class: 'lib-name' }, stem),
+          ext ? h('span', { class: 'lib-ext' }, ext) : null),
         h('button', { class: 'lib-del', title: `Delete library/models/${m}`, onclick: () => deleteModel(m) }, '✕'));
     };
+    const primitiveLabel = (m: string) => (isTextModel(m) ? '3D text' : m.slice(1));
+    const primitives = [...BUILTIN_MODELS, DEFAULT_TEXT_MODEL].filter((m) => primitiveLabel(m).toLowerCase().includes(filter));
+    const primitiveItem = (m: string) => h('button', {
+      class: `lib-item primitive ${isTextModel(m) ? 'primitive-text' : ''}`,
+      title: isTextModel(m) ? 'Extruded 3D text: set the text and font in the layer settings' : 'Built-in primitive shape',
+      onclick: () => app.addModel(m),
+    }, primitiveLabel(m));
     const textures = [...Object.keys(BUILTIN_TEXTURES), ...app.library.textures].filter((t) => t.toLowerCase().includes(filter));
     // Textures are a grid of thumbnails (name on hover) to keep the list short.
     const textureItem = (t: string) => {
@@ -146,19 +158,27 @@ export function LibraryPanel(root: HTMLElement, app: App, openEditor: (name: str
       }, fontLabel(f)),
       h('button', { class: 'lib-del', title: `Delete library/fonts/${f}`, onclick: () => deleteFont(f) }, '✕'));
     /** A heading that folds its items away (remembered). Everything shows while filtering. */
-    const section = (id: string, title: string, items: Node[], cls = 'lib-section'): (HTMLElement | null)[] => {
+    const section = (id: string, title: string, items: Node[], cls = 'lib-section', emptyHint?: string): (HTMLElement | null)[] => {
       const key = `lib:${id}`;
       const closed = !filter && isCollapsed(key);
       return [
-        h('h3', { class: `section-head ${closed ? 'closed' : ''}`, onclick: () => { setCollapsed(key, !isCollapsed(key)); render(); } },
-          `${title} · ${items.length}`),
-        closed ? null : h('div', { class: cls }, ...items),
+        h('h3', {
+          class: `section-head ${closed ? 'closed' : ''}`,
+          'data-section': id,
+          onclick: () => { setCollapsed(key, !isCollapsed(key)); render(); },
+        }, `${title} · ${items.length}`),
+        closed ? null : items.length
+          ? h('div', { class: cls, 'data-section-body': id }, ...items)
+          : emptyHint && !filter
+            ? h('p', { class: 'hint lib-empty', 'data-section-body': id }, emptyHint)
+            : h('div', { class: cls, 'data-section-body': id }),
       ];
     };
     list.replaceChildren(...[
       ...section('generators', 'Generators', gens.map(item)),
       ...section('effects', 'Effects', fx.map(item)),
-      ...section('models', '3D models', models.map(modelItem)),
+      ...section('models', '3D models', modelFiles.map(modelFileItem), 'lib-section', 'Drop a .glb / .obj / .stl file on the canvas to add one.'),
+      ...section('primitives', '3D primitives', primitives.map(primitiveItem), 'prim-grid'),
       ...section('textures', 'Textures', textures.map(textureItem), 'tex-grid'),
       ...section('fonts', 'Fonts', fonts.map(fontItem)),
       ...(broken.length ? section('broken', 'Broken', broken.map(item)) : []),
