@@ -6,7 +6,8 @@ import { BLEND_MODES, floatRange, type Layer, type ParamState } from '../render/
 import { MODEL_TEXTURE, ModelLayer } from '../render/ModelLayer';
 import { DEFAULT_TEXT_MODEL, FONT_EXTENSIONS, fontLabel, isFontFile, isTextModel, parseTextModel, TEXT_FONTS, textModelName } from '../model/text';
 import { BUILTIN_TEXTURES, INPUT_IMAGE, isTextureFile, isVideoTexture, TEXTURE_EXTENSIONS, thumbnailURL } from '../render/Textures';
-import { h, numberField, select, slider, type NumberField } from './dom';
+import { h, isCollapsed, numberField, select, setCollapsed, slider, type NumberField } from './dom';
+import { groupInputs, inputLabel, inputTooltip, matchesFilter } from './paramGroups';
 
 const toHex = (c: number[]) => '#' + c.slice(0, 3).map((v) => Math.round(v * 255).toString(16).padStart(2, '0')).join('');
 const fromHex = (hex: string, a = 1) => [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255).concat(a);
@@ -16,6 +17,34 @@ export function ParamsPanel(root: HTMLElement, app: App, openEditor: (name: stri
   /** The texture slot whose thumbnail grid is open, if any. */
   let openGrid: { layer: Layer; input: string } | null = null;
   let liveMarkers: { el: HTMLElement; text: NumberField; layer: Layer; key: string; min: number; max: number }[] = [];
+  let filter = '';
+  let lastLayer: Layer | null = null;
+  let currentGroupKeys: string[] = [];
+
+  const headerSlot = h('div', { class: 'params-head' });
+  const filterInput = h('input', {
+    type: 'search',
+    placeholder: 'Filter properties…',
+    'aria-label': 'Filter properties',
+    oninput: (e: Event) => {
+      filter = (e.target as HTMLInputElement).value;
+      renderBody();
+    },
+  }) as HTMLInputElement;
+  const toggleAllBtn = h('button', {
+    type: 'button',
+    title: 'Collapse or expand all property groups',
+    onclick: () => {
+      if (!currentGroupKeys.length) return;
+      const allClosed = currentGroupKeys.every((k) => isCollapsed(k));
+      for (const k of currentGroupKeys) setCollapsed(k, !allClosed);
+      renderBody();
+    },
+  }, 'Collapse all') as HTMLButtonElement;
+  const toolsBar = h('div', { class: 'params-tools' }, filterInput, toggleAllBtn);
+  const bodySlot = h('div', { class: 'params-body' });
+
+  root.replaceChildren(headerSlot, toolsBar, bodySlot);
 
   /**
    * Modulator amount as a "sensitivity" slider. Amount is a fraction of the parameter's range per unit
@@ -46,7 +75,7 @@ export function ParamsPanel(root: HTMLElement, app: App, openEditor: (name: stri
     return modCtl('smooth', 'Extra smoothing (seconds)', sl, val);
   };
 
-  const modRow = (state: ParamState, m: Modulator, rerender: () => void) => {
+  const modRow = (state: ParamState, m: Modulator, rerender: () => void, onModChange?: () => void) => {
     return h('div', { class: 'mod' },
       h('div', { class: 'mod-head' },
         select(MOD_SOURCES, m.source, (v: ModSource) => {
@@ -56,7 +85,16 @@ export function ParamsPanel(root: HTMLElement, app: App, openEditor: (name: stri
           app.touch();
           rerender();
         }),
-        h('button', { class: 'icon', title: 'Remove modulator', onclick: () => { state.mods.splice(state.mods.indexOf(m), 1); app.touch(); rerender(); } }, '✕')),
+        h('button', {
+          class: 'icon',
+          title: 'Remove modulator',
+          onclick: () => {
+            state.mods.splice(state.mods.indexOf(m), 1);
+            app.touch();
+            rerender();
+            onModChange?.();
+          },
+        }, '✕')),
       sensitivity(m),
       usesRate(m.source)
         ? modCtl(m.source === 'beatStep' ? 'beats' : 'Hz', m.source === 'beatStep' ? 'Beats per cycle' : 'Rate (Hz)',
@@ -66,10 +104,23 @@ export function ParamsPanel(root: HTMLElement, app: App, openEditor: (name: stri
     );
   };
 
-  const floatRow = (layer: Layer, key: string, label: string, state: ParamState, min: number, max: number) => {
+  const labelEl = (text: string, title?: string, hasTip = false) =>
+    h('span', { class: `lbl ${hasTip ? 'has-tip' : ''}`, title }, text);
+
+  const floatRow = (
+    layer: Layer,
+    key: string,
+    label: string,
+    state: ParamState,
+    min: number,
+    max: number,
+    title?: string,
+    hasTip = false,
+    onModChange?: () => void,
+  ) => {
     const marker = h('div', { class: 'live-marker' });
     const mods = h('div', { class: 'mods' });
-    const renderMods = () => mods.replaceChildren(...state.mods.map((m) => modRow(state, m, renderMods)));
+    const renderMods = () => mods.replaceChildren(...state.mods.map((m) => modRow(state, m, renderMods, onModChange)));
     renderMods();
     const sl = slider({ min, max, value: state.value as number, oninput: (v) => { state.value = v; app.touch(); } }) as HTMLInputElement;
     const valText = numberField({ min, max, get: () => state.value as number, set: (v) => { state.value = v; sl.value = String(v); app.touch(); } });
@@ -77,27 +128,30 @@ export function ParamsPanel(root: HTMLElement, app: App, openEditor: (name: stri
     liveMarkers.push({ el: marker, text: valText, layer, key, min, max });
     return h('div', { class: 'param' },
       h('div', { class: 'row' },
-        h('span', { class: 'lbl', title: key }, label),
+        labelEl(label, title ?? key, hasTip),
         h('div', { class: 'slider-wrap' }, sl, marker),
         valText,
         h('button', {
           class: 'icon mod-add',
           title: 'Add modulator (audio / LFO)',
-          onclick: () => { state.mods.push(newModulator()); app.touch(); renderMods(); },
+          onclick: () => { state.mods.push(newModulator()); app.touch(); renderMods(); onModChange?.(); },
         }, '∿'),
       ),
       mods,
     );
   };
 
-  const inputRow = (layer: Layer, inp: ISFInput) => {
+  const inputRow = (layer: Layer, inp: ISFInput, onModChange?: () => void) => {
     const state = layer.params[inp.NAME];
-    const label = inp.LABEL ?? inp.NAME;
-    const row = (control: Node) => h('div', { class: 'param' }, h('div', { class: 'row' }, h('span', { class: 'lbl' }, label), control));
+    const label = inputLabel(inp);
+    const tip = inputTooltip(inp);
+    const hasTip = !!inp.DESCRIPTION;
+    const row = (control: Node) =>
+      h('div', { class: 'param' }, h('div', { class: 'row row-span' }, labelEl(label, tip, hasTip), control));
     switch (inp.TYPE) {
       case 'float': {
         const [min, max] = floatRange(inp);
-        return floatRow(layer, inp.NAME, label, state, min, max);
+        return floatRow(layer, inp.NAME, label, state, min, max, tip, hasTip, onModChange);
       }
       case 'bool':
         return row(h('input', { type: 'checkbox', checked: !!state.value, onchange: (e: Event) => { state.value = (e.target as HTMLInputElement).checked; app.touch(); } }));
@@ -105,7 +159,7 @@ export function ParamsPanel(root: HTMLElement, app: App, openEditor: (name: stri
         const values = inp.VALUES ?? [0, 1, 2, 3];
         const labels = inp.LABELS ?? values.map(String);
         const opts = Object.fromEntries(values.map((v, i) => [String(v), labels[i] ?? String(v)]));
-        return row(select(opts, String(state.value), (v) => { state.value = Number(v); app.touch(); render(); }));
+        return row(select(opts, String(state.value), (v) => { state.value = Number(v); app.touch(); renderBody(); }));
       }
       case 'color': {
         const c = state.value as number[];
@@ -122,7 +176,7 @@ export function ParamsPanel(root: HTMLElement, app: App, openEditor: (name: stri
         if (inp.NAME === 'inputImage') return null;
         const open = openGrid?.layer === layer && openGrid.input === inp.NAME;
         return h('div', { class: 'param' }, h('div', { class: 'row texture-row' },
-          h('span', { class: 'lbl' }, label),
+          labelEl(label, tip, hasTip),
           texturePicker(layer, inp.NAME, open)),
           open ? textureGrid(layer, inp.NAME) : null,
           inp.TILE_SEQUENCE && layer.params.fit?.value === 3 ? tileSequence(layer, inp.NAME) : null);
@@ -130,7 +184,11 @@ export function ParamsPanel(root: HTMLElement, app: App, openEditor: (name: stri
       case 'event':
         return row(h('div', { class: 'btn-row' },
           h('button', { onclick: () => layer.trigger(inp.NAME) }, 'Trigger'),
-          h('label', {}, h('input', { type: 'checkbox', checked: !!state.onBeat, onchange: (e: Event) => { state.onBeat = (e.target as HTMLInputElement).checked; app.touch(); } }), ' on beat'),
+          h('label', {}, h('input', {
+            type: 'checkbox',
+            checked: !!state.onBeat,
+            onchange: (e: Event) => { state.onBeat = (e.target as HTMLInputElement).checked; app.touch(); onModChange?.(); },
+          }), ' on beat'),
         ));
       default:
         return null;
@@ -160,7 +218,7 @@ export function ParamsPanel(root: HTMLElement, app: App, openEditor: (name: stri
 
   const toggleGrid = (layer: Layer, input: string) => {
     openGrid = openGrid?.layer === layer && openGrid.input === input ? null : { layer, input };
-    render();
+    renderBody();
   };
 
   /** Click-to-pick grid of every texture, shown under the slot. */
@@ -181,7 +239,7 @@ export function ParamsPanel(root: HTMLElement, app: App, openEditor: (name: stri
     const max = app.engine.gl.getParameter(app.engine.gl.MAX_ARRAY_TEXTURE_LAYERS) as number;
     const apply = (next: string[]) => {
       state.value = next[0]; state.tiles = next.slice(1);
-      app.touch(); render();
+      app.touch(); renderBody();
     };
     const move = (i: number, step: number) => {
       const next = [...names];
@@ -246,8 +304,8 @@ export function ParamsPanel(root: HTMLElement, app: App, openEditor: (name: stri
       },
     }) as HTMLInputElement;
     return [
-      h('div', { class: 'param' }, h('div', { class: 'row model-row' }, h('span', { class: 'lbl' }, 'Text'), input)),
-      h('div', { class: 'param' }, h('div', { class: 'row model-row' }, h('span', { class: 'lbl' }, 'Font'),
+      h('div', { class: 'param' }, h('div', { class: 'row model-row' }, labelEl('Text', 'Text extruded into 3D geometry', true), input)),
+      h('div', { class: 'param' }, h('div', { class: 'row model-row' }, labelEl('Font', 'Typeface used for 3D text', true),
         select(opts, font, (f) => apply(f, (input as HTMLInputElement).value)),
         h('button', { title: 'Import a .ttf/.otf/.woff/.woff2 into library/fonts', onclick: () => file.click() }, 'Load…'),
         file)),
@@ -260,7 +318,7 @@ export function ParamsPanel(root: HTMLElement, app: App, openEditor: (name: stri
     const visible = meshes.filter(([id]) => !layer.hiddenMeshes.has(id)).length;
     const all = (show: boolean) => {
       layer.hiddenMeshes = new Set(show ? [] : meshes.map(([id]) => id));
-      app.touch(); render();
+      app.touch(); renderBody();
     };
     return h('fieldset', { class: 'mesh-visibility' },
       h('legend', {}, `Visible meshes · ${visible}/${meshes.length}`),
@@ -272,13 +330,13 @@ export function ParamsPanel(root: HTMLElement, app: App, openEditor: (name: stri
           h('input', { type: 'checkbox', checked: !layer.hiddenMeshes.has(id), onchange: (e: Event) => {
             if ((e.target as HTMLInputElement).checked) layer.hiddenMeshes.delete(id);
             else layer.hiddenMeshes.add(id);
-            app.touch(); render();
+            app.touch(); renderBody();
           } }),
           h('span', {}, name),
           h('span', { class: 'hint', 'aria-hidden': 'true' }, String(i + 1))))));
   };
 
-  const modelRow = (layer: ModelLayer) => {
+  const modelRows = (layer: ModelLayer) => {
     const isText = isTextModel(layer.modelName);
     // 3D text is one entry; picking it keeps the current text if there is one.
     const textOption = isText ? layer.modelName : DEFAULT_TEXT_MODEL;
@@ -297,7 +355,7 @@ export function ParamsPanel(root: HTMLElement, app: App, openEditor: (name: stri
     const mesh = layer.mesh;
     return [
       h('div', { class: 'param' }, h('div', { class: 'row model-row' },
-        h('span', { class: 'lbl' }, 'Model'),
+        labelEl('Model', '3D mesh file or built-in shape', true),
         select(opts, layer.modelName, (v) => void app.setModel(layer, v)),
         h('button', { title: 'Import a .glb/.gltf/.obj/.stl into library/models', onclick: () => file.click() }, 'Load…'),
         file)),
@@ -305,31 +363,169 @@ export function ParamsPanel(root: HTMLElement, app: App, openEditor: (name: stri
       layer.status ? null : meshVisibility(layer),
       h('p', { class: 'hint' }, layer.status
         ?? (mesh ? `${(mesh.vertexCount / 3).toLocaleString()} triangles · ${mesh.textures.length} textures · ${mesh.rig.animations.length} animations` : '')),
-    ];
+    ].filter((n) => n !== null) as HTMLElement[];
+  };
+
+  /** A collapsible group card with optional active-modulator badge and item count. */
+  const paramGroup = (opts: {
+    key: string;
+    title: string;
+    count?: number;
+    getModCount: () => number;
+    renderContent: (onModChange: () => void) => (HTMLElement | null)[];
+  }) => {
+    const filtering = !!filter.trim();
+    const closed = !filtering && isCollapsed(opts.key);
+    const modBadge = h('span', { class: 'param-group-mods' });
+    const updateBadge = () => {
+      const n = opts.getModCount();
+      modBadge.textContent = n > 0 ? `∿ ${n}` : '';
+      modBadge.title = n > 0 ? `${n} active modulator${n > 1 ? 's' : ''} / beat trigger${n > 1 ? 's' : ''}` : '';
+      modBadge.style.display = n > 0 ? '' : 'none';
+    };
+    updateBadge();
+
+    const head = h('button', {
+      type: 'button',
+      class: 'param-group-head',
+      'aria-expanded': String(!closed),
+      onclick: () => {
+        if (filtering) return;
+        setCollapsed(opts.key, !isCollapsed(opts.key));
+        renderBody();
+      },
+    },
+      h('span', { class: 'param-group-title' }, opts.title),
+      modBadge,
+      opts.count !== undefined ? h('span', { class: 'param-group-count' }, String(opts.count)) : null,
+    );
+
+    const children = closed ? [] : opts.renderContent(updateBadge).filter((n): n is HTMLElement => n !== null);
+    return h('section', { class: `param-group ${closed ? 'collapsed' : ''}`, 'data-group': opts.title },
+      head,
+      closed ? null : h('div', { class: 'param-group-body' }, ...children),
+    );
+  };
+
+  const renderBody = () => {
+    liveMarkers = [];
+    const layer = app.selected;
+    if (!layer) {
+      currentGroupKeys = [];
+      toolsBar.style.display = 'none';
+      bodySlot.replaceChildren(h('p', { class: 'hint' }, 'Select a layer.'));
+      return;
+    }
+
+    const meta = layer.parsed.meta;
+    const isModel = layer instanceof ModelLayer;
+    const inputGroups = groupInputs(meta.INPUTS);
+    const totalInputs = inputGroups.reduce((sum, g) => sum + g.inputs.length, 0);
+    const q = filter.trim();
+
+    const sections: HTMLElement[] = [];
+    const keys: string[] = [];
+
+    // 1. Model section (for 3D layers)
+    if (isModel) {
+      const key = `param:${layer.shaderName}:__model`;
+      keys.push(key);
+      if (matchesFilter(q, 'Model', 'Mesh', 'Visible meshes', '3D text', 'Text', 'Font', layer.modelName)) {
+        sections.push(paramGroup({
+          key,
+          title: 'Model',
+          getModCount: () => 0,
+          renderContent: () => modelRows(layer),
+        }));
+      }
+    }
+
+    // 2. Compositing section (Blend + Opacity)
+    {
+      const key = `param:${layer.shaderName}:__compositing`;
+      keys.push(key);
+      const groupHit = matchesFilter(q, 'Compositing', 'Layer');
+      const showBlend = groupHit || matchesFilter(q, 'Blend', 'blend mode', 'compositing');
+      const showOpacity = groupHit || matchesFilter(q, 'Opacity', 'alpha', 'transparency');
+      const compCount = (showBlend ? 1 : 0) + (showOpacity ? 1 : 0);
+      if (compCount > 0) {
+        sections.push(paramGroup({
+          key,
+          title: 'Compositing',
+          count: compCount,
+          getModCount: () => layer.opacity.mods.length,
+          renderContent: (onModChange) => [
+            showBlend
+              ? h('div', { class: 'param' }, h('div', { class: 'row row-span' },
+                labelEl('Blend', 'How this layer composites over layers below', true),
+                select([...BLEND_MODES], layer.blend, (v) => { layer.blend = v; app.touch(); })))
+              : null,
+            showOpacity
+              ? floatRow(layer, '__opacity', 'Opacity', layer.opacity, 0, 1, 'Overall layer visibility (0 = hidden, 1 = full)', true, onModChange)
+              : null,
+          ],
+        }));
+      }
+    }
+
+    // 3. Shader / Model input groups
+    for (const group of inputGroups) {
+      const key = `param:${layer.shaderName}:${group.id}`;
+      keys.push(key);
+      const groupMatch = matchesFilter(q, group.title);
+      const matched = groupMatch
+        ? group.inputs
+        : group.inputs.filter((inp) => matchesFilter(q, inputLabel(inp), inp.NAME, inp.DESCRIPTION));
+      if (!matched.length) continue;
+
+      sections.push(paramGroup({
+        key,
+        title: group.title,
+        count: matched.length,
+        getModCount: () => matched.reduce((sum, inp) => {
+          const st = layer.params[inp.NAME];
+          if (!st) return sum;
+          return sum + st.mods.length + (inp.TYPE === 'event' && st.onBeat ? 1 : 0);
+        }, 0),
+        renderContent: (onModChange) => matched.map((inp) => inputRow(layer, inp, onModChange)),
+      }));
+    }
+
+    currentGroupKeys = keys;
+    const showTools = keys.length >= 3 || totalInputs >= 6;
+    toolsBar.style.display = showTools ? '' : 'none';
+    const allClosed = keys.length > 0 && keys.every((k) => isCollapsed(k));
+    toggleAllBtn.textContent = allClosed ? 'Expand all' : 'Collapse all';
+    toggleAllBtn.disabled = !!q;
+
+    if (!sections.length) {
+      bodySlot.replaceChildren(h('p', { class: 'hint' }, `No properties matching “${q}”.`));
+    } else {
+      bodySlot.replaceChildren(...sections);
+    }
   };
 
   const render = () => {
-    liveMarkers = [];
     const layer = app.selected;
-    if (openGrid && openGrid.layer !== layer) openGrid = null;
-    if (!layer) {
-      root.replaceChildren(h('h2', {}, 'Parameters'), h('p', { class: 'hint' }, 'Select a layer.'));
-      return;
+    if (layer !== lastLayer) {
+      lastLayer = layer;
+      filter = '';
+      filterInput.value = '';
     }
-    const meta = layer.parsed.meta;
-    const isModel = layer instanceof ModelLayer;
-    root.replaceChildren(...[
-      h('h2', {}, layer.label,
-        isModel ? null : h('button', { class: 'edit-btn', onclick: () => openEditor(layer.shaderName) }, '{ } Edit')),
-      meta.DESCRIPTION ? h('p', { class: 'hint' }, meta.DESCRIPTION) : null,
-      ...(isModel ? modelRow(layer) : []),
-      h('div', { class: 'param' }, h('div', { class: 'row' },
-        h('span', { class: 'lbl' }, 'Blend'),
-        select([...BLEND_MODES], layer.blend, (v) => { layer.blend = v; app.touch(); }))),
-      floatRow(layer, '__opacity', 'Opacity', layer.opacity, 0, 1),
-      h('hr'),
-      ...meta.INPUTS.map((inp) => inputRow(layer, inp)),
-    ].filter((n) => n !== null) as HTMLElement[]);
+    if (openGrid && openGrid.layer !== layer) openGrid = null;
+
+    if (!layer) {
+      headerSlot.replaceChildren(h('h2', {}, 'Parameters'));
+    } else {
+      const meta = layer.parsed.meta;
+      const isModel = layer instanceof ModelLayer;
+      headerSlot.replaceChildren(...([
+        h('h2', {}, layer.label,
+          isModel ? null : h('button', { class: 'edit-btn', onclick: () => openEditor(layer.shaderName) }, '{ } Edit')),
+        meta.DESCRIPTION ? h('p', { class: 'hint' }, meta.DESCRIPTION) : null,
+      ].filter((n) => n !== null) as HTMLElement[]));
+    }
+    renderBody();
   };
 
   app.onChange(render);

@@ -4,12 +4,12 @@
   "CATEGORIES": ["Effect", "Retro"],
   "INPUTS": [
     { "NAME": "inputImage", "TYPE": "image" },
-    { "NAME": "tracking", "TYPE": "float", "DEFAULT": 0.2, "MIN": 0.0, "MAX": 1.0 },
-    { "NAME": "beatTear", "TYPE": "float", "DEFAULT": 0.0, "MIN": 0.0, "MAX": 2.0, "LABEL": "Tear", "MODS": [{ "SOURCE": "beat", "AMOUNT": 0.3 }] },
-    { "NAME": "chroma", "TYPE": "float", "DEFAULT": 0.5, "MIN": 0.0, "MAX": 1.0, "LABEL": "Chroma bleed" },
-    { "NAME": "tapeNoise", "TYPE": "float", "DEFAULT": 0.35, "MIN": 0.0, "MAX": 1.0 },
-    { "NAME": "saturation", "TYPE": "float", "DEFAULT": 0.8, "MIN": 0.0, "MAX": 1.5 },
-    { "NAME": "headSwitch", "TYPE": "bool", "DEFAULT": true, "LABEL": "Head switching" }
+    { "NAME": "tracking", "TYPE": "float", "GROUP": "Tracking", "LABEL": "Tracking", "DESCRIPTION": "Horizontal line jitter and tracking band strength", "DEFAULT": 0.2, "MIN": 0, "MAX": 1 },
+    { "NAME": "beatTear", "TYPE": "float", "GROUP": "Tracking", "LABEL": "Tear", "DESCRIPTION": "Extra horizontal tape tear on hits", "DEFAULT": 0, "MIN": 0, "MAX": 2, "MODS": [{ "SOURCE": "beat", "AMOUNT": 0.3 }] },
+    { "NAME": "chroma", "TYPE": "float", "GROUP": "Tape Signal", "LABEL": "Chroma bleed", "DESCRIPTION": "Horizontal colour smearing and chroma lag", "DEFAULT": 0.5, "MIN": 0, "MAX": 1 },
+    { "NAME": "tapeNoise", "TYPE": "float", "GROUP": "Tape Signal", "LABEL": "Tape noise", "DESCRIPTION": "Analog snow and magnetic dropout specks", "DEFAULT": 0.35, "MIN": 0, "MAX": 1 },
+    { "NAME": "saturation", "TYPE": "float", "GROUP": "Tape Signal", "LABEL": "Saturation", "DESCRIPTION": "Faded vs vivid VHS chroma saturation", "DEFAULT": 0.8, "MIN": 0, "MAX": 1.5 },
+    { "NAME": "headSwitch", "TYPE": "bool", "GROUP": "Tracking", "LABEL": "Head switching", "DESCRIPTION": "Distorted head-switching band at the bottom edge", "DEFAULT": true }
   ]
 }*/
 

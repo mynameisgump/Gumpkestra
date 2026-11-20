@@ -4,10 +4,10 @@
   "CATEGORIES": ["Effect", "Geometry"],
   "INPUTS": [
     { "NAME": "inputImage", "TYPE": "image" },
-    { "NAME": "segments", "TYPE": "float", "DEFAULT": 6.0, "MIN": 1.0, "MAX": 24.0 },
-    { "NAME": "rotation", "TYPE": "float", "DEFAULT": 0.0, "MIN": 0.0, "MAX": 1.0 },
-    { "NAME": "zoom", "TYPE": "float", "DEFAULT": 1.0, "MIN": 0.25, "MAX": 4.0 },
-    { "NAME": "center", "TYPE": "point2D", "DEFAULT": [0.5, 0.5], "MIN": [0.0, 0.0], "MAX": [1.0, 1.0] }
+    { "NAME": "segments", "TYPE": "float", "GROUP": "Symmetry", "LABEL": "Segments", "DESCRIPTION": "Number of mirrored radial wedges", "DEFAULT": 6, "MIN": 1, "MAX": 24 },
+    { "NAME": "rotation", "TYPE": "float", "GROUP": "Transform", "LABEL": "Rotation", "DESCRIPTION": "Rotate the kaleidoscope pattern", "DEFAULT": 0, "MIN": 0, "MAX": 1 },
+    { "NAME": "zoom", "TYPE": "float", "GROUP": "Transform", "LABEL": "Zoom", "DESCRIPTION": "Scale the sampled image inside the wedges", "DEFAULT": 1, "MIN": 0.25, "MAX": 4 },
+    { "NAME": "center", "TYPE": "point2D", "GROUP": "Symmetry", "LABEL": "Centre", "DESCRIPTION": "Focal centre point of the mirror wedges", "DEFAULT": [0.5, 0.5], "MIN": [0, 0], "MAX": [1, 1] }
   ]
 }*/
 

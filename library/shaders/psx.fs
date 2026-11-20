@@ -4,15 +4,15 @@
   "CATEGORIES": ["Effect", "Retro"],
   "INPUTS": [
     { "NAME": "inputImage", "TYPE": "image" },
-    { "NAME": "resolution", "TYPE": "float", "DEFAULT": 240.0, "MIN": 60.0, "MAX": 720.0, "LABEL": "Vertical res" },
-    { "NAME": "bits", "TYPE": "float", "DEFAULT": 5.0, "MIN": 1.0, "MAX": 8.0, "LABEL": "Bits / channel" },
-    { "NAME": "dither", "TYPE": "float", "DEFAULT": 0.8, "MIN": 0.0, "MAX": 1.0 },
-    { "NAME": "wobble", "TYPE": "float", "DEFAULT": 0.3, "MIN": 0.0, "MAX": 2.0, "LABEL": "Affine wobble" },
-    { "NAME": "fps", "TYPE": "float", "DEFAULT": 20.0, "MIN": 0.0, "MAX": 240.0, "LABEL": "Frame rate (0 = full)" }
+    { "NAME": "resolution", "TYPE": "float", "GROUP": "Resolution & Color", "LABEL": "Vertical res", "DESCRIPTION": "Target vertical pixel height", "DEFAULT": 240, "MIN": 60, "MAX": 720 },
+    { "NAME": "bits", "TYPE": "float", "GROUP": "Resolution & Color", "LABEL": "Bits / channel", "DESCRIPTION": "Colour depth per RGB channel", "DEFAULT": 5, "MIN": 1, "MAX": 8 },
+    { "NAME": "dither", "TYPE": "float", "GROUP": "Resolution & Color", "LABEL": "Dither", "DESCRIPTION": "Ordered PS1-style colour dithering strength", "DEFAULT": 0.8, "MIN": 0, "MAX": 1 },
+    { "NAME": "wobble", "TYPE": "float", "GROUP": "Artifacts", "LABEL": "Affine wobble", "DESCRIPTION": "Jittery vertex/UV affine warping", "DEFAULT": 0.3, "MIN": 0, "MAX": 2 },
+    { "NAME": "fps", "TYPE": "float", "GROUP": "Artifacts", "LABEL": "Frame rate (0 = full)", "DESCRIPTION": "Posterised frame rate cap (0 = native refresh)", "DEFAULT": 20, "MIN": 0, "MAX": 240 }
   ],
   "PASSES": [
     { "TARGET": "held", "PERSISTENT": true },
-    {}
+    {  }
   ]
 }*/
 

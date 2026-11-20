@@ -3,13 +3,13 @@
   "CREDIT": "Gumpkestra",
   "CATEGORIES": ["Generator", "Industrial"],
   "INPUTS": [
-    { "NAME": "speed", "TYPE": "float", "DEFAULT": 0.6, "MIN": 0.0, "MAX": 3.0, "LABEL": "Spin (rev/s)" },
-    { "NAME": "beams", "TYPE": "float", "DEFAULT": 2.0, "MIN": 1.0, "MAX": 6.0 },
-    { "NAME": "width", "TYPE": "float", "DEFAULT": 0.3, "MIN": 0.05, "MAX": 1.0, "LABEL": "Beam width" },
-    { "NAME": "haze", "TYPE": "float", "DEFAULT": 0.8, "MIN": 0.0, "MAX": 1.5 },
-    { "NAME": "strobe", "TYPE": "float", "DEFAULT": 0.0, "MIN": 0.0, "MAX": 1.0, "LABEL": "Strobe", "MODS": [{ "SOURCE": "beat", "AMOUNT": 0.7368 }] },
-    { "NAME": "position", "TYPE": "point2D", "DEFAULT": [0.5, 0.8], "MIN": [0.0, 0.0], "MAX": [1.0, 1.0] },
-    { "NAME": "lampColor", "TYPE": "color", "DEFAULT": [1.0, 0.07, 0.02, 1.0] }
+    { "NAME": "speed", "TYPE": "float", "GROUP": "Beam", "LABEL": "Spin (rev/s)", "DESCRIPTION": "Beacon rotation speed in revolutions per second", "DEFAULT": 0.6, "MIN": 0, "MAX": 3 },
+    { "NAME": "beams", "TYPE": "float", "GROUP": "Beam", "LABEL": "Beams", "DESCRIPTION": "Number of light cones radiating from the beacon", "DEFAULT": 2, "MIN": 1, "MAX": 6 },
+    { "NAME": "width", "TYPE": "float", "GROUP": "Beam", "LABEL": "Beam width", "DESCRIPTION": "Angular spread of each light beam", "DEFAULT": 0.3, "MIN": 0.05, "MAX": 1 },
+    { "NAME": "haze", "TYPE": "float", "GROUP": "Atmosphere & Color", "LABEL": "Haze", "DESCRIPTION": "Volumetric smoke/fog catching the light", "DEFAULT": 0.8, "MIN": 0, "MAX": 1.5 },
+    { "NAME": "strobe", "TYPE": "float", "GROUP": "Atmosphere & Color", "LABEL": "Strobe", "DESCRIPTION": "Additional flash intensity", "DEFAULT": 0, "MIN": 0, "MAX": 1, "MODS": [{ "SOURCE": "beat", "AMOUNT": 0.7368 }] },
+    { "NAME": "position", "TYPE": "point2D", "GROUP": "Beam", "LABEL": "Position", "DESCRIPTION": "Screen X/Y origin of the beacon", "DEFAULT": [0.5, 0.8], "MIN": [0, 0], "MAX": [1, 1] },
+    { "NAME": "lampColor", "TYPE": "color", "GROUP": "Atmosphere & Color", "LABEL": "Lamp colour", "DESCRIPTION": "Colour of the warning beacon", "DEFAULT": [1, 0.07, 0.02, 1] }
   ]
 }*/
 

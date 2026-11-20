@@ -3,16 +3,16 @@
   "CREDIT": "Gumpkestra",
   "CATEGORIES": ["Generator", "Industrial"],
   "INPUTS": [
-    { "NAME": "speed", "TYPE": "float", "DEFAULT": 0.2, "MIN": -2.0, "MAX": 2.0 },
-    { "NAME": "ratchet", "TYPE": "float", "DEFAULT": 0.6, "MIN": 0.0, "MAX": 3.0, "LABEL": "Beat ratchet" },
-    { "NAME": "slam", "TYPE": "float", "DEFAULT": 0.0, "MIN": 0.0, "MAX": 1.0, "LABEL": "Piston slam", "MODS": [{ "SOURCE": "beat", "AMOUNT": 1.0 }] },
-    { "NAME": "rust", "TYPE": "float", "DEFAULT": 0.5, "MIN": 0.0, "MAX": 1.0 },
-    { "NAME": "lampSwing", "TYPE": "float", "DEFAULT": 0.3, "MIN": 0.0, "MAX": 1.0 },
-    { "NAME": "tex", "TYPE": "image", "DEFAULT": "@rust", "LABEL": "Texture" },
-    { "NAME": "texMix", "TYPE": "float", "DEFAULT": 0.0, "MIN": 0.0, "MAX": 1.0, "LABEL": "Texture mix" },
-    { "NAME": "texScale", "TYPE": "float", "DEFAULT": 1.0, "MIN": 0.25, "MAX": 6.0, "LABEL": "Texture scale" },
-    { "NAME": "lightColor", "TYPE": "color", "DEFAULT": [1.0, 0.6, 0.3, 1.0], "LABEL": "Light" },
-    { "NAME": "hazard", "TYPE": "bool", "DEFAULT": true, "LABEL": "Hazard stripes" }
+    { "NAME": "speed", "TYPE": "float", "GROUP": "Motion", "LABEL": "Speed", "DESCRIPTION": "Continuous gearbox rotation speed", "DEFAULT": 0.2, "MIN": -2, "MAX": 2 },
+    { "NAME": "ratchet", "TYPE": "float", "GROUP": "Motion", "LABEL": "Beat ratchet", "DESCRIPTION": "Angular ratchet kick on every beat", "DEFAULT": 0.6, "MIN": 0, "MAX": 3 },
+    { "NAME": "slam", "TYPE": "float", "GROUP": "Motion", "LABEL": "Piston slam", "DESCRIPTION": "Hydraulic piston slam displacement", "DEFAULT": 0, "MIN": 0, "MAX": 1, "MODS": [{ "SOURCE": "beat", "AMOUNT": 1 }] },
+    { "NAME": "rust", "TYPE": "float", "GROUP": "Surface & Lighting", "LABEL": "Rust", "DESCRIPTION": "Amount of surface corrosion and grime", "DEFAULT": 0.5, "MIN": 0, "MAX": 1 },
+    { "NAME": "lampSwing", "TYPE": "float", "GROUP": "Motion", "LABEL": "Lamp swing", "DESCRIPTION": "Sway amplitude of the overhead sodium lamp", "DEFAULT": 0.3, "MIN": 0, "MAX": 1 },
+    { "NAME": "tex", "TYPE": "image", "GROUP": "Texture", "LABEL": "Texture", "DESCRIPTION": "Texture skinned onto gears and piston", "DEFAULT": "@rust" },
+    { "NAME": "texMix", "TYPE": "float", "GROUP": "Texture", "LABEL": "Texture mix", "DESCRIPTION": "Blend between procedural metal (0) and texture (1)", "DEFAULT": 0, "MIN": 0, "MAX": 1 },
+    { "NAME": "texScale", "TYPE": "float", "GROUP": "Texture", "LABEL": "Texture scale", "DESCRIPTION": "Tiling scale of the surface texture", "DEFAULT": 1, "MIN": 0.25, "MAX": 6 },
+    { "NAME": "lightColor", "TYPE": "color", "GROUP": "Surface & Lighting", "LABEL": "Light", "DESCRIPTION": "Colour of the swinging overhead lamp", "DEFAULT": [1, 0.6, 0.3, 1] },
+    { "NAME": "hazard", "TYPE": "bool", "GROUP": "Surface & Lighting", "LABEL": "Hazard stripes", "DESCRIPTION": "Toggle industrial black-and-yellow hazard stripes", "DEFAULT": true }
   ]
 }*/
 

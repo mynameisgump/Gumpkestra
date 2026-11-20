@@ -2,16 +2,16 @@
   "DESCRIPTION": "Shows a texture: an image or looping video from library/textures, a built-in, or the layers below. Fit, tile, scroll, spin, and pulse on the beat. Transparent outside the picture in Contain mode.",
   "CATEGORIES": ["Generator", "Texture"],
   "INPUTS": [
-    { "NAME": "tex", "TYPE": "image", "DEFAULT": "@meat", "LABEL": "Texture", "TILE_SEQUENCE": true },
-    { "NAME": "fit", "TYPE": "long", "DEFAULT": 1, "VALUES": [0, 1, 2, 3], "LABELS": ["Contain", "Cover", "Stretch", "Tile"] },
-    { "NAME": "zoom", "TYPE": "float", "DEFAULT": 1.0, "MIN": 0.25, "MAX": 4.0 },
-    { "NAME": "pulse", "TYPE": "float", "DEFAULT": 0.0, "MIN": 0.0, "MAX": 0.5, "LABEL": "Pulse", "MODS": [{ "SOURCE": "beat", "AMOUNT": 0.12 }] },
-    { "NAME": "rotate", "TYPE": "float", "DEFAULT": 0.0, "MIN": -180.0, "MAX": 180.0, "LABEL": "Rotate°" },
-    { "NAME": "spin", "TYPE": "float", "DEFAULT": 0.0, "MIN": -0.5, "MAX": 0.5, "LABEL": "Spin (rev/s)" },
-    { "NAME": "offset", "TYPE": "point2D", "DEFAULT": [0.0, 0.0], "MIN": [-1.0, -1.0], "MAX": [1.0, 1.0] },
-    { "NAME": "scroll", "TYPE": "point2D", "DEFAULT": [0.0, 0.0], "MIN": [-0.5, -0.5], "MAX": [0.5, 0.5], "LABEL": "Scroll (/s)" },
-    { "NAME": "brightness", "TYPE": "float", "DEFAULT": 1.0, "MIN": 0.0, "MAX": 3.0 },
-    { "NAME": "tint", "TYPE": "color", "DEFAULT": [1.0, 1.0, 1.0, 1.0] }
+    { "NAME": "tex", "TYPE": "image", "GROUP": "Source", "LABEL": "Texture", "DESCRIPTION": "Image, video, built-in texture, or layers below", "TILE_SEQUENCE": true, "DEFAULT": "@meat" },
+    { "NAME": "fit", "TYPE": "long", "GROUP": "Source", "LABEL": "Fit", "DESCRIPTION": "How the image fits the viewport (Tile enables tile sequences)", "DEFAULT": 1, "VALUES": [0, 1, 2, 3], "LABELS": ["Contain", "Cover", "Stretch", "Tile"] },
+    { "NAME": "zoom", "TYPE": "float", "GROUP": "Transform", "LABEL": "Zoom", "DESCRIPTION": "Image scale factor", "DEFAULT": 1, "MIN": 0.25, "MAX": 4 },
+    { "NAME": "pulse", "TYPE": "float", "GROUP": "Transform", "LABEL": "Pulse", "DESCRIPTION": "Extra zoom pulse amount", "DEFAULT": 0, "MIN": 0, "MAX": 0.5, "MODS": [{ "SOURCE": "beat", "AMOUNT": 0.12 }] },
+    { "NAME": "rotate", "TYPE": "float", "GROUP": "Transform", "LABEL": "Rotate°", "DESCRIPTION": "Static rotation angle in degrees", "DEFAULT": 0, "MIN": -180, "MAX": 180 },
+    { "NAME": "spin", "TYPE": "float", "GROUP": "Motion", "LABEL": "Spin (rev/s)", "DESCRIPTION": "Continuous rotation speed in revolutions per second", "DEFAULT": 0, "MIN": -0.5, "MAX": 0.5 },
+    { "NAME": "offset", "TYPE": "point2D", "GROUP": "Transform", "LABEL": "Offset", "DESCRIPTION": "Static X/Y shift", "DEFAULT": [0, 0], "MIN": [-1, -1], "MAX": [1, 1] },
+    { "NAME": "scroll", "TYPE": "point2D", "GROUP": "Motion", "LABEL": "Scroll (/s)", "DESCRIPTION": "Continuous X/Y scrolling speed", "DEFAULT": [0, 0], "MIN": [-0.5, -0.5], "MAX": [0.5, 0.5] },
+    { "NAME": "brightness", "TYPE": "float", "GROUP": "Color", "LABEL": "Brightness", "DESCRIPTION": "Output brightness multiplier", "DEFAULT": 1, "MIN": 0, "MAX": 3 },
+    { "NAME": "tint", "TYPE": "color", "GROUP": "Color", "LABEL": "Tint", "DESCRIPTION": "Multiply colour over the image", "DEFAULT": [1, 1, 1, 1] }
   ]
 }*/
 

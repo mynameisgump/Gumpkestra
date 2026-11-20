@@ -3,19 +3,19 @@
   "CREDIT": "Gumpkestra",
   "CATEGORIES": ["Generator", "Biological"],
   "INPUTS": [
-    { "NAME": "scale", "TYPE": "float", "DEFAULT": 2.5, "MIN": 0.5, "MAX": 8.0 },
-    { "NAME": "thickness", "TYPE": "float", "DEFAULT": 0.05, "MIN": 0.005, "MAX": 0.2 },
-    { "NAME": "capillaries", "TYPE": "float", "DEFAULT": 0.5, "MIN": 0.0, "MAX": 1.0 },
-    { "NAME": "spread", "TYPE": "float", "DEFAULT": 1.0, "MIN": 0.0, "MAX": 1.0 },
-    { "NAME": "flow", "TYPE": "float", "DEFAULT": 0.6, "MIN": 0.0, "MAX": 3.0, "LABEL": "Pulse speed" },
-    { "NAME": "surge", "TYPE": "float", "DEFAULT": 0.8, "MIN": 0.0, "MAX": 2.0, "LABEL": "Beat surge" },
-    { "NAME": "writhe", "TYPE": "float", "DEFAULT": 0.2, "MIN": 0.0, "MAX": 1.0 },
-    { "NAME": "motionSpeed", "TYPE": "float", "DEFAULT": 0.65, "MIN": 0.0, "MAX": 3.0, "LABEL": "Motion speed" },
-    { "NAME": "pulse", "TYPE": "float", "DEFAULT": 0.55, "MIN": 0.0, "MAX": 1.0, "LABEL": "Vessel pulse" },
-    { "NAME": "audioResponse", "TYPE": "float", "DEFAULT": 0.6, "MIN": 0.0, "MAX": 1.0, "LABEL": "Audio response" },
-    { "NAME": "skinColor", "TYPE": "color", "DEFAULT": [0.12, 0.07, 0.07, 1.0] },
-    { "NAME": "veinColor", "TYPE": "color", "DEFAULT": [0.3, 0.03, 0.14, 1.0] },
-    { "NAME": "bloodColor", "TYPE": "color", "DEFAULT": [1.0, 0.08, 0.04, 1.0] }
+    { "NAME": "scale", "TYPE": "float", "GROUP": "Network", "LABEL": "Scale", "DESCRIPTION": "Zoom scale of the branching vessel network", "DEFAULT": 2.5, "MIN": 0.5, "MAX": 8 },
+    { "NAME": "thickness", "TYPE": "float", "GROUP": "Network", "LABEL": "Thickness", "DESCRIPTION": "Width of main blood vessels", "DEFAULT": 0.05, "MIN": 0.005, "MAX": 0.2 },
+    { "NAME": "capillaries", "TYPE": "float", "GROUP": "Network", "LABEL": "Capillaries", "DESCRIPTION": "Density of fine secondary capillary branches", "DEFAULT": 0.5, "MIN": 0, "MAX": 1 },
+    { "NAME": "spread", "TYPE": "float", "GROUP": "Network", "LABEL": "Spread", "DESCRIPTION": "Growth reach of the network from the centre", "DEFAULT": 1, "MIN": 0, "MAX": 1 },
+    { "NAME": "flow", "TYPE": "float", "GROUP": "Motion & Pulse", "LABEL": "Pulse speed", "DESCRIPTION": "Travel speed of blood pulses along vessels", "DEFAULT": 0.6, "MIN": 0, "MAX": 3 },
+    { "NAME": "surge", "TYPE": "float", "GROUP": "Audio", "LABEL": "Beat surge", "DESCRIPTION": "Outward pressure wave strength on beats", "DEFAULT": 0.8, "MIN": 0, "MAX": 2 },
+    { "NAME": "writhe", "TYPE": "float", "GROUP": "Motion & Pulse", "LABEL": "Writhe", "DESCRIPTION": "How far vessels bend and squirm", "DEFAULT": 0.2, "MIN": 0, "MAX": 1 },
+    { "NAME": "motionSpeed", "TYPE": "float", "GROUP": "Motion & Pulse", "LABEL": "Motion speed", "DESCRIPTION": "Speed of vessel writhing motion (0 = still)", "DEFAULT": 0.65, "MIN": 0, "MAX": 3 },
+    { "NAME": "pulse", "TYPE": "float", "GROUP": "Motion & Pulse", "LABEL": "Vessel pulse", "DESCRIPTION": "Vessel dilation strength as pulses pass", "DEFAULT": 0.55, "MIN": 0, "MAX": 1 },
+    { "NAME": "audioResponse", "TYPE": "float", "GROUP": "Audio", "LABEL": "Audio response", "DESCRIPTION": "Bass vessel swelling and treble capillary activity", "DEFAULT": 0.6, "MIN": 0, "MAX": 1 },
+    { "NAME": "skinColor", "TYPE": "color", "GROUP": "Color", "LABEL": "Skin colour", "DESCRIPTION": "Translucent skin background colour", "DEFAULT": [0.12, 0.07, 0.07, 1] },
+    { "NAME": "veinColor", "TYPE": "color", "GROUP": "Color", "LABEL": "Vein colour", "DESCRIPTION": "Resting colour of vessels", "DEFAULT": [0.3, 0.03, 0.14, 1] },
+    { "NAME": "bloodColor", "TYPE": "color", "GROUP": "Color", "LABEL": "Blood colour", "DESCRIPTION": "Glowing colour of travelling blood pulses", "DEFAULT": [1, 0.08, 0.04, 1] }
   ]
 }*/
 

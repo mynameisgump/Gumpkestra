@@ -3,19 +3,19 @@
   "CREDIT": "Gumpkestra",
   "CATEGORIES": ["Generator", "Biological"],
   "INPUTS": [
-    { "NAME": "scale", "TYPE": "float", "DEFAULT": 3.0, "MIN": 1.0, "MAX": 10.0 },
-    { "NAME": "writhe", "TYPE": "float", "DEFAULT": 0.4, "MIN": 0.0, "MAX": 1.5 },
-    { "NAME": "throb", "TYPE": "float", "DEFAULT": 0.0, "MIN": 0.0, "MAX": 2.0, "LABEL": "Throb", "MODS": [{ "SOURCE": "bass", "AMOUNT": 0.3 }] },
-    { "NAME": "flush", "TYPE": "float", "DEFAULT": 0.0, "MIN": 0.0, "MAX": 1.0, "MODS": [{ "SOURCE": "beat", "AMOUNT": 0.3 }] },
-    { "NAME": "fibers", "TYPE": "float", "DEFAULT": 0.5, "MIN": 0.0, "MAX": 1.0, "LABEL": "Muscle fibre" },
-    { "NAME": "fat", "TYPE": "float", "DEFAULT": 0.3, "MIN": 0.0, "MAX": 1.0 },
-    { "NAME": "wetness", "TYPE": "float", "DEFAULT": 0.7, "MIN": 0.0, "MAX": 1.5 },
-    { "NAME": "speed", "TYPE": "float", "DEFAULT": 0.2, "MIN": 0.0, "MAX": 2.0 },
-    { "NAME": "tex", "TYPE": "image", "DEFAULT": "@meat", "LABEL": "Texture" },
-    { "NAME": "texMix", "TYPE": "float", "DEFAULT": 0.0, "MIN": 0.0, "MAX": 1.0, "LABEL": "Texture mix" },
-    { "NAME": "texScale", "TYPE": "float", "DEFAULT": 1.0, "MIN": 0.25, "MAX": 6.0, "LABEL": "Texture scale" },
-    { "NAME": "meatColor", "TYPE": "color", "DEFAULT": [0.55, 0.03, 0.05, 1.0] },
-    { "NAME": "fatColor", "TYPE": "color", "DEFAULT": [0.95, 0.78, 0.5, 1.0] }
+    { "NAME": "scale", "TYPE": "float", "GROUP": "Tissue", "LABEL": "Scale", "DESCRIPTION": "Zoom scale of cells and striations", "DEFAULT": 3, "MIN": 1, "MAX": 10 },
+    { "NAME": "writhe", "TYPE": "float", "GROUP": "Motion", "LABEL": "Writhe", "DESCRIPTION": "Organic tissue warping amplitude", "DEFAULT": 0.4, "MIN": 0, "MAX": 1.5 },
+    { "NAME": "throb", "TYPE": "float", "GROUP": "Motion", "LABEL": "Throb", "DESCRIPTION": "Swelling throb intensity", "DEFAULT": 0, "MIN": 0, "MAX": 2, "MODS": [{ "SOURCE": "bass", "AMOUNT": 0.3 }] },
+    { "NAME": "flush", "TYPE": "float", "GROUP": "Motion", "LABEL": "Flush", "DESCRIPTION": "Sudden blood-red brightness flush", "DEFAULT": 0, "MIN": 0, "MAX": 1, "MODS": [{ "SOURCE": "beat", "AMOUNT": 0.3 }] },
+    { "NAME": "fibers", "TYPE": "float", "GROUP": "Tissue", "LABEL": "Muscle fibre", "DESCRIPTION": "Strength of striated muscle fibres", "DEFAULT": 0.5, "MIN": 0, "MAX": 1 },
+    { "NAME": "fat", "TYPE": "float", "GROUP": "Tissue", "LABEL": "Fat", "DESCRIPTION": "Coverage of marbled fat cells", "DEFAULT": 0.3, "MIN": 0, "MAX": 1 },
+    { "NAME": "wetness", "TYPE": "float", "GROUP": "Tissue", "LABEL": "Wetness", "DESCRIPTION": "Specular slime highlight brightness", "DEFAULT": 0.7, "MIN": 0, "MAX": 1.5 },
+    { "NAME": "speed", "TYPE": "float", "GROUP": "Motion", "LABEL": "Speed", "DESCRIPTION": "Animation speed of writhing tissue", "DEFAULT": 0.2, "MIN": 0, "MAX": 2 },
+    { "NAME": "tex", "TYPE": "image", "GROUP": "Texture", "LABEL": "Texture", "DESCRIPTION": "Optional texture warped along with the tissue", "DEFAULT": "@meat" },
+    { "NAME": "texMix", "TYPE": "float", "GROUP": "Texture", "LABEL": "Texture mix", "DESCRIPTION": "Blend between procedural meat (0) and texture (1)", "DEFAULT": 0, "MIN": 0, "MAX": 1 },
+    { "NAME": "texScale", "TYPE": "float", "GROUP": "Texture", "LABEL": "Texture scale", "DESCRIPTION": "Tiling scale of the surface texture", "DEFAULT": 1, "MIN": 0.25, "MAX": 6 },
+    { "NAME": "meatColor", "TYPE": "color", "GROUP": "Color", "LABEL": "Meat colour", "DESCRIPTION": "Primary muscle tissue colour", "DEFAULT": [0.55, 0.03, 0.05, 1] },
+    { "NAME": "fatColor", "TYPE": "color", "GROUP": "Color", "LABEL": "Fat colour", "DESCRIPTION": "Marbled fat cell colour", "DEFAULT": [0.95, 0.78, 0.5, 1] }
   ]
 }*/
 

@@ -86,8 +86,10 @@ Standard ISF: you can paste in shaders from [editor.isf.video](https://editor.is
 For shaders you want to share with other ISF hosts, prefer exposing a float parameter and modulating it over reading `AUDIO_*` directly. That also puts the audio reaction in the UI, where it can be tuned. To ship a parameter already modulated, give the input a `MODS` list (a Gumpkestra extension that other hosts ignore). `SOURCE` is any modulator source (`bass`, `high`, `beat`, `lfoSine`, …). `AMOUNT` is a fraction of the parameter's range, and `RATE` and `SMOOTH` are optional:
 
 ```json
-{ "NAME": "radius", "TYPE": "float", "DEFAULT": 0.9, "MIN": 0.3, "MAX": 1.6, "MODS": [{ "SOURCE": "bass", "AMOUNT": 0.1731 }] }
+{ "NAME": "radius", "TYPE": "float", "GROUP": "Shape", "LABEL": "Radius", "DESCRIPTION": "Base sphere radius", "DEFAULT": 0.9, "MIN": 0.3, "MAX": 1.6, "MODS": [{ "SOURCE": "bass", "AMOUNT": 0.1731 }] }
 ```
+
+Inputs also support optional `GROUP` (collapsible section heading in the parameters panel) and `DESCRIPTION` (tooltip shown on hover) fields — Gumpkestra extensions that other ISF hosts ignore. Shaders without `GROUP` fields are grouped automatically by role when they have five or more controls.
 
 The `veins` generator has locally bending vessels, moving capillaries, and blood pulses that dilate the network as they travel. **Writhe** sets how far the vessels bend; **Motion speed** sets how fast they move. **Pulse speed** sets blood travel speed, and **Vessel pulse** sets the swelling from that flow. **Audio response** controls bass swelling and treble activity in the capillaries; **Beat surge** controls outward beat pressure waves separately. Set Motion speed and Pulse speed to 0 for a still network in silence. These controls also appear in existing presets that use `veins`.
 

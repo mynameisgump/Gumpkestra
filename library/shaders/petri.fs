@@ -3,19 +3,19 @@
   "CREDIT": "Gumpkestra",
   "CATEGORIES": ["Generator", "Biological"],
   "INPUTS": [
-    { "NAME": "tex", "TYPE": "image", "DEFAULT": "@meat", "LABEL": "Cell texture" },
-    { "NAME": "textureAmount", "TYPE": "float", "DEFAULT": 0.0, "MIN": 0.0, "MAX": 1.0, "LABEL": "Texture amount" },
-    { "NAME": "textureScale", "TYPE": "float", "DEFAULT": 1.0, "MIN": 0.2, "MAX": 8.0, "LABEL": "Texture scale" },
-    { "NAME": "scale", "TYPE": "float", "DEFAULT": 6.0, "MIN": 2.0, "MAX": 16.0, "LABEL": "Zoom out" },
-    { "NAME": "density", "TYPE": "float", "DEFAULT": 0.7, "MIN": 0.0, "MAX": 1.0 },
-    { "NAME": "size", "TYPE": "float", "DEFAULT": 0.45, "MIN": 0.2, "MAX": 0.8 },
-    { "NAME": "writhe", "TYPE": "float", "DEFAULT": 0.4, "MIN": 0.0, "MAX": 1.0 },
-    { "NAME": "jitter", "TYPE": "float", "DEFAULT": 0.0, "MIN": 0.0, "MAX": 2.0, "LABEL": "Jitter", "MODS": [{ "SOURCE": "high", "AMOUNT": 0.3 }] },
-    { "NAME": "swell", "TYPE": "float", "DEFAULT": 0.0, "MIN": 0.0, "MAX": 1.0, "LABEL": "Swell", "MODS": [{ "SOURCE": "bass", "AMOUNT": 0.5 }] },
-    { "NAME": "lens", "TYPE": "float", "DEFAULT": 0.48, "MIN": 0.3, "MAX": 1.0, "LABEL": "Lens radius" },
-    { "NAME": "stain", "TYPE": "color", "DEFAULT": [0.6, 0.25, 0.65, 1.0] },
-    { "NAME": "nucleusColor", "TYPE": "color", "DEFAULT": [0.18, 0.04, 0.32, 1.0] },
-    { "NAME": "background", "TYPE": "color", "DEFAULT": [0.92, 0.86, 0.8, 1.0] }
+    { "NAME": "tex", "TYPE": "image", "GROUP": "Texture", "LABEL": "Cell texture", "DESCRIPTION": "Image or video blended inside each cell", "DEFAULT": "@meat" },
+    { "NAME": "textureAmount", "TYPE": "float", "GROUP": "Texture", "LABEL": "Texture amount", "DESCRIPTION": "Blend strength of texture inside cells", "DEFAULT": 0, "MIN": 0, "MAX": 1 },
+    { "NAME": "textureScale", "TYPE": "float", "GROUP": "Texture", "LABEL": "Texture scale", "DESCRIPTION": "Repetition scale of texture inside each cell", "DEFAULT": 1, "MIN": 0.2, "MAX": 8 },
+    { "NAME": "scale", "TYPE": "float", "GROUP": "Cells", "LABEL": "Zoom out", "DESCRIPTION": "Field-of-view zoom (higher = smaller, more cells)", "DEFAULT": 6, "MIN": 2, "MAX": 16 },
+    { "NAME": "density", "TYPE": "float", "GROUP": "Cells", "LABEL": "Density", "DESCRIPTION": "How packed the cells are", "DEFAULT": 0.7, "MIN": 0, "MAX": 1 },
+    { "NAME": "size", "TYPE": "float", "GROUP": "Cells", "LABEL": "Cell size", "DESCRIPTION": "Base radius of each metaball cell", "DEFAULT": 0.45, "MIN": 0.2, "MAX": 0.8 },
+    { "NAME": "writhe", "TYPE": "float", "GROUP": "Motion", "LABEL": "Writhe", "DESCRIPTION": "Organic drifting motion of cells", "DEFAULT": 0.4, "MIN": 0, "MAX": 1 },
+    { "NAME": "jitter", "TYPE": "float", "GROUP": "Motion", "LABEL": "Jitter", "DESCRIPTION": "High-frequency trembling jitter", "DEFAULT": 0, "MIN": 0, "MAX": 2, "MODS": [{ "SOURCE": "high", "AMOUNT": 0.3 }] },
+    { "NAME": "swell", "TYPE": "float", "GROUP": "Motion", "LABEL": "Swell", "DESCRIPTION": "Cell swelling expansion", "DEFAULT": 0, "MIN": 0, "MAX": 1, "MODS": [{ "SOURCE": "bass", "AMOUNT": 0.5 }] },
+    { "NAME": "lens", "TYPE": "float", "GROUP": "Microscope & Color", "LABEL": "Lens radius", "DESCRIPTION": "Circular microscope aperture radius", "DEFAULT": 0.48, "MIN": 0.3, "MAX": 1 },
+    { "NAME": "stain", "TYPE": "color", "GROUP": "Microscope & Color", "LABEL": "Stain", "DESCRIPTION": "Cell membrane and cytoplasm dye colour", "DEFAULT": [0.6, 0.25, 0.65, 1] },
+    { "NAME": "nucleusColor", "TYPE": "color", "GROUP": "Microscope & Color", "LABEL": "Nucleus colour", "DESCRIPTION": "Colour of the dark cell nuclei", "DEFAULT": [0.18, 0.04, 0.32, 1] },
+    { "NAME": "background", "TYPE": "color", "GROUP": "Microscope & Color", "LABEL": "Background", "DESCRIPTION": "Backlit microscope slide colour", "DEFAULT": [0.92, 0.86, 0.8, 1] }
   ]
 }*/
 

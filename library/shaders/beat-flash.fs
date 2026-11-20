@@ -4,10 +4,10 @@
   "CATEGORIES": ["Effect", "Audio"],
   "INPUTS": [
     { "NAME": "inputImage", "TYPE": "image" },
-    { "NAME": "flash", "TYPE": "float", "DEFAULT": 0.0, "MIN": 0.0, "MAX": 1.0, "MODS": [{ "SOURCE": "beat", "AMOUNT": 0.5 }] },
-    { "NAME": "punch", "TYPE": "float", "DEFAULT": 0.0, "MIN": 0.0, "MAX": 0.4, "LABEL": "Zoom punch", "MODS": [{ "SOURCE": "beat", "AMOUNT": 0.15 }] },
-    { "NAME": "invertEvery", "TYPE": "long", "DEFAULT": 0, "VALUES": [0, 2, 4, 8], "LABELS": ["Never", "2 beats", "4 beats", "8 beats"] },
-    { "NAME": "flashColor", "TYPE": "color", "DEFAULT": [1.0, 1.0, 1.0, 1.0] }
+    { "NAME": "flash", "TYPE": "float", "GROUP": "Beat Reaction", "LABEL": "Flash", "DESCRIPTION": "Intensity of the beat colour flash", "DEFAULT": 0, "MIN": 0, "MAX": 1, "MODS": [{ "SOURCE": "beat", "AMOUNT": 0.5 }] },
+    { "NAME": "punch", "TYPE": "float", "GROUP": "Beat Reaction", "LABEL": "Zoom punch", "DESCRIPTION": "Zoom kick strength on each beat", "DEFAULT": 0, "MIN": 0, "MAX": 0.4, "MODS": [{ "SOURCE": "beat", "AMOUNT": 0.15 }] },
+    { "NAME": "invertEvery", "TYPE": "long", "GROUP": "Beat Reaction", "LABEL": "Invert every", "DESCRIPTION": "Invert colours periodically on beat count", "DEFAULT": 0, "VALUES": [0, 2, 4, 8], "LABELS": ["Never", "2 beats", "4 beats", "8 beats"] },
+    { "NAME": "flashColor", "TYPE": "color", "GROUP": "Color", "LABEL": "Flash colour", "DESCRIPTION": "Colour used for beat flashes", "DEFAULT": [1, 1, 1, 1] }
   ]
 }*/
 

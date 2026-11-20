@@ -2,18 +2,18 @@
   "DESCRIPTION": "Flies down a tunnel lined with a texture. Lurches forward on every beat, and the walls swell with the bass. Try the built-in Meat or Rust, or the layers below.",
   "CATEGORIES": ["Generator", "Texture"],
   "INPUTS": [
-    { "NAME": "tex", "TYPE": "image", "DEFAULT": "@meat", "LABEL": "Texture" },
-    { "NAME": "speed", "TYPE": "float", "DEFAULT": 0.25, "MIN": -2.0, "MAX": 2.0 },
-    { "NAME": "kick", "TYPE": "float", "DEFAULT": 0.25, "MIN": 0.0, "MAX": 1.0, "LABEL": "Beat lurch" },
-    { "NAME": "twist", "TYPE": "float", "DEFAULT": 0.15, "MIN": -2.0, "MAX": 2.0 },
-    { "NAME": "roll", "TYPE": "float", "DEFAULT": 0.02, "MIN": -0.5, "MAX": 0.5, "LABEL": "Roll (rev/s)" },
-    { "NAME": "wraps", "TYPE": "long", "DEFAULT": 2, "VALUES": [1, 2, 3, 4, 6], "LABEL": "Texture wraps" },
-    { "NAME": "stretch", "TYPE": "float", "DEFAULT": 1.0, "MIN": 0.2, "MAX": 4.0, "LABEL": "Depth stretch" },
-    { "NAME": "shape", "TYPE": "long", "DEFAULT": 0, "VALUES": [0, 1, 2], "LABELS": ["Round", "Square", "Hex"] },
-    { "NAME": "swell", "TYPE": "float", "DEFAULT": 0.0, "MIN": 0.0, "MAX": 0.6, "LABEL": "Swell", "MODS": [{ "SOURCE": "bass", "AMOUNT": 0.25 }] },
-    { "NAME": "darkness", "TYPE": "float", "DEFAULT": 1.5, "MIN": 0.0, "MAX": 4.0 },
-    { "NAME": "flash", "TYPE": "float", "DEFAULT": 0.0, "MIN": 0.0, "MAX": 2.0, "LABEL": "Flash", "MODS": [{ "SOURCE": "beat", "AMOUNT": 0.15 }] },
-    { "NAME": "tint", "TYPE": "color", "DEFAULT": [1.0, 1.0, 1.0, 1.0] }
+    { "NAME": "tex", "TYPE": "image", "GROUP": "Texture", "LABEL": "Texture", "DESCRIPTION": "Texture lining the tunnel walls", "DEFAULT": "@meat" },
+    { "NAME": "speed", "TYPE": "float", "GROUP": "Motion", "LABEL": "Speed", "DESCRIPTION": "Forward flight speed down the tunnel", "DEFAULT": 0.25, "MIN": -2, "MAX": 2 },
+    { "NAME": "kick", "TYPE": "float", "GROUP": "Motion", "LABEL": "Beat lurch", "DESCRIPTION": "Forward lurch on every beat", "DEFAULT": 0.25, "MIN": 0, "MAX": 1 },
+    { "NAME": "twist", "TYPE": "float", "GROUP": "Geometry", "LABEL": "Twist", "DESCRIPTION": "Corkscrew twist along depth", "DEFAULT": 0.15, "MIN": -2, "MAX": 2 },
+    { "NAME": "roll", "TYPE": "float", "GROUP": "Motion", "LABEL": "Roll (rev/s)", "DESCRIPTION": "Camera roll rotation speed", "DEFAULT": 0.02, "MIN": -0.5, "MAX": 0.5 },
+    { "NAME": "wraps", "TYPE": "long", "GROUP": "Texture", "LABEL": "Texture wraps", "DESCRIPTION": "Number of times the texture wraps around the circumference", "DEFAULT": 2, "VALUES": [1, 2, 3, 4, 6] },
+    { "NAME": "stretch", "TYPE": "float", "GROUP": "Texture", "LABEL": "Depth stretch", "DESCRIPTION": "Axial stretching along the tunnel depth", "DEFAULT": 1, "MIN": 0.2, "MAX": 4 },
+    { "NAME": "shape", "TYPE": "long", "GROUP": "Geometry", "LABEL": "Shape", "DESCRIPTION": "Tunnel cross-section profile", "DEFAULT": 0, "VALUES": [0, 1, 2], "LABELS": ["Round", "Square", "Hex"] },
+    { "NAME": "swell", "TYPE": "float", "GROUP": "Geometry", "LABEL": "Swell", "DESCRIPTION": "Wall breathing/swelling modulation", "DEFAULT": 0, "MIN": 0, "MAX": 0.6, "MODS": [{ "SOURCE": "bass", "AMOUNT": 0.25 }] },
+    { "NAME": "darkness", "TYPE": "float", "GROUP": "Lighting & Color", "LABEL": "Darkness", "DESCRIPTION": "Depth fog fading into the vanishing point", "DEFAULT": 1.5, "MIN": 0, "MAX": 4 },
+    { "NAME": "flash", "TYPE": "float", "GROUP": "Lighting & Color", "LABEL": "Flash", "DESCRIPTION": "Brightness flash along the tunnel", "DEFAULT": 0, "MIN": 0, "MAX": 2, "MODS": [{ "SOURCE": "beat", "AMOUNT": 0.15 }] },
+    { "NAME": "tint", "TYPE": "color", "GROUP": "Lighting & Color", "LABEL": "Tint", "DESCRIPTION": "Colour multiplier over the tunnel walls", "DEFAULT": [1, 1, 1, 1] }
   ]
 }*/
 

@@ -3,11 +3,11 @@
   "CREDIT": "Gumpkestra",
   "CATEGORIES": ["Generator"],
   "INPUTS": [
-    { "NAME": "scale", "TYPE": "float", "DEFAULT": 2.5, "MIN": 0.5, "MAX": 8.0 },
-    { "NAME": "speed", "TYPE": "float", "DEFAULT": 0.08, "MIN": 0.0, "MAX": 1.0 },
-    { "NAME": "warp", "TYPE": "float", "DEFAULT": 1.2, "MIN": 0.0, "MAX": 4.0 },
-    { "NAME": "hue", "TYPE": "float", "DEFAULT": 0.6, "MIN": 0.0, "MAX": 1.0 },
-    { "NAME": "brightness", "TYPE": "float", "DEFAULT": 0.8, "MIN": 0.0, "MAX": 2.0 }
+    { "NAME": "scale", "TYPE": "float", "GROUP": "Clouds", "LABEL": "Scale", "DESCRIPTION": "Zoom scale of the noise clouds", "DEFAULT": 2.5, "MIN": 0.5, "MAX": 8 },
+    { "NAME": "speed", "TYPE": "float", "GROUP": "Clouds", "LABEL": "Speed", "DESCRIPTION": "Evolution speed of the clouds", "DEFAULT": 0.08, "MIN": 0, "MAX": 1 },
+    { "NAME": "warp", "TYPE": "float", "GROUP": "Clouds", "LABEL": "Warp", "DESCRIPTION": "Domain-warping swirl turbulence", "DEFAULT": 1.2, "MIN": 0, "MAX": 4 },
+    { "NAME": "hue", "TYPE": "float", "GROUP": "Color", "LABEL": "Hue", "DESCRIPTION": "Shift the cosine colour palette", "DEFAULT": 0.6, "MIN": 0, "MAX": 1 },
+    { "NAME": "brightness", "TYPE": "float", "GROUP": "Color", "LABEL": "Brightness", "DESCRIPTION": "Overall cloud luminance", "DEFAULT": 0.8, "MIN": 0, "MAX": 2 }
   ]
 }*/
 

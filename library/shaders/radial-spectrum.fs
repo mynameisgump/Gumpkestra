@@ -4,14 +4,14 @@
   "CATEGORIES": ["Generator", "Audio"],
   "INPUTS": [
     { "NAME": "audioFFT", "TYPE": "audioFFT" },
-    { "NAME": "radius", "TYPE": "float", "DEFAULT": 0.22, "MIN": 0.02, "MAX": 0.6 },
-    { "NAME": "pulse", "TYPE": "float", "DEFAULT": 0.0, "MIN": 0.0, "MAX": 1.5, "LABEL": "Pulse", "MODS": [{ "SOURCE": "bass", "AMOUNT": 0.2333 }] },
-    { "NAME": "spikes", "TYPE": "float", "DEFAULT": 0.35, "MIN": 0.0, "MAX": 1.0 },
-    { "NAME": "coreGlow", "TYPE": "float", "DEFAULT": 0.0, "MIN": 0.0, "MAX": 1.0, "LABEL": "Core glow", "MODS": [{ "SOURCE": "beat", "AMOUNT": 0.35 }] },
-    { "NAME": "thickness", "TYPE": "float", "DEFAULT": 0.006, "MIN": 0.001, "MAX": 0.05 },
-    { "NAME": "spin", "TYPE": "float", "DEFAULT": 0.03, "MIN": -0.5, "MAX": 0.5 },
-    { "NAME": "colorA", "TYPE": "color", "DEFAULT": [0.2, 0.9, 1.0, 1.0] },
-    { "NAME": "colorB", "TYPE": "color", "DEFAULT": [1.0, 0.25, 0.7, 1.0] }
+    { "NAME": "radius", "TYPE": "float", "GROUP": "Ring", "LABEL": "Radius", "DESCRIPTION": "Base radius of the spectrum ring", "DEFAULT": 0.22, "MIN": 0.02, "MAX": 0.6 },
+    { "NAME": "pulse", "TYPE": "float", "GROUP": "Audio Reaction", "LABEL": "Pulse", "DESCRIPTION": "Radial expansion pulse", "DEFAULT": 0, "MIN": 0, "MAX": 1.5, "MODS": [{ "SOURCE": "bass", "AMOUNT": 0.2333 }] },
+    { "NAME": "spikes", "TYPE": "float", "GROUP": "Audio Reaction", "LABEL": "Spikes", "DESCRIPTION": "Height of FFT frequency spikes around the ring", "DEFAULT": 0.35, "MIN": 0, "MAX": 1 },
+    { "NAME": "coreGlow", "TYPE": "float", "GROUP": "Audio Reaction", "LABEL": "Core glow", "DESCRIPTION": "Soft glow filling the centre of the ring", "DEFAULT": 0, "MIN": 0, "MAX": 1, "MODS": [{ "SOURCE": "beat", "AMOUNT": 0.35 }] },
+    { "NAME": "thickness", "TYPE": "float", "GROUP": "Ring", "LABEL": "Thickness", "DESCRIPTION": "Stroke width of the ring and spikes", "DEFAULT": 0.006, "MIN": 0.001, "MAX": 0.05 },
+    { "NAME": "spin", "TYPE": "float", "GROUP": "Ring", "LABEL": "Spin", "DESCRIPTION": "Rotation speed around the centre", "DEFAULT": 0.03, "MIN": -0.5, "MAX": 0.5 },
+    { "NAME": "colorA", "TYPE": "color", "GROUP": "Color", "LABEL": "Colour A", "DESCRIPTION": "Inner / low-frequency gradient colour", "DEFAULT": [0.2, 0.9, 1, 1] },
+    { "NAME": "colorB", "TYPE": "color", "GROUP": "Color", "LABEL": "Colour B", "DESCRIPTION": "Outer / high-frequency gradient colour", "DEFAULT": [1, 0.25, 0.7, 1] }
   ]
 }*/
 

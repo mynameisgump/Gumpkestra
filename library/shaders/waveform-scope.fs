@@ -4,11 +4,11 @@
   "CATEGORIES": ["Generator", "Audio"],
   "INPUTS": [
     { "NAME": "audio", "TYPE": "audio" },
-    { "NAME": "amplitude", "TYPE": "float", "DEFAULT": 0.4, "MIN": 0.0, "MAX": 2.0 },
-    { "NAME": "thickness", "TYPE": "float", "DEFAULT": 2.5, "MIN": 0.5, "MAX": 20.0, "LABEL": "Thickness (px)" },
-    { "NAME": "glow", "TYPE": "float", "DEFAULT": 12.0, "MIN": 0.0, "MAX": 60.0, "LABEL": "Glow (px)" },
-    { "NAME": "brightness", "TYPE": "float", "DEFAULT": 0.8, "MIN": 0.0, "MAX": 2.0, "MODS": [{ "SOURCE": "level", "AMOUNT": 0.3 }] },
-    { "NAME": "color", "TYPE": "color", "DEFAULT": [0.7, 1.0, 0.3, 1.0] }
+    { "NAME": "amplitude", "TYPE": "float", "GROUP": "Trace", "LABEL": "Amplitude", "DESCRIPTION": "Vertical height of the oscilloscope wave", "DEFAULT": 0.4, "MIN": 0, "MAX": 2 },
+    { "NAME": "thickness", "TYPE": "float", "GROUP": "Trace", "LABEL": "Thickness (px)", "DESCRIPTION": "Core trace line width in pixels", "DEFAULT": 2.5, "MIN": 0.5, "MAX": 20 },
+    { "NAME": "glow", "TYPE": "float", "GROUP": "Glow & Color", "LABEL": "Glow (px)", "DESCRIPTION": "Soft phosphor halo radius in pixels", "DEFAULT": 12, "MIN": 0, "MAX": 60 },
+    { "NAME": "brightness", "TYPE": "float", "GROUP": "Glow & Color", "LABEL": "Brightness", "DESCRIPTION": "Overall trace luminance", "DEFAULT": 0.8, "MIN": 0, "MAX": 2, "MODS": [{ "SOURCE": "level", "AMOUNT": 0.3 }] },
+    { "NAME": "color", "TYPE": "color", "GROUP": "Glow & Color", "LABEL": "Colour", "DESCRIPTION": "Phosphor trace colour", "DEFAULT": [0.7, 1, 0.3, 1] }
   ]
 }*/
 

@@ -4,22 +4,22 @@
   "CATEGORIES": ["Generator", "Audio", "3D", "Texture"],
   "INPUTS": [
     { "NAME": "audioFFT", "TYPE": "audioFFT" },
-    { "NAME": "radius", "TYPE": "float", "DEFAULT": 0.9, "MIN": 0.3, "MAX": 1.6, "MODS": [{ "SOURCE": "bass", "AMOUNT": 0.1731 }] },
-    { "NAME": "scale", "TYPE": "float", "DEFAULT": 1.0, "MIN": 0.1, "MAX": 4.0, "LABEL": "Scale" },
-    { "NAME": "displace", "TYPE": "float", "DEFAULT": 0.25, "MIN": 0.0, "MAX": 0.8, "LABEL": "Lump height" },
-    { "NAME": "frequency", "TYPE": "float", "DEFAULT": 6.0, "MIN": 1.0, "MAX": 20.0, "LABEL": "Lump count" },
-    { "NAME": "lumpSpeed", "TYPE": "float", "DEFAULT": 1.0, "MIN": 0.0, "MAX": 4.0, "LABEL": "Lump speed" },
-    { "NAME": "spectrum", "TYPE": "float", "DEFAULT": 0.0, "MIN": 0.0, "MAX": 4.0, "LABEL": "Ripple", "MODS": [{ "SOURCE": "level", "AMOUNT": 0.5 }] },
-    { "NAME": "rippleCount", "TYPE": "float", "DEFAULT": 6.0, "MIN": 1.0, "MAX": 20.0, "LABEL": "Ripple count" },
-    { "NAME": "spin", "TYPE": "float", "DEFAULT": 0.3, "MIN": -2.0, "MAX": 2.0 },
-    { "NAME": "hue", "TYPE": "float", "DEFAULT": 0.55, "MIN": 0.0, "MAX": 1.0 },
-    { "NAME": "rim", "TYPE": "float", "DEFAULT": 0.6, "MIN": 0.0, "MAX": 2.0, "LABEL": "Edge glow", "MODS": [{ "SOURCE": "high", "AMOUNT": 0.5 }] },
-    { "NAME": "tex", "TYPE": "image", "DEFAULT": "@meat", "LABEL": "Texture" },
-    { "NAME": "texMix", "TYPE": "float", "DEFAULT": 1.0, "MIN": 0.0, "MAX": 1.0, "LABEL": "Texture mix" },
-    { "NAME": "texScale", "TYPE": "float", "DEFAULT": 1.0, "MIN": 0.25, "MAX": 6.0, "LABEL": "Texture scale" },
-    { "NAME": "bump", "TYPE": "float", "DEFAULT": 0.6, "MIN": 0.0, "MAX": 2.0, "LABEL": "Texture bump" },
-    { "NAME": "gloss", "TYPE": "float", "DEFAULT": 0.5, "MIN": 0.0, "MAX": 2.0, "LABEL": "Wet gloss" },
-    { "NAME": "fillBackground", "TYPE": "bool", "DEFAULT": false, "LABEL": "Fill background" }
+    { "NAME": "radius", "TYPE": "float", "GROUP": "Shape", "LABEL": "Radius", "DESCRIPTION": "Base sphere radius", "DEFAULT": 0.9, "MIN": 0.3, "MAX": 1.6, "MODS": [{ "SOURCE": "bass", "AMOUNT": 0.1731 }] },
+    { "NAME": "scale", "TYPE": "float", "GROUP": "Shape", "LABEL": "Scale", "DESCRIPTION": "Overall zoom scale of the orb", "DEFAULT": 1, "MIN": 0.1, "MAX": 4 },
+    { "NAME": "displace", "TYPE": "float", "GROUP": "Lumps", "LABEL": "Lump height", "DESCRIPTION": "Height of organic drifting surface lumps", "DEFAULT": 0.25, "MIN": 0, "MAX": 0.8 },
+    { "NAME": "frequency", "TYPE": "float", "GROUP": "Lumps", "LABEL": "Lump count", "DESCRIPTION": "Number/density of drifting lumps", "DEFAULT": 6, "MIN": 1, "MAX": 20 },
+    { "NAME": "lumpSpeed", "TYPE": "float", "GROUP": "Lumps", "LABEL": "Lump speed", "DESCRIPTION": "Drift speed of surface lumps", "DEFAULT": 1, "MIN": 0, "MAX": 4 },
+    { "NAME": "spectrum", "TYPE": "float", "GROUP": "Spectrum Ripple", "LABEL": "Ripple", "DESCRIPTION": "Audio FFT ripple amplitude (bass at bottom, treble at top)", "DEFAULT": 0, "MIN": 0, "MAX": 4, "MODS": [{ "SOURCE": "level", "AMOUNT": 0.5 }] },
+    { "NAME": "rippleCount", "TYPE": "float", "GROUP": "Spectrum Ripple", "LABEL": "Ripple count", "DESCRIPTION": "Frequency/density of spectrum ripples", "DEFAULT": 6, "MIN": 1, "MAX": 20 },
+    { "NAME": "spin", "TYPE": "float", "GROUP": "Shape", "LABEL": "Spin", "DESCRIPTION": "Rotation speed around the vertical axis", "DEFAULT": 0.3, "MIN": -2, "MAX": 2 },
+    { "NAME": "hue", "TYPE": "float", "GROUP": "Surface & Color", "LABEL": "Hue", "DESCRIPTION": "Base surface colour hue when texture mix is below 1", "DEFAULT": 0.55, "MIN": 0, "MAX": 1 },
+    { "NAME": "rim", "TYPE": "float", "GROUP": "Surface & Color", "LABEL": "Edge glow", "DESCRIPTION": "Fresnel glow along the silhouette edge", "DEFAULT": 0.6, "MIN": 0, "MAX": 2, "MODS": [{ "SOURCE": "high", "AMOUNT": 0.5 }] },
+    { "NAME": "tex", "TYPE": "image", "GROUP": "Texture", "LABEL": "Texture", "DESCRIPTION": "Texture wrapped around the sphere", "DEFAULT": "@meat" },
+    { "NAME": "texMix", "TYPE": "float", "GROUP": "Texture", "LABEL": "Texture mix", "DESCRIPTION": "Blend between plain hue colouring (0) and texture (1)", "DEFAULT": 1, "MIN": 0, "MAX": 1 },
+    { "NAME": "texScale", "TYPE": "float", "GROUP": "Texture", "LABEL": "Texture scale", "DESCRIPTION": "Texture repeat scale on the sphere", "DEFAULT": 1, "MIN": 0.25, "MAX": 6 },
+    { "NAME": "bump", "TYPE": "float", "GROUP": "Texture", "LABEL": "Texture bump", "DESCRIPTION": "Surface bump height derived from the texture", "DEFAULT": 0.6, "MIN": 0, "MAX": 2 },
+    { "NAME": "gloss", "TYPE": "float", "GROUP": "Surface & Color", "LABEL": "Wet gloss", "DESCRIPTION": "Wet specular highlight intensity", "DEFAULT": 0.5, "MIN": 0, "MAX": 2 },
+    { "NAME": "fillBackground", "TYPE": "bool", "GROUP": "Surface & Color", "LABEL": "Fill background", "DESCRIPTION": "Fill transparent area around the orb with solid background", "DEFAULT": false }
   ]
 }*/
 

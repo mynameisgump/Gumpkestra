@@ -4,14 +4,14 @@
   "CATEGORIES": ["Effect", "Retro"],
   "INPUTS": [
     { "NAME": "inputImage", "TYPE": "image" },
-    { "NAME": "curvature", "TYPE": "float", "DEFAULT": 0.3, "MIN": 0.0, "MAX": 1.0 },
-    { "NAME": "scanlines", "TYPE": "float", "DEFAULT": 0.55, "MIN": 0.0, "MAX": 1.0 },
-    { "NAME": "lineSize", "TYPE": "float", "DEFAULT": 3.0, "MIN": 1.0, "MAX": 8.0, "LABEL": "Line size (px)" },
-    { "NAME": "mask", "TYPE": "float", "DEFAULT": 0.3, "MIN": 0.0, "MAX": 1.0, "LABEL": "Shadow mask" },
-    { "NAME": "convergence", "TYPE": "float", "DEFAULT": 0.5, "MIN": 0.0, "MAX": 2.0 },
-    { "NAME": "hum", "TYPE": "float", "DEFAULT": 0.25, "MIN": 0.0, "MAX": 1.0, "LABEL": "Hum bar" },
-    { "NAME": "flicker", "TYPE": "float", "DEFAULT": 0.2, "MIN": 0.0, "MAX": 1.0 },
-    { "NAME": "vignette", "TYPE": "float", "DEFAULT": 0.5, "MIN": 0.0, "MAX": 1.5 }
+    { "NAME": "curvature", "TYPE": "float", "GROUP": "Tube & Screen", "LABEL": "Curvature", "DESCRIPTION": "Barrel distortion simulating curved glass", "DEFAULT": 0.3, "MIN": 0, "MAX": 1 },
+    { "NAME": "scanlines", "TYPE": "float", "GROUP": "Scanlines & Mask", "LABEL": "Scanlines", "DESCRIPTION": "Darkness of horizontal scanlines", "DEFAULT": 0.55, "MIN": 0, "MAX": 1 },
+    { "NAME": "lineSize", "TYPE": "float", "GROUP": "Scanlines & Mask", "LABEL": "Line size (px)", "DESCRIPTION": "Vertical spacing of scanlines in pixels", "DEFAULT": 3, "MIN": 1, "MAX": 8 },
+    { "NAME": "mask", "TYPE": "float", "GROUP": "Scanlines & Mask", "LABEL": "Shadow mask", "DESCRIPTION": "RGB phosphor aperture-grille mask strength", "DEFAULT": 0.3, "MIN": 0, "MAX": 1 },
+    { "NAME": "convergence", "TYPE": "float", "GROUP": "Signal", "LABEL": "Convergence", "DESCRIPTION": "Horizontal RGB beam misconvergence offset", "DEFAULT": 0.5, "MIN": 0, "MAX": 2 },
+    { "NAME": "hum", "TYPE": "float", "GROUP": "Signal", "LABEL": "Hum bar", "DESCRIPTION": "Scrolling AC power hum band brightness", "DEFAULT": 0.25, "MIN": 0, "MAX": 1 },
+    { "NAME": "flicker", "TYPE": "float", "GROUP": "Signal", "LABEL": "Flicker", "DESCRIPTION": "Subtle high-frequency screen brightness flicker", "DEFAULT": 0.2, "MIN": 0, "MAX": 1 },
+    { "NAME": "vignette", "TYPE": "float", "GROUP": "Tube & Screen", "LABEL": "Vignette", "DESCRIPTION": "Corner darkening around the bezel", "DEFAULT": 0.5, "MIN": 0, "MAX": 1.5 }
   ]
 }*/
 

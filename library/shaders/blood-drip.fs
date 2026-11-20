@@ -4,18 +4,18 @@
   "CATEGORIES": ["Effect", "Biological", "Feedback"],
   "INPUTS": [
     { "NAME": "inputImage", "TYPE": "image" },
-    { "NAME": "pour", "TYPE": "float", "DEFAULT": 0.5, "MIN": 0.0, "MAX": 1.0, "LABEL": "Beat pour" },
-    { "NAME": "bleed", "TYPE": "float", "DEFAULT": 0.0, "MIN": 0.0, "MAX": 1.0, "LABEL": "Bleed from highlights" },
-    { "NAME": "threshold", "TYPE": "float", "DEFAULT": 0.8, "MIN": 0.0, "MAX": 1.0 },
-    { "NAME": "speed", "TYPE": "float", "DEFAULT": 0.4, "MIN": 0.0, "MAX": 1.0 },
-    { "NAME": "columns", "TYPE": "float", "DEFAULT": 90.0, "MIN": 20.0, "MAX": 300.0, "LABEL": "Drip density" },
-    { "NAME": "dry", "TYPE": "float", "DEFAULT": 0.15, "MIN": 0.0, "MAX": 1.0, "LABEL": "Dry speed" },
-    { "NAME": "gloss", "TYPE": "float", "DEFAULT": 0.6, "MIN": 0.0, "MAX": 1.5 },
-    { "NAME": "bloodColor", "TYPE": "color", "DEFAULT": [0.45, 0.0, 0.02, 1.0] }
+    { "NAME": "pour", "TYPE": "float", "GROUP": "Sources", "LABEL": "Beat pour", "DESCRIPTION": "Amount of new drips spawned along the top edge on beats", "DEFAULT": 0.5, "MIN": 0, "MAX": 1 },
+    { "NAME": "bleed", "TYPE": "float", "GROUP": "Sources", "LABEL": "Bleed highlights", "DESCRIPTION": "Rate at which bright areas weep blood", "DEFAULT": 0, "MIN": 0, "MAX": 1 },
+    { "NAME": "threshold", "TYPE": "float", "GROUP": "Sources", "LABEL": "Threshold", "DESCRIPTION": "Minimum brightness required to bleed", "DEFAULT": 0.8, "MIN": 0, "MAX": 1 },
+    { "NAME": "speed", "TYPE": "float", "GROUP": "Flow", "LABEL": "Speed", "DESCRIPTION": "Downward drip flow speed", "DEFAULT": 0.4, "MIN": 0, "MAX": 1 },
+    { "NAME": "columns", "TYPE": "float", "GROUP": "Flow", "LABEL": "Drip density", "DESCRIPTION": "Number of vertical drip columns across the screen", "DEFAULT": 90, "MIN": 20, "MAX": 300 },
+    { "NAME": "dry", "TYPE": "float", "GROUP": "Flow", "LABEL": "Dry speed", "DESCRIPTION": "How quickly trails fade and dry out", "DEFAULT": 0.15, "MIN": 0, "MAX": 1 },
+    { "NAME": "gloss", "TYPE": "float", "GROUP": "Surface", "LABEL": "Gloss", "DESCRIPTION": "Wet specular shine along drip edges", "DEFAULT": 0.6, "MIN": 0, "MAX": 1.5 },
+    { "NAME": "bloodColor", "TYPE": "color", "GROUP": "Surface", "LABEL": "Blood colour", "DESCRIPTION": "Tint of the liquid drips", "DEFAULT": [0.45, 0, 0.02, 1] }
   ],
   "PASSES": [
     { "TARGET": "blood", "PERSISTENT": true, "FLOAT": true },
-    {}
+    {  }
   ]
 }*/
 

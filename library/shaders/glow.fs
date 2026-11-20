@@ -4,9 +4,9 @@
   "CATEGORIES": ["Effect", "Color"],
   "INPUTS": [
     { "NAME": "inputImage", "TYPE": "image" },
-    { "NAME": "threshold", "TYPE": "float", "DEFAULT": 0.4, "MIN": 0.0, "MAX": 1.0 },
-    { "NAME": "radius", "TYPE": "float", "DEFAULT": 12.0, "MIN": 1.0, "MAX": 60.0, "LABEL": "Radius (px)" },
-    { "NAME": "intensity", "TYPE": "float", "DEFAULT": 0.8, "MIN": 0.0, "MAX": 3.0 }
+    { "NAME": "threshold", "TYPE": "float", "GROUP": "Bloom", "LABEL": "Threshold", "DESCRIPTION": "Minimum pixel brightness that triggers bloom", "DEFAULT": 0.4, "MIN": 0, "MAX": 1 },
+    { "NAME": "radius", "TYPE": "float", "GROUP": "Bloom", "LABEL": "Radius (px)", "DESCRIPTION": "Blur spread radius in pixels", "DEFAULT": 12, "MIN": 1, "MAX": 60 },
+    { "NAME": "intensity", "TYPE": "float", "GROUP": "Bloom", "LABEL": "Intensity", "DESCRIPTION": "Strength of the additive bloom glow", "DEFAULT": 0.8, "MIN": 0, "MAX": 3 }
   ]
 }*/
 

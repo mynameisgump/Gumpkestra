@@ -4,18 +4,18 @@
   "CATEGORIES": ["Effect", "Biological", "Feedback"],
   "INPUTS": [
     { "NAME": "inputImage", "TYPE": "image" },
-    { "NAME": "infect", "TYPE": "event" },
-    { "NAME": "spreadRate", "TYPE": "float", "DEFAULT": 0.6, "MIN": 0.0, "MAX": 1.0, "LABEL": "Spread" },
-    { "NAME": "seedSize", "TYPE": "float", "DEFAULT": 0.03, "MIN": 0.005, "MAX": 0.2 },
-    { "NAME": "heal", "TYPE": "float", "DEFAULT": 0.15, "MIN": 0.0, "MAX": 1.0 },
-    { "NAME": "corrupt", "TYPE": "float", "DEFAULT": 0.7, "MIN": 0.0, "MAX": 1.0, "LABEL": "Corruption" },
-    { "NAME": "rimGlow", "TYPE": "float", "DEFAULT": 0.6, "MIN": 0.0, "MAX": 2.0, "LABEL": "Rim glow", "MODS": [{ "SOURCE": "high", "AMOUNT": 0.4 }] },
-    { "NAME": "rotColor", "TYPE": "color", "DEFAULT": [0.3, 0.4, 0.05, 1.0] },
-    { "NAME": "rimColor", "TYPE": "color", "DEFAULT": [0.85, 1.0, 0.25, 1.0] }
+    { "NAME": "infect", "TYPE": "event", "GROUP": "Growth", "LABEL": "Infect", "DESCRIPTION": "Plant a new rot seed (or tick on beat)" },
+    { "NAME": "spreadRate", "TYPE": "float", "GROUP": "Growth", "LABEL": "Spread", "DESCRIPTION": "Speed at which infection expands outward", "DEFAULT": 0.6, "MIN": 0, "MAX": 1 },
+    { "NAME": "seedSize", "TYPE": "float", "GROUP": "Growth", "LABEL": "Seed size", "DESCRIPTION": "Initial radius of each newly planted seed", "DEFAULT": 0.03, "MIN": 0.005, "MAX": 0.2 },
+    { "NAME": "heal", "TYPE": "float", "GROUP": "Growth", "LABEL": "Heal", "DESCRIPTION": "Rate at which infected areas slowly recover", "DEFAULT": 0.15, "MIN": 0, "MAX": 1 },
+    { "NAME": "corrupt", "TYPE": "float", "GROUP": "Appearance", "LABEL": "Corruption", "DESCRIPTION": "Intensity of pixel corruption inside infected regions", "DEFAULT": 0.7, "MIN": 0, "MAX": 1 },
+    { "NAME": "rimGlow", "TYPE": "float", "GROUP": "Appearance", "LABEL": "Rim glow", "DESCRIPTION": "Glowing border strength along the advancing rot edge", "DEFAULT": 0.6, "MIN": 0, "MAX": 2, "MODS": [{ "SOURCE": "high", "AMOUNT": 0.4 }] },
+    { "NAME": "rotColor", "TYPE": "color", "GROUP": "Appearance", "LABEL": "Rot colour", "DESCRIPTION": "Colour tint inside infected zones", "DEFAULT": [0.3, 0.4, 0.05, 1] },
+    { "NAME": "rimColor", "TYPE": "color", "GROUP": "Appearance", "LABEL": "Rim colour", "DESCRIPTION": "Colour of the glowing infection edge", "DEFAULT": [0.85, 1, 0.25, 1] }
   ],
   "PASSES": [
     { "TARGET": "rotmap", "PERSISTENT": true, "FLOAT": true },
-    {}
+    {  }
   ]
 }*/
 

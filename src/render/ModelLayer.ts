@@ -209,55 +209,72 @@ void main() {
 
 export const SHADING_MODES = ['Lit', 'Flat (faceted)', 'Unlit', 'Normals', 'X-ray', 'Wireframe'];
 
-const f = (NAME: string, DEFAULT: number, MIN: number, MAX: number, LABEL?: string): ISFInput =>
-  ({ NAME, TYPE: 'float', DEFAULT, MIN, MAX, LABEL });
+const f = (GROUP: string, NAME: string, DEFAULT: number, MIN: number, MAX: number, LABEL: string, DESCRIPTION: string): ISFInput =>
+  ({ GROUP, NAME, TYPE: 'float', DEFAULT, MIN, MAX, LABEL, DESCRIPTION });
 
 // Declared ISF-style so the params panel, modulators and presets treat a model
 // layer exactly like a shader layer.
 const BASE_INPUTS: ISFInput[] = [
-  { NAME: 'animation', TYPE: 'long', DEFAULT: 0, VALUES: [0], LABELS: ['(no animations)'] },
-  f('animSpeed', 1, -2, 4, 'Anim speed'),
-  f('scale', 1, 0.1, 4),
-  f('spinY', 0.08, -1, 1, 'Spin (rev/s)'),
-  f('spinX', 0, -1, 1, 'Tumble (rev/s)'),
-  f('spinZ', 0, -2, 2, 'Roll (rev/s)'),
-  f('ratchet', 0, -1, 1, 'Roll ratchet (rev/beat)'),
-  f('rotX', 0, -180, 180, 'Rotate X°'),
-  f('rotY', 0, -180, 180, 'Rotate Y°'),
-  f('rotZ', 0, -180, 180, 'Rotate Z°'),
-  f('offsetX', 0, -2, 2, 'Offset X'),
-  f('offsetY', 0, -2, 2, 'Offset Y'),
-  { NAME: 'pivot', TYPE: 'long', DEFAULT: 0, VALUES: [0, 1], LABELS: ['Bounds centre', 'Model origin'] },
-  f('zoom', 1, 0.3, 4),
-  f('fov', 45, 10, 120, 'FOV°'),
-  f('inflate', 0, -0.3, 0.6),
-  f('writhe', 0, 0, 0.6),
-  f('writheScale', 2.5, 0.5, 10, 'Writhe scale'),
-  f('writheSpeed', 0.6, 0, 4, 'Writhe speed'),
-  f('fftDisplace', 0, 0, 1.5, 'Spectrum spikes'),
-  f('twist', 0, -6, 6),
-  f('explode', 0, 0, 1, 'Explode / shatter'),
-  f('melt', 0, 0, 1),
-  f('snap', 0, 0, 1, 'Vertex snap (PSX)'),
-  f('affine', 0, 0, 1, 'Affine textures (PSX)'),
-  { NAME: 'copies', TYPE: 'long', DEFAULT: 1, VALUES: [1, 2, 3, 4, 5, 6, 8, 12] },
-  f('spread', 1.8, 0, 4, 'Ring radius'),
-  f('orbit', 0, -1, 1, 'Ring spin (rev/s)'),
-  { NAME: 'shading', TYPE: 'long', DEFAULT: 0, VALUES: SHADING_MODES.map((_, i) => i), LABELS: SHADING_MODES },
-  { NAME: 'texture', TYPE: 'image', DEFAULT: MODEL_TEXTURE, LABEL: 'Texture' },
-  { NAME: 'mapping', TYPE: 'long', DEFAULT: 0, VALUES: [0, 1], LABELS: ['Model UVs', 'Box (triplanar)'] },
-  f('texScale', 1, 0.1, 8, 'Texture scale'),
-  f('texScrollX', 0, -1, 1, 'Scroll X (/s)'),
-  f('texScrollY', 0, -1, 1, 'Scroll Y (/s)'),
-  { NAME: 'tint', TYPE: 'color', DEFAULT: [1, 1, 1, 1] },
-  f('wet', 0.4, 0, 2, 'Wet / specular'),
-  f('rim', 0.4, 0, 2, 'Rim light'),
-  { NAME: 'rimColor', TYPE: 'color', DEFAULT: [1, 0.25, 0.3, 1], LABEL: 'Rim colour' },
-  f('lightAngle', 35, -180, 180, 'Light angle°'),
-  f('wire', 0, 0, 1, 'Wire overlay'),
-  { NAME: 'wireColor', TYPE: 'color', DEFAULT: [0.7, 1, 0.3, 1], LABEL: 'Wire colour' },
-  f('fog', 0, 0, 3),
-  { NAME: 'pixelated', TYPE: 'bool', DEFAULT: false, LABEL: 'Pixelated textures' },
+  // Animation
+  { GROUP: 'Animation', NAME: 'animation', TYPE: 'long', DEFAULT: 0, VALUES: [0], LABELS: ['(no animations)'], LABEL: 'Clip', DESCRIPTION: 'glTF skeletal or node animation clip' },
+  f('Animation', 'animSpeed', 1, -2, 4, 'Speed', 'Animation playback speed multiplier (negative reverses)'),
+
+  // Transform
+  f('Transform', 'scale', 1, 0.1, 4, 'Scale', 'Uniform model scale'),
+  f('Transform', 'rotX', 0, -180, 180, 'Rotate X°', 'Static pitch angle in degrees'),
+  f('Transform', 'rotY', 0, -180, 180, 'Rotate Y°', 'Static yaw angle in degrees'),
+  f('Transform', 'rotZ', 0, -180, 180, 'Rotate Z°', 'Static roll angle in degrees'),
+  f('Transform', 'offsetX', 0, -2, 2, 'Offset X', 'Horizontal screen offset'),
+  f('Transform', 'offsetY', 0, -2, 2, 'Offset Y', 'Vertical screen offset'),
+  { GROUP: 'Transform', NAME: 'pivot', TYPE: 'long', DEFAULT: 0, VALUES: [0, 1], LABELS: ['Bounds centre', 'Model origin'], LABEL: 'Pivot', DESCRIPTION: 'Point the model rotates around' },
+
+  // Motion
+  f('Motion', 'spinY', 0.08, -1, 1, 'Spin (rev/s)', 'Continuous Y-axis rotation speed'),
+  f('Motion', 'spinX', 0, -1, 1, 'Tumble (rev/s)', 'Continuous X-axis rotation speed'),
+  f('Motion', 'spinZ', 0, -2, 2, 'Roll (rev/s)', 'Continuous Z-axis rotation speed'),
+  f('Motion', 'ratchet', 0, -1, 1, 'Roll ratchet', 'Revolutions to click forward on every beat'),
+
+  // Camera
+  f('Camera', 'zoom', 1, 0.3, 4, 'Zoom', 'Camera distance zoom'),
+  f('Camera', 'fov', 45, 10, 120, 'FOV°', 'Perspective field of view in degrees'),
+
+  // Deform
+  f('Deform', 'inflate', 0, -0.3, 0.6, 'Inflate', 'Push vertices outward along surface normals'),
+  f('Deform', 'writhe', 0, 0, 0.6, 'Writhe', '3D noise displacement along surface normals'),
+  f('Deform', 'writheScale', 2.5, 0.5, 10, 'Writhe scale', 'Spatial frequency of writhe noise'),
+  f('Deform', 'writheSpeed', 0.6, 0, 4, 'Writhe speed', 'Animation speed of writhe noise'),
+  f('Deform', 'fftDisplace', 0, 0, 1.5, 'Spectrum spikes', 'Displace vertices with audio FFT along height'),
+  f('Deform', 'twist', 0, -6, 6, 'Twist', 'Spiral twist around the vertical axis'),
+  f('Deform', 'explode', 0, 0, 1, 'Explode', 'Shatter and tumble triangles outward'),
+  f('Deform', 'melt', 0, 0, 1, 'Melt', 'Sag and puddle geometry downward'),
+
+  // Copies
+  { GROUP: 'Copies', NAME: 'copies', TYPE: 'long', DEFAULT: 1, VALUES: [1, 2, 3, 4, 5, 6, 8, 12], LABEL: 'Count', DESCRIPTION: 'Number of instances arranged in a ring' },
+  f('Copies', 'spread', 1.8, 0, 4, 'Ring radius', 'Radius of the instance ring'),
+  f('Copies', 'orbit', 0, -1, 1, 'Ring spin', 'Rotation speed of the ring (rev/s)'),
+
+  // Texture
+  { GROUP: 'Texture', NAME: 'texture', TYPE: 'image', DEFAULT: MODEL_TEXTURE, LABEL: 'Texture', DESCRIPTION: 'Override model materials with a texture or layers below' },
+  { GROUP: 'Texture', NAME: 'mapping', TYPE: 'long', DEFAULT: 0, VALUES: [0, 1], LABELS: ['Model UVs', 'Box (triplanar)'], LABEL: 'Mapping', DESCRIPTION: 'Use model UVs or triplanar box projection' },
+  f('Texture', 'texScale', 1, 0.1, 8, 'Scale', 'Texture repeat scale'),
+  f('Texture', 'texScrollX', 0, -1, 1, 'Scroll X (/s)', 'Horizontal texture scroll speed'),
+  f('Texture', 'texScrollY', 0, -1, 1, 'Scroll Y (/s)', 'Vertical texture scroll speed'),
+
+  // Shading & Lighting
+  { GROUP: 'Shading & Lighting', NAME: 'shading', TYPE: 'long', DEFAULT: 0, VALUES: SHADING_MODES.map((_, i) => i), LABELS: SHADING_MODES, LABEL: 'Shading', DESCRIPTION: 'Surface rendering mode' },
+  { GROUP: 'Shading & Lighting', NAME: 'tint', TYPE: 'color', DEFAULT: [1, 1, 1, 1], LABEL: 'Tint', DESCRIPTION: 'Multiply colour over the surface' },
+  f('Shading & Lighting', 'wet', 0.4, 0, 2, 'Wet / specular', 'Glossy specular highlight intensity'),
+  f('Shading & Lighting', 'rim', 0.4, 0, 2, 'Rim light', 'Fresnel edge highlight intensity'),
+  { GROUP: 'Shading & Lighting', NAME: 'rimColor', TYPE: 'color', DEFAULT: [1, 0.25, 0.3, 1], LABEL: 'Rim colour', DESCRIPTION: 'Colour of the fresnel edge glow' },
+  f('Shading & Lighting', 'lightAngle', 35, -180, 180, 'Light angle°', 'Key light azimuth angle around the model'),
+  f('Shading & Lighting', 'wire', 0, 0, 1, 'Wire overlay', 'Blend wireframe edges over the surface'),
+  { GROUP: 'Shading & Lighting', NAME: 'wireColor', TYPE: 'color', DEFAULT: [0.7, 1, 0.3, 1], LABEL: 'Wire colour', DESCRIPTION: 'Colour of wireframe lines' },
+  f('Shading & Lighting', 'fog', 0, 0, 3, 'Fog', 'Distance fog attenuation into darkness'),
+
+  // PSX / Retro
+  f('PSX / Retro', 'snap', 0, 0, 1, 'Vertex snap', 'Snap projected vertices to a coarse PS1-style grid'),
+  f('PSX / Retro', 'affine', 0, 0, 1, 'Affine warp', 'Disable perspective-correct UVs for PS1 texture wobble'),
+  { GROUP: 'PSX / Retro', NAME: 'pixelated', TYPE: 'bool', DEFAULT: false, LABEL: 'Pixelated', DESCRIPTION: 'Use nearest-neighbour texture filtering' },
 ];
 
 const DESCRIPTION = '3D model (.glb/.gltf, .obj, .stl or a built-in shape). Drop a file on the canvas to import it. Every deformer runs on the GPU and can be modulated.';

@@ -4,9 +4,9 @@
   "CATEGORIES": ["Effect", "Glitch"],
   "INPUTS": [
     { "NAME": "inputImage", "TYPE": "image" },
-    { "NAME": "amount", "TYPE": "float", "DEFAULT": 0.006, "MIN": 0.0, "MAX": 0.08 },
-    { "NAME": "radial", "TYPE": "bool", "DEFAULT": true },
-    { "NAME": "angle", "TYPE": "float", "DEFAULT": 0.0, "MIN": 0.0, "MAX": 6.2832 }
+    { "NAME": "amount", "TYPE": "float", "GROUP": "Aberration", "LABEL": "Amount", "DESCRIPTION": "Channel separation distance", "DEFAULT": 0.006, "MIN": 0, "MAX": 0.08 },
+    { "NAME": "radial", "TYPE": "bool", "GROUP": "Aberration", "LABEL": "Radial", "DESCRIPTION": "Radiate split outward from screen centre instead of a fixed angle", "DEFAULT": true },
+    { "NAME": "angle", "TYPE": "float", "GROUP": "Aberration", "LABEL": "Angle", "DESCRIPTION": "Split direction in radians (when Radial is off)", "DEFAULT": 0, "MIN": 0, "MAX": 6.2832 }
   ]
 }*/
 

@@ -3,13 +3,13 @@
   "CATEGORIES": ["Effect", "Texture", "Distortion"],
   "INPUTS": [
     { "NAME": "inputImage", "TYPE": "image" },
-    { "NAME": "map", "TYPE": "image", "DEFAULT": "@noise", "LABEL": "Displacement map" },
-    { "NAME": "amount", "TYPE": "float", "DEFAULT": 0.025, "MIN": 0.0, "MAX": 0.25 },
-    { "NAME": "beatKick", "TYPE": "float", "DEFAULT": 0.0, "MIN": 0.0, "MAX": 0.25, "LABEL": "Kick", "MODS": [{ "SOURCE": "beat", "AMOUNT": 0.16 }] },
-    { "NAME": "scale", "TYPE": "float", "DEFAULT": 1.0, "MIN": 0.25, "MAX": 8.0, "LABEL": "Map scale" },
-    { "NAME": "scroll", "TYPE": "point2D", "DEFAULT": [0.0, 0.03], "MIN": [-0.5, -0.5], "MAX": [0.5, 0.5], "LABEL": "Map scroll (/s)" },
-    { "NAME": "mode", "TYPE": "long", "DEFAULT": 0, "VALUES": [0, 1], "LABELS": ["Crawl (two-way)", "Radial (bulge)"] },
-    { "NAME": "stain", "TYPE": "float", "DEFAULT": 0.0, "MIN": 0.0, "MAX": 1.0, "LABEL": "Stain with map" }
+    { "NAME": "map", "TYPE": "image", "GROUP": "Map", "LABEL": "Displacement map", "DESCRIPTION": "Texture driving pixel displacement", "DEFAULT": "@noise" },
+    { "NAME": "amount", "TYPE": "float", "GROUP": "Warp", "LABEL": "Amount", "DESCRIPTION": "Base displacement distance", "DEFAULT": 0.025, "MIN": 0, "MAX": 0.25 },
+    { "NAME": "beatKick", "TYPE": "float", "GROUP": "Warp", "LABEL": "Beat kick", "DESCRIPTION": "Extra displacement punch on beats", "DEFAULT": 0, "MIN": 0, "MAX": 0.25, "MODS": [{ "SOURCE": "beat", "AMOUNT": 0.16 }] },
+    { "NAME": "scale", "TYPE": "float", "GROUP": "Map", "LABEL": "Map scale", "DESCRIPTION": "Tiling scale of the displacement map", "DEFAULT": 1, "MIN": 0.25, "MAX": 8 },
+    { "NAME": "scroll", "TYPE": "point2D", "GROUP": "Map", "LABEL": "Map scroll (/s)", "DESCRIPTION": "Continuous X/Y scroll speed of the map", "DEFAULT": [0, 0.03], "MIN": [-0.5, -0.5], "MAX": [0.5, 0.5] },
+    { "NAME": "mode", "TYPE": "long", "GROUP": "Warp", "LABEL": "Mode", "DESCRIPTION": "Two-way directional crawl vs radial bulge", "DEFAULT": 0, "VALUES": [0, 1], "LABELS": ["Crawl (two-way)", "Radial (bulge)"] },
+    { "NAME": "stain", "TYPE": "float", "GROUP": "Surface", "LABEL": "Stain with map", "DESCRIPTION": "Tint/blend the map texture visibly onto the image", "DEFAULT": 0, "MIN": 0, "MAX": 1 }
   ]
 }*/
 

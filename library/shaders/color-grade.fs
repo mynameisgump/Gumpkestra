@@ -4,11 +4,11 @@
   "CATEGORIES": ["Effect", "Color"],
   "INPUTS": [
     { "NAME": "inputImage", "TYPE": "image" },
-    { "NAME": "hue", "TYPE": "float", "DEFAULT": 0.0, "MIN": 0.0, "MAX": 1.0 },
-    { "NAME": "saturation", "TYPE": "float", "DEFAULT": 1.0, "MIN": 0.0, "MAX": 2.5 },
-    { "NAME": "contrast", "TYPE": "float", "DEFAULT": 1.0, "MIN": 0.3, "MAX": 2.5 },
-    { "NAME": "exposure", "TYPE": "float", "DEFAULT": 0.0, "MIN": -2.0, "MAX": 2.0 },
-    { "NAME": "invert", "TYPE": "bool", "DEFAULT": false }
+    { "NAME": "hue", "TYPE": "float", "GROUP": "Color", "LABEL": "Hue", "DESCRIPTION": "Rotate all colours around the hue wheel", "DEFAULT": 0, "MIN": 0, "MAX": 1 },
+    { "NAME": "saturation", "TYPE": "float", "GROUP": "Color", "LABEL": "Saturation", "DESCRIPTION": "Colour intensity (0 = greyscale)", "DEFAULT": 1, "MIN": 0, "MAX": 2.5 },
+    { "NAME": "contrast", "TYPE": "float", "GROUP": "Tone", "LABEL": "Contrast", "DESCRIPTION": "Expand or compress midtone contrast", "DEFAULT": 1, "MIN": 0.3, "MAX": 2.5 },
+    { "NAME": "exposure", "TYPE": "float", "GROUP": "Tone", "LABEL": "Exposure", "DESCRIPTION": "Brightness shift in stops", "DEFAULT": 0, "MIN": -2, "MAX": 2 },
+    { "NAME": "invert", "TYPE": "bool", "GROUP": "Color", "LABEL": "Invert", "DESCRIPTION": "Invert output RGB colours", "DEFAULT": false }
   ]
 }*/
 

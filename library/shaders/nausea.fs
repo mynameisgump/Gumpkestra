@@ -4,14 +4,14 @@
   "CATEGORIES": ["Effect", "Distortion"],
   "INPUTS": [
     { "NAME": "inputImage", "TYPE": "image" },
-    { "NAME": "doubleVision", "TYPE": "float", "DEFAULT": 0.02, "MIN": 0.0, "MAX": 0.1 },
-    { "NAME": "split", "TYPE": "float", "DEFAULT": 0.0, "MIN": 0.0, "MAX": 0.1, "MODS": [{ "SOURCE": "beat", "AMOUNT": 0.2 }] },
-    { "NAME": "sway", "TYPE": "float", "DEFAULT": 0.04, "MIN": 0.0, "MAX": 0.2 },
-    { "NAME": "rate", "TYPE": "float", "DEFAULT": 0.12, "MIN": 0.0, "MAX": 1.0, "LABEL": "Sway speed" },
-    { "NAME": "waver", "TYPE": "float", "DEFAULT": 0.006, "MIN": 0.0, "MAX": 0.04 },
-    { "NAME": "sick", "TYPE": "float", "DEFAULT": 0.35, "MIN": 0.0, "MAX": 1.0, "LABEL": "Sick tint" },
-    { "NAME": "tunnelVision", "TYPE": "float", "DEFAULT": 0.5, "MIN": 0.0, "MAX": 1.0 },
-    { "NAME": "tunnelPulse", "TYPE": "float", "DEFAULT": 0.0, "MIN": 0.0, "MAX": 1.0, "LABEL": "Tunnel pulse", "MODS": [{ "SOURCE": "level", "AMOUNT": 0.4 }] }
+    { "NAME": "doubleVision", "TYPE": "float", "GROUP": "Double Vision", "LABEL": "Double vision", "DESCRIPTION": "Drifting offset separating the twin ghost images", "DEFAULT": 0.02, "MIN": 0, "MAX": 0.1 },
+    { "NAME": "split", "TYPE": "float", "GROUP": "Double Vision", "LABEL": "Split", "DESCRIPTION": "Horizontal stereo split kick", "DEFAULT": 0, "MIN": 0, "MAX": 0.1, "MODS": [{ "SOURCE": "beat", "AMOUNT": 0.2 }] },
+    { "NAME": "sway", "TYPE": "float", "GROUP": "Motion", "LABEL": "Sway", "DESCRIPTION": "Rocking tilt angle amplitude", "DEFAULT": 0.04, "MIN": 0, "MAX": 0.2 },
+    { "NAME": "rate", "TYPE": "float", "GROUP": "Motion", "LABEL": "Sway speed", "DESCRIPTION": "Speed of the rocking sway cycle", "DEFAULT": 0.12, "MIN": 0, "MAX": 1 },
+    { "NAME": "waver", "TYPE": "float", "GROUP": "Motion", "LABEL": "Waver", "DESCRIPTION": "Wobbly heat-haze sine ripple", "DEFAULT": 0.006, "MIN": 0, "MAX": 0.04 },
+    { "NAME": "sick", "TYPE": "float", "GROUP": "Tunnel & Tint", "LABEL": "Sick tint", "DESCRIPTION": "Amount of queasy yellow-green colour cast", "DEFAULT": 0.35, "MIN": 0, "MAX": 1 },
+    { "NAME": "tunnelVision", "TYPE": "float", "GROUP": "Tunnel & Tint", "LABEL": "Tunnel vision", "DESCRIPTION": "Darkness closing in around the edges", "DEFAULT": 0.5, "MIN": 0, "MAX": 1 },
+    { "NAME": "tunnelPulse", "TYPE": "float", "GROUP": "Tunnel & Tint", "LABEL": "Tunnel pulse", "DESCRIPTION": "Extra tunnel constriction driven by loudness", "DEFAULT": 0, "MIN": 0, "MAX": 1, "MODS": [{ "SOURCE": "level", "AMOUNT": 0.4 }] }
   ]
 }*/
 

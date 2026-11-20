@@ -4,15 +4,15 @@
   "CATEGORIES": ["Effect", "Feedback"],
   "INPUTS": [
     { "NAME": "inputImage", "TYPE": "image" },
-    { "NAME": "feedback", "TYPE": "float", "DEFAULT": 0.88, "MIN": 0.0, "MAX": 0.99 },
-    { "NAME": "zoom", "TYPE": "float", "DEFAULT": 1.015, "MIN": 0.9, "MAX": 1.15 },
-    { "NAME": "rotate", "TYPE": "float", "DEFAULT": 0.0, "MIN": -0.1, "MAX": 0.1 },
-    { "NAME": "drift", "TYPE": "point2D", "DEFAULT": [0.0, 0.0], "MIN": [-0.01, -0.01], "MAX": [0.01, 0.01] },
-    { "NAME": "hueDrift", "TYPE": "float", "DEFAULT": 0.01, "MIN": 0.0, "MAX": 0.2 }
+    { "NAME": "feedback", "TYPE": "float", "GROUP": "Feedback", "LABEL": "Feedback", "DESCRIPTION": "Amount of previous frame retained each step", "DEFAULT": 0.88, "MIN": 0, "MAX": 0.99 },
+    { "NAME": "zoom", "TYPE": "float", "GROUP": "Transform", "LABEL": "Zoom", "DESCRIPTION": "Per-frame scale factor (> 1 zooms in, < 1 zooms out)", "DEFAULT": 1.015, "MIN": 0.9, "MAX": 1.15 },
+    { "NAME": "rotate", "TYPE": "float", "GROUP": "Transform", "LABEL": "Rotate", "DESCRIPTION": "Per-frame spin angle in radians", "DEFAULT": 0, "MIN": -0.1, "MAX": 0.1 },
+    { "NAME": "drift", "TYPE": "point2D", "GROUP": "Transform", "LABEL": "Drift", "DESCRIPTION": "Per-frame X/Y translation offset", "DEFAULT": [0, 0], "MIN": [-0.01, -0.01], "MAX": [0.01, 0.01] },
+    { "NAME": "hueDrift", "TYPE": "float", "GROUP": "Color", "LABEL": "Hue drift", "DESCRIPTION": "Per-frame hue rotation applied to trails", "DEFAULT": 0.01, "MIN": 0, "MAX": 0.2 }
   ],
   "PASSES": [
     { "TARGET": "trail", "PERSISTENT": true, "FLOAT": true },
-    {}
+    {  }
   ]
 }*/
 

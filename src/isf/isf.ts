@@ -10,6 +10,10 @@ export interface ISFInput {
   NAME: string;
   TYPE: ISFInputType;
   LABEL?: string;
+  /** Gumpkestra extension: section heading for grouping inputs in the parameters panel. */
+  GROUP?: string;
+  /** Gumpkestra extension: tooltip explaining what this parameter controls. */
+  DESCRIPTION?: string;
   /** Image input supports an ordered, spatial tile sequence. */
   TILE_SEQUENCE?: boolean;
   DEFAULT?: unknown;

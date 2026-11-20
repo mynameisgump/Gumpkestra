@@ -4,16 +4,16 @@
   "CATEGORIES": ["Effect", "Glitch"],
   "INPUTS": [
     { "NAME": "inputImage", "TYPE": "image" },
-    { "NAME": "blockSize", "TYPE": "float", "DEFAULT": 0.06, "MIN": 0.01, "MAX": 0.3 },
-    { "NAME": "amount", "TYPE": "float", "DEFAULT": 0.15, "MIN": 0.0, "MAX": 1.0, "LABEL": "Displace" },
-    { "NAME": "smear", "TYPE": "float", "DEFAULT": 0.2, "MIN": 0.0, "MAX": 1.0 },
-    { "NAME": "flow", "TYPE": "float", "DEFAULT": 0.004, "MIN": 0.0, "MAX": 0.03, "LABEL": "Smear flow" },
-    { "NAME": "colorGlitch", "TYPE": "float", "DEFAULT": 0.3, "MIN": 0.0, "MAX": 1.0 },
-    { "NAME": "jitter", "TYPE": "float", "DEFAULT": 0.0, "MIN": 0.0, "MAX": 30.0, "LABEL": "Reseed / sec" }
+    { "NAME": "blockSize", "TYPE": "float", "GROUP": "Blocks", "LABEL": "Block size", "DESCRIPTION": "Size of glitch displacement blocks", "DEFAULT": 0.06, "MIN": 0.01, "MAX": 0.3 },
+    { "NAME": "amount", "TYPE": "float", "GROUP": "Blocks", "LABEL": "Displace", "DESCRIPTION": "Strength of block UV displacement", "DEFAULT": 0.15, "MIN": 0, "MAX": 1 },
+    { "NAME": "smear", "TYPE": "float", "GROUP": "Smear", "LABEL": "Smear", "DESCRIPTION": "Datamosh retention of blocks from previous frames", "DEFAULT": 0.2, "MIN": 0, "MAX": 1 },
+    { "NAME": "flow", "TYPE": "float", "GROUP": "Smear", "LABEL": "Smear flow", "DESCRIPTION": "Drift speed of held datamosh smear trails", "DEFAULT": 0.004, "MIN": 0, "MAX": 0.03 },
+    { "NAME": "colorGlitch", "TYPE": "float", "GROUP": "Color", "LABEL": "Colour glitch", "DESCRIPTION": "Per-block RGB channel offset and tint corruption", "DEFAULT": 0.3, "MIN": 0, "MAX": 1 },
+    { "NAME": "jitter", "TYPE": "float", "GROUP": "Blocks", "LABEL": "Reseed / sec", "DESCRIPTION": "Random block re-seed rate per second (0 = beats only)", "DEFAULT": 0, "MIN": 0, "MAX": 30 }
   ],
   "PASSES": [
     { "TARGET": "mosh", "PERSISTENT": true },
-    {}
+    {  }
   ]
 }*/
 

@@ -4,11 +4,11 @@
   "CATEGORIES": ["Effect", "Retro", "Color"],
   "INPUTS": [
     { "NAME": "inputImage", "TYPE": "image" },
-    { "NAME": "palette", "TYPE": "long", "DEFAULT": 1, "VALUES": [0, 1, 2, 3, 4, 5], "LABELS": ["Mono", "Sickbay green", "Blood", "Rust", "Bruise", "Garish"] },
-    { "NAME": "pixelSize", "TYPE": "float", "DEFAULT": 2.0, "MIN": 1.0, "MAX": 8.0 },
-    { "NAME": "strength", "TYPE": "float", "DEFAULT": 1.0, "MIN": 0.0, "MAX": 1.0, "LABEL": "Dither strength" },
-    { "NAME": "gamma", "TYPE": "float", "DEFAULT": 1.0, "MIN": 0.4, "MAX": 2.5 },
-    { "NAME": "amount", "TYPE": "float", "DEFAULT": 1.0, "MIN": 0.0, "MAX": 1.0, "LABEL": "Mix" }
+    { "NAME": "palette", "TYPE": "long", "GROUP": "Palette & Tone", "LABEL": "Palette", "DESCRIPTION": "4-colour retro palette preset", "DEFAULT": 1, "VALUES": [0, 1, 2, 3, 4, 5], "LABELS": ["Mono", "Sickbay green", "Blood", "Rust", "Bruise", "Garish"] },
+    { "NAME": "pixelSize", "TYPE": "float", "GROUP": "Dither", "LABEL": "Pixel size", "DESCRIPTION": "Size of dithered pixel blocks", "DEFAULT": 2, "MIN": 1, "MAX": 8 },
+    { "NAME": "strength", "TYPE": "float", "GROUP": "Dither", "LABEL": "Dither strength", "DESCRIPTION": "Ordered Bayer dithering threshold intensity", "DEFAULT": 1, "MIN": 0, "MAX": 1 },
+    { "NAME": "gamma", "TYPE": "float", "GROUP": "Palette & Tone", "LABEL": "Gamma", "DESCRIPTION": "Midtone curve before quantising to the palette", "DEFAULT": 1, "MIN": 0.4, "MAX": 2.5 },
+    { "NAME": "amount", "TYPE": "float", "GROUP": "Dither", "LABEL": "Mix", "DESCRIPTION": "Blend between original image (0) and dithered output (1)", "DEFAULT": 1, "MIN": 0, "MAX": 1 }
   ]
 }*/
 

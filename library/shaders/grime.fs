@@ -4,14 +4,14 @@
   "CATEGORIES": ["Effect", "Industrial", "Color"],
   "INPUTS": [
     { "NAME": "inputImage", "TYPE": "image" },
-    { "NAME": "grain", "TYPE": "float", "DEFAULT": 0.12, "MIN": 0.0, "MAX": 0.5 },
-    { "NAME": "dust", "TYPE": "float", "DEFAULT": 0.3, "MIN": 0.0, "MAX": 1.0, "LABEL": "Dust & scratches" },
-    { "NAME": "smudge", "TYPE": "float", "DEFAULT": 0.3, "MIN": 0.0, "MAX": 1.0, "LABEL": "Dirty lens" },
-    { "NAME": "flicker", "TYPE": "float", "DEFAULT": 0.25, "MIN": 0.0, "MAX": 1.0, "LABEL": "Fluorescent flicker" },
-    { "NAME": "crush", "TYPE": "float", "DEFAULT": 0.25, "MIN": 0.0, "MAX": 1.0, "LABEL": "Crush blacks" },
-    { "NAME": "vignette", "TYPE": "float", "DEFAULT": 0.6, "MIN": 0.0, "MAX": 1.5 },
-    { "NAME": "tintAmount", "TYPE": "float", "DEFAULT": 0.3, "MIN": 0.0, "MAX": 1.0 },
-    { "NAME": "tint", "TYPE": "color", "DEFAULT": [1.0, 0.75, 0.45, 1.0] }
+    { "NAME": "grain", "TYPE": "float", "GROUP": "Film & Dirt", "LABEL": "Film grain", "DESCRIPTION": "Animated film grain intensity", "DEFAULT": 0.12, "MIN": 0, "MAX": 0.5 },
+    { "NAME": "dust", "TYPE": "float", "GROUP": "Film & Dirt", "LABEL": "Dust & scratches", "DESCRIPTION": "Floating film dust specks and vertical scratches", "DEFAULT": 0.3, "MIN": 0, "MAX": 1 },
+    { "NAME": "smudge", "TYPE": "float", "GROUP": "Film & Dirt", "LABEL": "Dirty lens", "DESCRIPTION": "Smudged/dirty lens haze overlay", "DEFAULT": 0.3, "MIN": 0, "MAX": 1 },
+    { "NAME": "flicker", "TYPE": "float", "GROUP": "Lighting & Tone", "LABEL": "Fluorescent flicker", "DESCRIPTION": "Buzzing fluorescent exposure flicker", "DEFAULT": 0.25, "MIN": 0, "MAX": 1 },
+    { "NAME": "crush", "TYPE": "float", "GROUP": "Lighting & Tone", "LABEL": "Crush blacks", "DESCRIPTION": "Crush shadow detail toward pure black", "DEFAULT": 0.25, "MIN": 0, "MAX": 1 },
+    { "NAME": "vignette", "TYPE": "float", "GROUP": "Lighting & Tone", "LABEL": "Vignette", "DESCRIPTION": "Edge darkening around the frame", "DEFAULT": 0.6, "MIN": 0, "MAX": 1.5 },
+    { "NAME": "tintAmount", "TYPE": "float", "GROUP": "Color", "LABEL": "Tint amount", "DESCRIPTION": "Strength of industrial colour cast", "DEFAULT": 0.3, "MIN": 0, "MAX": 1 },
+    { "NAME": "tint", "TYPE": "color", "GROUP": "Color", "LABEL": "Tint colour", "DESCRIPTION": "Colour of the sodium/grime cast", "DEFAULT": [1, 0.75, 0.45, 1] }
   ]
 }*/
 

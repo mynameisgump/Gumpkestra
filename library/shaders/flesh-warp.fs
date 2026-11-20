@@ -4,13 +4,13 @@
   "CATEGORIES": ["Effect", "Biological"],
   "INPUTS": [
     { "NAME": "inputImage", "TYPE": "image" },
-    { "NAME": "warp", "TYPE": "float", "DEFAULT": 0.025, "MIN": 0.0, "MAX": 0.15 },
-    { "NAME": "scale", "TYPE": "float", "DEFAULT": 3.0, "MIN": 0.5, "MAX": 10.0 },
-    { "NAME": "breathRate", "TYPE": "float", "DEFAULT": 0.25, "MIN": 0.0, "MAX": 2.0, "LABEL": "Breaths / sec" },
-    { "NAME": "heartbeat", "TYPE": "float", "DEFAULT": 0.0, "MIN": 0.0, "MAX": 0.25, "LABEL": "Swell", "MODS": [{ "SOURCE": "bass", "AMOUNT": 0.24 }] },
-    { "NAME": "fleshTint", "TYPE": "float", "DEFAULT": 0.3, "MIN": 0.0, "MAX": 1.0 },
-    { "NAME": "wetness", "TYPE": "float", "DEFAULT": 0.4, "MIN": 0.0, "MAX": 1.5 },
-    { "NAME": "tint", "TYPE": "color", "DEFAULT": [0.75, 0.12, 0.12, 1.0] }
+    { "NAME": "warp", "TYPE": "float", "GROUP": "Warp & Motion", "LABEL": "Warp", "DESCRIPTION": "Amplitude of organic domain distortion", "DEFAULT": 0.025, "MIN": 0, "MAX": 0.15 },
+    { "NAME": "scale", "TYPE": "float", "GROUP": "Warp & Motion", "LABEL": "Scale", "DESCRIPTION": "Spatial frequency of the warp noise", "DEFAULT": 3, "MIN": 0.5, "MAX": 10 },
+    { "NAME": "breathRate", "TYPE": "float", "GROUP": "Warp & Motion", "LABEL": "Breaths / sec", "DESCRIPTION": "Slow breathing oscillation speed in cycles per second", "DEFAULT": 0.25, "MIN": 0, "MAX": 2 },
+    { "NAME": "heartbeat", "TYPE": "float", "GROUP": "Warp & Motion", "LABEL": "Swell", "DESCRIPTION": "Radial swelling pulse intensity", "DEFAULT": 0, "MIN": 0, "MAX": 0.25, "MODS": [{ "SOURCE": "bass", "AMOUNT": 0.24 }] },
+    { "NAME": "fleshTint", "TYPE": "float", "GROUP": "Surface & Color", "LABEL": "Flesh tint", "DESCRIPTION": "Amount of fleshy colour cast blended over the image", "DEFAULT": 0.3, "MIN": 0, "MAX": 1 },
+    { "NAME": "wetness", "TYPE": "float", "GROUP": "Surface & Color", "LABEL": "Wetness", "DESCRIPTION": "Wet specular sheen along warped contours", "DEFAULT": 0.4, "MIN": 0, "MAX": 1.5 },
+    { "NAME": "tint", "TYPE": "color", "GROUP": "Surface & Color", "LABEL": "Tint colour", "DESCRIPTION": "Colour of the fleshy tint", "DEFAULT": [0.75, 0.12, 0.12, 1] }
   ]
 }*/
 

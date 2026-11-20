@@ -4,13 +4,13 @@
   "CATEGORIES": ["Generator", "Audio"],
   "INPUTS": [
     { "NAME": "audioFFT", "TYPE": "audioFFT" },
-    { "NAME": "speed", "TYPE": "float", "DEFAULT": 0.4, "MIN": 0.0, "MAX": 3.0 },
-    { "NAME": "push", "TYPE": "float", "DEFAULT": 0.0, "MIN": 0.0, "MAX": 2.0 },
-    { "NAME": "segments", "TYPE": "float", "DEFAULT": 8.0, "MIN": 2.0, "MAX": 32.0 },
-    { "NAME": "rings", "TYPE": "float", "DEFAULT": 4.0, "MIN": 1.0, "MAX": 16.0 },
-    { "NAME": "twist", "TYPE": "float", "DEFAULT": 0.3, "MIN": -2.0, "MAX": 2.0 },
-    { "NAME": "colorA", "TYPE": "color", "DEFAULT": [0.1, 0.6, 1.0, 1.0] },
-    { "NAME": "colorB", "TYPE": "color", "DEFAULT": [1.0, 0.3, 0.1, 1.0] }
+    { "NAME": "speed", "TYPE": "float", "GROUP": "Motion", "LABEL": "Speed", "DESCRIPTION": "Forward travel speed through the tunnel", "DEFAULT": 0.4, "MIN": 0, "MAX": 3 },
+    { "NAME": "push", "TYPE": "float", "GROUP": "Motion", "LABEL": "Push", "DESCRIPTION": "Extra forward lurch offset", "DEFAULT": 0, "MIN": 0, "MAX": 2 },
+    { "NAME": "segments", "TYPE": "float", "GROUP": "Geometry", "LABEL": "Segments", "DESCRIPTION": "Radial grid divisions around the tunnel", "DEFAULT": 8, "MIN": 2, "MAX": 32 },
+    { "NAME": "rings", "TYPE": "float", "GROUP": "Geometry", "LABEL": "Rings", "DESCRIPTION": "Density of depth rings", "DEFAULT": 4, "MIN": 1, "MAX": 16 },
+    { "NAME": "twist", "TYPE": "float", "GROUP": "Geometry", "LABEL": "Twist", "DESCRIPTION": "Spiral twist down the tunnel", "DEFAULT": 0.3, "MIN": -2, "MAX": 2 },
+    { "NAME": "colorA", "TYPE": "color", "GROUP": "Color", "LABEL": "Colour A", "DESCRIPTION": "Primary neon grid colour", "DEFAULT": [0.1, 0.6, 1, 1] },
+    { "NAME": "colorB", "TYPE": "color", "GROUP": "Color", "LABEL": "Colour B", "DESCRIPTION": "Secondary alternating grid colour", "DEFAULT": [1, 0.3, 0.1, 1] }
   ]
 }*/
 

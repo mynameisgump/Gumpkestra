@@ -4,14 +4,14 @@
   "CATEGORIES": ["Effect", "Glitch", "Color"],
   "INPUTS": [
     { "NAME": "inputImage", "TYPE": "image" },
-    { "NAME": "saturation", "TYPE": "float", "DEFAULT": 2.5, "MIN": 0.0, "MAX": 5.0 },
-    { "NAME": "contrast", "TYPE": "float", "DEFAULT": 1.6, "MIN": 0.5, "MAX": 3.0 },
-    { "NAME": "sharpen", "TYPE": "float", "DEFAULT": 1.5, "MIN": 0.0, "MAX": 4.0 },
-    { "NAME": "jpeg", "TYPE": "float", "DEFAULT": 0.6, "MIN": 0.0, "MAX": 1.0, "LABEL": "JPEG crunch" },
-    { "NAME": "posterize", "TYPE": "float", "DEFAULT": 8.0, "MIN": 2.0, "MAX": 32.0 },
-    { "NAME": "bulge", "TYPE": "float", "DEFAULT": 0.0, "MIN": 0.0, "MAX": 1.0 },
-    { "NAME": "hueSpin", "TYPE": "float", "DEFAULT": 0.0, "MIN": 0.0, "MAX": 1.0 },
-    { "NAME": "grit", "TYPE": "float", "DEFAULT": 0.15, "MIN": 0.0, "MAX": 1.0 }
+    { "NAME": "saturation", "TYPE": "float", "GROUP": "Color & Contrast", "LABEL": "Saturation", "DESCRIPTION": "Extreme colour saturation boost", "DEFAULT": 2.5, "MIN": 0, "MAX": 5 },
+    { "NAME": "contrast", "TYPE": "float", "GROUP": "Color & Contrast", "LABEL": "Contrast", "DESCRIPTION": "Blown-out contrast curve", "DEFAULT": 1.6, "MIN": 0.5, "MAX": 3 },
+    { "NAME": "sharpen", "TYPE": "float", "GROUP": "Crunch & Distortion", "LABEL": "Sharpen", "DESCRIPTION": "Harsh halo oversharpening", "DEFAULT": 1.5, "MIN": 0, "MAX": 4 },
+    { "NAME": "jpeg", "TYPE": "float", "GROUP": "Crunch & Distortion", "LABEL": "JPEG crunch", "DESCRIPTION": "8x8 block quantisation and chroma crunch", "DEFAULT": 0.6, "MIN": 0, "MAX": 1 },
+    { "NAME": "posterize", "TYPE": "float", "GROUP": "Color & Contrast", "LABEL": "Posterize", "DESCRIPTION": "Quantise colour levels per channel", "DEFAULT": 8, "MIN": 2, "MAX": 32 },
+    { "NAME": "bulge", "TYPE": "float", "GROUP": "Crunch & Distortion", "LABEL": "Centre bulge", "DESCRIPTION": "Fisheye bulge magnifying the centre", "DEFAULT": 0, "MIN": 0, "MAX": 1 },
+    { "NAME": "hueSpin", "TYPE": "float", "GROUP": "Color & Contrast", "LABEL": "Hue spin", "DESCRIPTION": "Rotate hue across the image", "DEFAULT": 0, "MIN": 0, "MAX": 1 },
+    { "NAME": "grit", "TYPE": "float", "GROUP": "Crunch & Distortion", "LABEL": "Grit", "DESCRIPTION": "Harsh high-frequency noise grain", "DEFAULT": 0.15, "MIN": 0, "MAX": 1 }
   ]
 }*/
 

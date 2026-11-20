@@ -3,21 +3,21 @@
   "CREDIT": "Gumpkestra",
   "CATEGORIES": ["Generator", "Biological"],
   "INPUTS": [
-    { "NAME": "count", "TYPE": "float", "DEFAULT": 1.0, "MIN": 1.0, "MAX": 6.0, "LABEL": "Eyes (grid)" },
-    { "NAME": "moveX", "TYPE": "float", "DEFAULT": 0.0, "MIN": -1.0, "MAX": 1.0, "LABEL": "Move X" },
-    { "NAME": "moveY", "TYPE": "float", "DEFAULT": 0.0, "MIN": -1.0, "MAX": 1.0, "LABEL": "Move Y" },
-    { "NAME": "zoom", "TYPE": "float", "DEFAULT": 1.0, "MIN": 0.2, "MAX": 4.0 },
-    { "NAME": "rotate", "TYPE": "float", "DEFAULT": 0.0, "MIN": -180.0, "MAX": 180.0, "LABEL": "Rotate°" },
-    { "NAME": "size", "TYPE": "float", "DEFAULT": 0.8, "MIN": 0.3, "MAX": 1.0 },
-    { "NAME": "pupil", "TYPE": "float", "DEFAULT": 0.35, "MIN": 0.1, "MAX": 0.9 },
-    { "NAME": "dilate", "TYPE": "float", "DEFAULT": 0.0, "MIN": 0.0, "MAX": 1.0, "LABEL": "Dilate", "MODS": [{ "SOURCE": "bass", "AMOUNT": 0.5 }] },
-    { "NAME": "look", "TYPE": "float", "DEFAULT": 0.7, "MIN": 0.0, "MAX": 1.0, "LABEL": "Darting" },
-    { "NAME": "blink", "TYPE": "float", "DEFAULT": 0.0, "MIN": 0.0, "MAX": 1.0 },
-    { "NAME": "bloodshot", "TYPE": "float", "DEFAULT": 0.6, "MIN": 0.0, "MAX": 1.0 },
-    { "NAME": "veinFlush", "TYPE": "float", "DEFAULT": 0.0, "MIN": 0.0, "MAX": 2.0, "LABEL": "Vein flush", "MODS": [{ "SOURCE": "beat", "AMOUNT": 0.5 }] },
-    { "NAME": "irisColor", "TYPE": "color", "DEFAULT": [0.4, 0.55, 0.2, 1.0] },
-    { "NAME": "skinColor", "TYPE": "color", "DEFAULT": [0.4, 0.16, 0.13, 1.0] },
-    { "NAME": "fillBackground", "TYPE": "bool", "DEFAULT": false, "LABEL": "Fill background" }
+    { "NAME": "count", "TYPE": "float", "GROUP": "Layout & Transform", "LABEL": "Eyes (grid)", "DESCRIPTION": "Grid rows/columns of repeated eyes", "DEFAULT": 1, "MIN": 1, "MAX": 6 },
+    { "NAME": "moveX", "TYPE": "float", "GROUP": "Layout & Transform", "LABEL": "Move X", "DESCRIPTION": "Horizontal offset of the eye layer", "DEFAULT": 0, "MIN": -1, "MAX": 1 },
+    { "NAME": "moveY", "TYPE": "float", "GROUP": "Layout & Transform", "LABEL": "Move Y", "DESCRIPTION": "Vertical offset of the eye layer", "DEFAULT": 0, "MIN": -1, "MAX": 1 },
+    { "NAME": "zoom", "TYPE": "float", "GROUP": "Layout & Transform", "LABEL": "Zoom", "DESCRIPTION": "Scale of the eye grid", "DEFAULT": 1, "MIN": 0.2, "MAX": 4 },
+    { "NAME": "rotate", "TYPE": "float", "GROUP": "Layout & Transform", "LABEL": "Rotate°", "DESCRIPTION": "Rotation of the eye grid in degrees", "DEFAULT": 0, "MIN": -180, "MAX": 180 },
+    { "NAME": "size", "TYPE": "float", "GROUP": "Anatomy", "LABEL": "Eye size", "DESCRIPTION": "Radius of each eyeball within its cell", "DEFAULT": 0.8, "MIN": 0.3, "MAX": 1 },
+    { "NAME": "pupil", "TYPE": "float", "GROUP": "Anatomy", "LABEL": "Pupil", "DESCRIPTION": "Resting pupil radius", "DEFAULT": 0.35, "MIN": 0.1, "MAX": 0.9 },
+    { "NAME": "dilate", "TYPE": "float", "GROUP": "Anatomy", "LABEL": "Dilate", "DESCRIPTION": "Additional pupil dilation (often modulated by bass)", "DEFAULT": 0, "MIN": 0, "MAX": 1, "MODS": [{ "SOURCE": "bass", "AMOUNT": 0.5 }] },
+    { "NAME": "look", "TYPE": "float", "GROUP": "Animation", "LABEL": "Darting", "DESCRIPTION": "How far eyes dart to a new gaze direction on beats", "DEFAULT": 0.7, "MIN": 0, "MAX": 1 },
+    { "NAME": "blink", "TYPE": "float", "GROUP": "Animation", "LABEL": "Blink", "DESCRIPTION": "Eyelid closure (0 = open, 1 = closed)", "DEFAULT": 0, "MIN": 0, "MAX": 1 },
+    { "NAME": "bloodshot", "TYPE": "float", "GROUP": "Color & Surface", "LABEL": "Bloodshot", "DESCRIPTION": "Visibility of red sclera veins", "DEFAULT": 0.6, "MIN": 0, "MAX": 1 },
+    { "NAME": "veinFlush", "TYPE": "float", "GROUP": "Color & Surface", "LABEL": "Vein flush", "DESCRIPTION": "Extra pulsing flush in sclera veins", "DEFAULT": 0, "MIN": 0, "MAX": 2, "MODS": [{ "SOURCE": "beat", "AMOUNT": 0.5 }] },
+    { "NAME": "irisColor", "TYPE": "color", "GROUP": "Color & Surface", "LABEL": "Iris colour", "DESCRIPTION": "Colour of the iris ring", "DEFAULT": [0.4, 0.55, 0.2, 1] },
+    { "NAME": "skinColor", "TYPE": "color", "GROUP": "Color & Surface", "LABEL": "Skin colour", "DESCRIPTION": "Colour of eyelids and background skin", "DEFAULT": [0.4, 0.16, 0.13, 1] },
+    { "NAME": "fillBackground", "TYPE": "bool", "GROUP": "Color & Surface", "LABEL": "Fill background", "DESCRIPTION": "Fill transparent space outside the eyelids with skin colour", "DEFAULT": false }
   ]
 }*/
 
