@@ -44,5 +44,5 @@ void main() {
   vec3 col = yiq2rgb(yiq);
   col = floor(col * posterize + 0.5) / posterize;
   col += (hash(gl_FragCoord.xy + fract(TIME) * 91.0) - 0.5) * grit * 0.3;
-  gl_FragColor = vec4(clamp(col, 0.0, 1.0), 1.0);
+  gl_FragColor = vec4(max(col, 0.0), 1.0);
 }

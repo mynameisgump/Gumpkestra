@@ -56,5 +56,5 @@ void main() {
   float streakLine = step(0.994 - band * 0.05, hash(vec2(ly, fr)));
   float streak = streakLine * step(fract(uv.x * 0.7 + hash(vec2(ly, fr + 1.0)) * 3.0), 0.3);
   col += streak * 0.7 * tapeNoise + band * 0.08;
-  gl_FragColor = vec4(clamp(col, 0.0, 1.0), 1.0);
+  gl_FragColor = vec4(max(col, 0.0), 1.0);
 }

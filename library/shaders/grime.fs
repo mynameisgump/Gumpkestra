@@ -52,6 +52,6 @@ void main() {
   vec2 cc = (uv - 0.5) * asp;
   c *= clamp(1.0 - dot(cc, cc) * vignette * 1.5, 0.0, 1.0);
   float l = dot(c, vec3(0.299, 0.587, 0.114));
-  c += (hash(gl_FragCoord.xy + fract(TIME) * 137.0) - 0.5) * grain * (1.3 - l);
+  c += (hash(gl_FragCoord.xy + fract(TIME) * 137.0) - 0.5) * grain * max(1.3 - l, 0.0);
   gl_FragColor = vec4(max(c, 0.0), 1.0);
 }

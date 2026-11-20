@@ -43,5 +43,5 @@ void main() {
   float levels = exp2(floor(bits)) - 1.0;
   float b = (bayer4(cell) - 0.5) * dither;
   c = floor(c * levels + 0.5 + b) / levels;
-  gl_FragColor = vec4(clamp(c, 0.0, 1.0), 1.0);
+  gl_FragColor = vec4(max(c, 0.0), 1.0);
 }

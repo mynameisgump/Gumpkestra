@@ -14,8 +14,8 @@
 void main() {
   vec2 uv = (isf_FragNormCoord - 0.5) / (1.0 + punch) + 0.5;
   vec3 c = IMG_NORM_PIXEL(inputImage, uv).rgb;
-  if (invertEvery > 0 && BEAT_COUNT % invertEvery == 0 && AUDIO_BEAT > 0.2) c = 1.0 - c;
+  if (invertEvery > 0 && BEAT_COUNT % invertEvery == 0 && AUDIO_BEAT > 0.2) c = max(1.0 - c, 0.0);
   // Squared so a decaying beat flash snaps off quickly.
   c += flashColor.rgb * pow(flash, 2.0);
-  gl_FragColor = vec4(c, 1.0);
+  gl_FragColor = vec4(max(c, 0.0), 1.0);
 }

@@ -29,11 +29,12 @@ void main() {
   float ps = floor(pixelSize);
   vec2 cell = floor(gl_FragCoord.xy / ps);
   vec3 c = IMG_NORM_PIXEL(inputImage, (cell + 0.5) * ps / RENDERSIZE).rgb;
+  float peak = max(c.r, max(c.g, c.b));
   float l = pow(clamp(dot(c, vec3(0.299, 0.587, 0.114)), 0.0, 1.0), gamma);
   float v = l * 3.0;
   float i0 = floor(v);
   float idx = clamp(i0 + step(mix(0.5, bayer8(cell), strength), v - i0), 0.0, 3.0);
   int p = clamp(palette, 0, 5);
-  vec3 q = PALS[p * 4 + int(idx)];
+  vec3 q = PALS[p * 4 + int(idx)] * max(peak, 1.0);
   gl_FragColor = vec4(mix(IMG_NORM_PIXEL(inputImage, isf_FragNormCoord).rgb, q, amount), 1.0);
 }

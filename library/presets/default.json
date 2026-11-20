@@ -309,7 +309,8 @@
           "mods": []
         }
       },
-      "model": "@text:sans/GUMP"
+      "model": "@text:sans/GUMP",
+      "hiddenMeshes": []
     },
     {
       "shader": "@model",
@@ -329,7 +330,7 @@
           "mods": [
             {
               "source": "level",
-              "amount": 0.21,
+              "amount": 0.32,
               "rate": 0.25,
               "smooth": 0
             }
@@ -515,7 +516,8 @@
           "mods": []
         }
       },
-      "model": "Rat_god_ex.glb"
+      "model": "Rat_god_ex.glb",
+      "hiddenMeshes": []
     },
     {
       "shader": "feedback-zoom",
