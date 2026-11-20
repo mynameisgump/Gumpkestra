@@ -48,13 +48,18 @@ export function LibraryPanel(root: HTMLElement, app: App, openEditor: (name: str
     if (!name) return;
     if (app.library.shaders.has(name)) return toast(`"${name}" already exists`, true);
     try {
-      await app.library.saveShader(name, kind === 'generator' ? GENERATOR_TEMPLATE : EFFECT_TEMPLATE);
-      app.addShader(name);
-      openEditor(name);
+      const entry = await app.library.saveShader(name, kind === 'generator' ? GENERATOR_TEMPLATE : EFFECT_TEMPLATE);
+      app.addShader(entry.name);
+      openEditor(entry.name);
     } catch (e) {
       toast((e as Error).message, true);
     }
   };
+
+  const deletePrompt = (kind: 'models' | 'textures' | 'fonts', name: string) =>
+    app.library.mode === 'browser'
+      ? `Delete ${name} from this browser's library?`
+      : `Delete library/${kind}/${name}? This removes the file from disk.`;
 
   const deleteModel = (name: string) => {
     const layers = app.modelLayers(name).length;
@@ -63,7 +68,7 @@ export function LibraryPanel(root: HTMLElement, app: App, openEditor: (name: str
       layers && `${layers} layer${layers > 1 ? 's' : ''} showing it will be removed.`,
       presets.length && `Still used by preset${presets.length > 1 ? 's' : ''}: ${presets.join(', ')}.`,
     ].filter(Boolean);
-    if (!confirm([`Delete library/models/${name}? This removes the file from disk.`, ...warnings].join('\n\n'))) return;
+    if (!confirm([deletePrompt('models', name), ...warnings].join('\n\n'))) return;
     void app.deleteModel(name);
   };
 
@@ -76,7 +81,7 @@ export function LibraryPanel(root: HTMLElement, app: App, openEditor: (name: str
       slots && `${slots} texture slot${slots > 1 ? 's' : ''} showing it will go back to ${slots > 1 ? 'their' : 'its'} default.`,
       presets.length && `Still used by preset${presets.length > 1 ? 's' : ''}: ${presets.join(', ')}.`,
     ].filter(Boolean);
-    if (!confirm([`Delete library/textures/${name}? This removes the file from disk.`, ...warnings].join('\n\n'))) return;
+    if (!confirm([deletePrompt('textures', name), ...warnings].join('\n\n'))) return;
     void app.deleteTexture(name);
   };
 
@@ -89,7 +94,7 @@ export function LibraryPanel(root: HTMLElement, app: App, openEditor: (name: str
       layers && `${layers} 3D text layer${layers > 1 ? 's' : ''} using it will go back to the default font.`,
       presets.length && `Still used by preset${presets.length > 1 ? 's' : ''}: ${presets.join(', ')}.`,
     ].filter(Boolean);
-    if (!confirm([`Delete library/fonts/${name}? This removes the file from disk.`, ...warnings].join('\n\n'))) return;
+    if (!confirm([deletePrompt('fonts', name), ...warnings].join('\n\n'))) return;
     void app.deleteFont(name);
   };
 
@@ -121,7 +126,7 @@ export function LibraryPanel(root: HTMLElement, app: App, openEditor: (name: str
     const textures = [...Object.keys(BUILTIN_TEXTURES), ...app.library.textures].filter((t) => t.toLowerCase().includes(filter));
     // Textures are a grid of thumbnails (name on hover) to keep the list short.
     const textureItem = (t: string) => {
-      const src = thumbnailURL(t);
+      const src = thumbnailURL(t, (n) => app.library.fileURL('textures', n));
       const target = app.textureInputs(app.selected)[0];
       const name = t.startsWith('@') ? `${BUILTIN_TEXTURES[t].label} (built-in)` : t;
       return h('div', { class: 'tex-tile' },
@@ -172,7 +177,9 @@ export function LibraryPanel(root: HTMLElement, app: App, openEditor: (name: str
       h('button', { onclick: () => createShader('effect') }, '+ Effect'),
     ),
     list,
-    h('p', { class: 'hint' }, 'Click to add above the selected layer. Shaders live in library/shaders/*.fs (ISF) and hot-reload when edited in any editor. Drop a .glb/.obj/.stl on the canvas to add a 3D model, an image/video to add a texture, or a .ttf/.otf/.woff font for 3D text. Clicking a texture puts it on the selected layer if it has a texture slot, otherwise adds an image layer.'),
+    h('p', { class: 'hint' }, app.library.mode === 'browser'
+      ? 'Click to add above the selected layer. Edits, new shaders, presets and dropped files (.glb/.obj/.stl, images/videos, .ttf/.otf/.woff fonts) are saved locally in this browser. Clicking a texture puts it on the selected layer if it has a texture slot, otherwise adds an image layer.'
+      : 'Click to add above the selected layer. Shaders live in library/shaders/*.fs (ISF) and hot-reload when edited in any editor. Drop a .glb/.obj/.stl on the canvas to add a 3D model, an image/video to add a texture, or a .ttf/.otf/.woff font for 3D text. Clicking a texture puts it on the selected layer if it has a texture slot, otherwise adds an image layer.'),
   );
   render();
   app.library.onChange((kind) => kind !== 'presets' && render());

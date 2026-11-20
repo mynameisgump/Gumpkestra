@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
     "typecheck": "tsc --noEmit",
     "check-shaders": "node scripts/check-shaders.mjs",
     "check-hdr": "node scripts/check-hdr.mjs",

@@ -258,8 +258,8 @@ export function builtinTexture(name: string): ImageData {
 
 const thumbs = new Map<string, string>();
 
-/** An <img> src for a texture picker: data URL for built-ins, the library URL for files. */
-export function thumbnailURL(name: string): string | null {
+/** An <img> src for a texture picker: data URL for built-ins, or the resolved library URL for files. */
+export function thumbnailURL(name: string, resolveFile?: (name: string) => string | null): string | null {
   if (name.startsWith('@')) {
     if (!BUILTIN_TEXTURES[name]) return null;
     if (!thumbs.has(name)) {
@@ -269,5 +269,6 @@ export function thumbnailURL(name: string): string | null {
     }
     return thumbs.get(name)!;
   }
-  return VIDEO.test(name) ? null : `/api/library/textures/${encodeURIComponent(name)}`;
+  if (VIDEO.test(name)) return null;
+  return resolveFile ? resolveFile(name) : `/api/library/textures/${encodeURIComponent(name)}`;
 }

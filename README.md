@@ -4,13 +4,21 @@ A prototype modular audio-visualiser, in the spirit of Arkestra (ISF shader engi
 
 ```sh
 npm install
-npm run dev            # open http://localhost:5173 in Chrome
+npm run dev            # open http://localhost:5173 in Chrome (disk-backed library + hot reload)
+npm run build          # build standalone static web app into dist/
+npm run preview        # preview the static build locally
 npm run check-meshes   # verify mesh controls, rendering and preset restoration
 npm run check-presets  # verify groups, keyboard navigation and canvas transitions
 npm run check-timer    # verify automatic transitions, timing and edit protection
 npm run check-shaders  # compile every library shader in headless Chrome (add -- --shots for preset screenshots)
 npm run check-hdr      # verify HDR pixels, output controls, fallback and model targets (add -- --native to test experimental display APIs)
 ```
+
+## Static web app & GitHub Pages
+
+`npm run build` outputs a self-contained static site into `dist/` with the bundled `library/` manifest and assets. In the static build, shader/preset edits and dropped models, textures, or fonts are persisted locally in the browser via IndexedDB instead of writing to disk.
+
+To publish on GitHub Pages, push to `main` and enable **Settings → Pages → Source: GitHub Actions**. The workflow in `.github/workflows/deploy-pages.yml` builds and deploys `dist/` automatically. Note that `library/textures/` is currently gitignored, so only committed library assets are included in GitHub Pages builds unless you track them.
 
 Drop an audio file on the canvas, use **Use input** to pick a mic or loopback device (for example BlackHole, to get DAW or system audio), or use **Tab audio** to capture a browser tab.
 

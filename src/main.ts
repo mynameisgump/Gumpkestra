@@ -167,7 +167,7 @@ function Topbar(app: App) {
   const write = async (name: string) => {
     try {
       await app.savePreset(name);
-      toast(`Saved library/presets/${name}.json`);
+      toast(app.library.mode === 'browser' ? `Saved preset ${name} (browser storage)` : `Saved library/presets/${name}.json`);
     } catch (e) {
       toast((e as Error).message, true);
     }
@@ -192,13 +192,14 @@ function Topbar(app: App) {
       app.engine.colorOutput.configure(app.engine.width, app.engine.height);
       stream = app.engine.canvas.captureStream(60);
       for (const track of app.audio.recordDest.stream.getAudioTracks()) stream.addTrack(track);
-      const mimeType = ['video/webm;codecs=vp9,opus', 'video/webm'].find((m) => MediaRecorder.isTypeSupported(m));
+      const mimeType = ['video/webm;codecs=vp9,opus', 'video/webm', 'video/mp4'].find((m) => MediaRecorder.isTypeSupported(m));
+      const isMp4 = mimeType?.startsWith('video/mp4') ?? false;
       const chunks: Blob[] = [];
       recorder = new MediaRecorder(stream, { mimeType, videoBitsPerSecond: 16_000_000 });
       recorder.ondataavailable = (e) => chunks.push(e.data);
       recorder.onstop = () => {
-        const url = URL.createObjectURL(new Blob(chunks, { type: 'video/webm' }));
-        h('a', { href: url, download: `gumpkestra-${Date.now()}.webm` }).click();
+        const url = URL.createObjectURL(new Blob(chunks, { type: isMp4 ? 'video/mp4' : 'video/webm' }));
+        h('a', { href: url, download: `gumpkestra-${Date.now()}.${isMp4 ? 'mp4' : 'webm'}` }).click();
         recorder = null;
         app.engine.colorOutput.recordingSDR = false;
         stream?.getVideoTracks().forEach((t) => t.stop());

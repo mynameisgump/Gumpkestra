@@ -111,7 +111,7 @@ export class App {
       const name = await this.library.importFile('models', file);
       if (target) await this.setModel(target, name);
       else this.addModel(name);
-      toast(`Imported ${name} into library/models`);
+      toast(this.library.mode === 'browser' ? `Imported ${name} (browser storage)` : `Imported ${name} into library/models`);
     } catch (e) {
       toast(`${file.name}: ${(e as Error).message}`, true);
     }
@@ -127,7 +127,7 @@ export class App {
     for (const layer of this.modelLayers(name)) this.removeLayer(layer);
     try {
       await this.library.deleteFile('models', name);
-      toast(`Deleted ${name} from library/models`);
+      toast(this.library.mode === 'browser' ? `Deleted ${name}` : `Deleted ${name} from library/models`);
     } catch (e) {
       toast(`${name}: ${(e as Error).message}`, true);
     }
@@ -151,7 +151,7 @@ export class App {
     }
     try {
       await this.library.deleteFile('textures', name);
-      toast(`Deleted ${name} from library/textures`);
+      toast(this.library.mode === 'browser' ? `Deleted ${name}` : `Deleted ${name} from library/textures`);
     } catch (e) {
       for (const { layer, input, state } of previous) layer.params[input.NAME] = state;
       toast(`${name}: ${(e as Error).message}`, true);
@@ -218,7 +218,7 @@ export class App {
       const name = await this.library.importFile('fonts', file);
       if (layer) await this.setModel(layer, textModelName(name, parseTextModel(layer.modelName).text));
       else this.useFont(name);
-      toast(`Imported ${name} into library/fonts`);
+      toast(this.library.mode === 'browser' ? `Imported ${name} (browser storage)` : `Imported ${name} into library/fonts`);
     } catch (e) {
       toast(`${file.name}: ${(e as Error).message}`, true);
     }
@@ -230,7 +230,7 @@ export class App {
     try {
       await this.library.deleteFile('fonts', name);
       for (const layer of layers) void this.setModel(layer, textModelName('sans', parseTextModel(layer.modelName).text));
-      toast(`Deleted ${name} from library/fonts`);
+      toast(this.library.mode === 'browser' ? `Deleted ${name}` : `Deleted ${name} from library/fonts`);
     } catch (e) {
       toast(`${name}: ${(e as Error).message}`, true);
     }

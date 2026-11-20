@@ -49,8 +49,9 @@ export function Editor(root: HTMLElement, app: App) {
     if (!name) return;
     const target = asName ?? name;
     try {
-      await app.library.saveShader(target, code.value);
-      if (target !== name) {
+      const entry = await app.library.saveShader(target, code.value);
+      const savedName = entry.name;
+      if (savedName !== name) {
         // Fork: restore the original in memory, point the selected layer at the copy.
         app.library.preview(name, saved);
         app.reloadShader(name);
@@ -59,13 +60,13 @@ export function Editor(root: HTMLElement, app: App) {
           const json = layer.toJSON();
           const idx = app.engine.layers.indexOf(layer);
           app.engine.removeLayer(layer);
-          app.select(app.addShader(target, json, idx));
+          app.select(app.addShader(savedName, json, idx));
         }
-        open(target);
+        open(savedName);
       }
       saved = code.value;
       compile();
-      toast(`Saved library/shaders/${target}.fs`);
+      toast(app.library.mode === 'browser' ? `Saved shader ${savedName} (browser storage)` : `Saved library/shaders/${savedName}.fs`);
     } catch (e) {
       toast((e as Error).message, true);
     }

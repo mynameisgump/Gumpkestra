@@ -32,9 +32,28 @@ function nameOf(kind: Kind, file: string) {
   return binary ? path.basename(file) : path.basename(file, ext);
 }
 
+async function readKindDir(kind: Kind) {
+  const dir = path.join(LIB, kind);
+  try {
+    return (await fs.readdir(dir))
+      .filter((f) => nameOf(kind, f))
+      .sort((a, b) => a.localeCompare(b));
+  } catch (err) {
+    if ((err as NodeJS.ErrnoException).code === 'ENOENT') return [];
+    throw err;
+  }
+}
+
 function libraryPlugin(): Plugin {
+  let outDir = path.resolve(import.meta.dirname, 'dist');
+  let isBuild = false;
+
   return {
     name: 'gumpkestra-library',
+    configResolved(config) {
+      outDir = path.resolve(config.root, config.build.outDir);
+      isBuild = config.command === 'build';
+    },
     configureServer(server) {
       server.watcher.add(LIB);
       const notify = (file: string) => {
@@ -93,9 +112,51 @@ function libraryPlugin(): Plugin {
         }
       });
     },
+    async closeBundle() {
+      if (!isBuild) return;
+      const distLib = path.join(outDir, 'library');
+      await fs.mkdir(distLib, { recursive: true });
+
+      const readText = async (kind: 'shaders' | 'presets') => {
+        const files = await readKindDir(kind);
+        return Promise.all(
+          files.map(async (f) => ({
+            name: nameOf(kind, f)!,
+            source: await fs.readFile(path.join(LIB, kind, f), 'utf8'),
+          })),
+        );
+      };
+
+      const copyBinaries = async (kind: 'models' | 'textures' | 'fonts') => {
+        const files = await readKindDir(kind);
+        if (files.length) {
+          const destDir = path.join(distLib, kind);
+          await fs.mkdir(destDir, { recursive: true });
+          await Promise.all(
+            files.map((f) => fs.copyFile(path.join(LIB, kind, f), path.join(destDir, f))),
+          );
+        }
+        return files;
+      };
+
+      const [shaders, presets, models, textures, fonts] = await Promise.all([
+        readText('shaders'),
+        readText('presets'),
+        copyBinaries('models'),
+        copyBinaries('textures'),
+        copyBinaries('fonts'),
+      ]);
+
+      await fs.writeFile(
+        path.join(distLib, 'manifest.json'),
+        JSON.stringify({ shaders, presets, models, textures, fonts }),
+      );
+      await fs.writeFile(path.join(outDir, '.nojekyll'), '');
+    },
   };
 }
 
 export default defineConfig({
+  base: process.env.BASE_PATH || './',
   plugins: [libraryPlugin()],
 });

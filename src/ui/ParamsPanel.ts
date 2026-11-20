@@ -208,10 +208,13 @@ export function ParamsPanel(root: HTMLElement, app: App, openEditor: (name: stri
 
   /** A preview of a texture value: image thumbnail, looping muted video, or an icon for the specials. */
   const preview = (value: string, cls: string) => {
-    const src = thumbnailURL(value);
+    const src = thumbnailURL(value, (n) => app.library.fileURL('textures', n));
     if (src) return h('img', { class: cls, src, alt: '', loading: 'lazy' });
-    if (isVideoTexture(value) && app.library.textures.includes(value)) {
-      return h('video', { class: cls, src: `/api/library/textures/${encodeURIComponent(value)}`, muted: true, autoplay: true, loop: true, playsInline: true });
+    const videoSrc = isVideoTexture(value) && app.library.textures.includes(value)
+      ? app.library.fileURL('textures', value)
+      : null;
+    if (videoSrc) {
+      return h('video', { class: cls, src: videoSrc, muted: true, autoplay: true, loop: true, playsInline: true });
     }
     return h('span', { class: cls }, value === INPUT_IMAGE ? '↓' : value === MODEL_TEXTURE ? '◆' : isVideoTexture(value) ? '🎞' : '?');
   };
