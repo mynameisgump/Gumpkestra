@@ -105,6 +105,13 @@ export function PresetsPanel(root: HTMLElement, app: App, load: (name: string) =
           h('button', { title: `Remove ${name} from group`, onclick: () => {
             group.presets = group.presets.filter((n) => n !== name); groups.changed();
           } }, '×'),
+        ] : !custom && saved ? [
+          h('button', {
+            class: 'lib-del',
+            title: `Delete preset ${name}`,
+            'aria-label': `Delete preset ${name}`,
+            onclick: () => void app.deletePreset(name),
+          }, '✕'),
         ] : []));
     };
     list.replaceChildren(

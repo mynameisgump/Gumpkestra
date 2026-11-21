@@ -337,6 +337,28 @@ export class App {
     this.changed();
   }
 
+  /** Confirm and delete a saved preset from the library (and any custom groups). */
+  async deletePreset(name: string) {
+    if (!this.library.presets.has(name)) return;
+    const base = this.library.mode === 'browser'
+      ? `Delete preset "${name}" from this browser's library?`
+      : `Delete library/presets/${name}.json? This removes the file from disk.`;
+    const groupNames = this.presetGroups.groupsContaining(name).map((g) => g.name);
+    const warnings = [
+      groupNames.length && `It will also be removed from group${groupNames.length > 1 ? 's' : ''}: ${groupNames.join(', ')}.`,
+      name === this.presetName && 'It is currently loaded and will stay on screen as unsaved.',
+    ].filter(Boolean);
+    if (!confirm([base, ...warnings].join('\n\n'))) return;
+    try {
+      await this.library.deletePreset(name);
+      this.presetGroups.removePreset(name);
+      this.changed();
+      toast(this.library.mode === 'browser' ? `Deleted preset ${name}` : `Deleted library/presets/${name}.json`);
+    } catch (e) {
+      toast(`${name}: ${(e as Error).message}`, true);
+    }
+  }
+
   restoreSession(): boolean {
     try {
       const raw = localStorage.getItem(AUTOSAVE_KEY);

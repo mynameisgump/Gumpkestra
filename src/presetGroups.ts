@@ -55,4 +55,18 @@ export class PresetGroups {
     this.activeId = group.id;
     this.changed();
   }
+  /** Custom groups that reference `name`. */
+  groupsContaining(name: string) {
+    return this.groups.filter((g) => g.id !== 'all' && g.presets.includes(name));
+  }
+  /** Remove a deleted preset from every custom group. */
+  removePreset(name: string) {
+    let removed = false;
+    for (const g of this.groups) {
+      if (g.id === 'all' || !g.presets.includes(name)) continue;
+      g.presets = g.presets.filter((n) => n !== name);
+      removed = true;
+    }
+    if (removed) this.changed();
+  }
 }

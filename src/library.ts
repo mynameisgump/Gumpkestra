@@ -73,6 +73,7 @@ export class Library {
 
   /** Browser-mode storage overlay + bundled asset index + object URL cache for previews. */
   private store = new LocalLibraryStore();
+  private bundledPresets = new Set<string>();
   private bundledFiles: Record<FileKind, Set<string>> = {
     models: new Set(),
     textures: new Set(),
@@ -171,7 +172,11 @@ export class Library {
     const manifest = (await manifestRes.json()) as StaticManifest;
 
     for (const s of manifest.shaders ?? []) this.setShader(s.name, s.source);
-    for (const p of manifest.presets ?? []) this.setPreset(p.name, p.source);
+    this.bundledPresets.clear();
+    for (const p of manifest.presets ?? []) {
+      this.bundledPresets.add(p.name);
+      this.setPreset(p.name, p.source);
+    }
 
     const fileSets: Record<FileKind, Set<string>> = {
       models: new Set(manifest.models ?? []),
@@ -355,5 +360,21 @@ export class Library {
     }
     await api('presets', name, { method: 'PUT', body });
     this.presets.set(name, preset);
+    this.emit('presets', name);
+  }
+
+  /** Delete a preset from library/presets (or tombstone it in browser storage). */
+  async deletePreset(name: string) {
+    if (this.mode === 'browser') {
+      if (this.bundledPresets.has(name)) {
+        await this.store.put({ kind: 'presets', name, deleted: true });
+      } else {
+        await this.store.remove('presets', name);
+      }
+    } else {
+      await api('presets', name, { method: 'DELETE' });
+    }
+    this.presets.delete(name);
+    this.emit('presets', name);
   }
 }

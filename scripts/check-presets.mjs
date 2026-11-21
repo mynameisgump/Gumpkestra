@@ -51,6 +51,16 @@ try {
   await page.locator('#canvas').click();
   await page.keyboard.press('ArrowRight');
   assert.equal(await page.evaluate(() => window.app.presetName), before);
+  // Deleting a saved preset removes it from the library and every custom group, keeping it on screen as unsaved if active.
+  const tempPreset = '__check-delete-temp';
+  await page.evaluate((n) => window.app.savePreset(n), tempPreset);
+  await page.getByLabel('Add preset to group').selectOption(tempPreset);
+  await page.getByLabel('Active preset group').selectOption('all');
+  page.once('dialog', (d) => d.accept());
+  await page.locator('#presets-panel').getByTitle(`Delete preset ${tempPreset}`, { exact: true }).click();
+  await page.waitForFunction((n) => !window.app.library.presets.has(n), tempPreset);
+  assert.equal(await page.evaluate(() => window.app.presetSaved), false, 'Deleting the active preset marks it unsaved');
+  assert.equal(await page.evaluate((n) => window.app.presetGroups.groupsContaining(n).length, tempPreset), 0, 'Deleted preset is removed from custom groups');
   // Solid colours make the GPU result deterministic. Read the presentation target,
   // which is also blitted to the canvas used by the recorder.
   const pixels = await page.evaluate(async () => {

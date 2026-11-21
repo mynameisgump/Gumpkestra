@@ -19,10 +19,20 @@ export function PresetPicker(app: App, load: (name: string) => void) {
     const q = filter.value.trim().toLowerCase();
     const names = [...app.library.presets.keys()].filter((n) => n.toLowerCase().includes(q)).sort((a, b) => a.localeCompare(b));
     grid.replaceChildren(
-      ...names.map((n) => h('button', {
-        class: `preset-tile ${n === app.presetName ? 'current' : ''}`,
-        onclick: () => { close(); load(n); },
-      }, h('span', { class: 'name' }, n), h('span', { class: 'count' }, `${app.library.presets.get(n)!.layers.length} layers`))),
+      ...names.map((n) => h('div', { class: 'preset-tile-wrap' },
+        h('button', {
+          class: `preset-tile ${n === app.presetName ? 'current' : ''}`,
+          onclick: () => { close(); load(n); },
+        }, h('span', { class: 'name' }, n), h('span', { class: 'count' }, `${app.library.presets.get(n)!.layers.length} layers`)),
+        h('button', {
+          class: 'lib-del',
+          title: `Delete preset ${n}`,
+          'aria-label': `Delete preset ${n}`,
+          onclick: (e: Event) => {
+            e.stopPropagation();
+            void app.deletePreset(n);
+          },
+        }, '✕'))),
     );
     if (!names.length) grid.append(h('p', { class: 'hint' }, 'No presets match.'));
   };
