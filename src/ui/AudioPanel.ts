@@ -64,11 +64,39 @@ export function AudioPanel(root: HTMLElement, app: App) {
     deviceSelect.value = activeInput ?? NO_INPUT;
   };
 
-  const settingRow = (label: string, key: keyof typeof audio.settings, min: number, max: number) => {
-    const sl = slider({ min, max, value: audio.settings[key], oninput: (v) => { audio.settings[key] = v; val.show(v); } }) as HTMLInputElement;
-    const val = numberField({ min, max, get: () => audio.settings[key], set: (v) => { audio.settings[key] = v; sl.value = String(v); } });
+  type NumericSettingKey = 'gain' | 'noiseGate' | 'release' | 'beatSensitivity' | 'beatDecay';
+
+  const settingRow = (label: string, key: NumericSettingKey, min: number, max: number, title: string, step?: number) => {
+    const sl = slider({
+      min,
+      max,
+      step,
+      value: audio.settings[key],
+      oninput: (v) => { audio.settings[key] = v; val.show(v); audio.saveSettings(); },
+    }) as HTMLInputElement;
+    sl.setAttribute('aria-label', label);
+    const val = numberField({
+      min,
+      max,
+      get: () => audio.settings[key],
+      set: (v) => { audio.settings[key] = v; sl.value = String(v); audio.saveSettings(); },
+    });
     val.classList.add('val');
-    return h('div', { class: 'row' }, h('span', { class: 'lbl' }, label), sl, val);
+    return h('div', { class: 'row' }, h('span', { class: 'lbl has-tip', title }, label), sl, val);
+  };
+
+  const autoGainRow = () => {
+    const title = 'Track loudness automatically with a floor above the noise gate; turn off for fixed dBFS metering';
+    const cb = h('input', {
+      type: 'checkbox',
+      checked: audio.settings.autoGain,
+      'aria-label': 'Auto-gain',
+      onchange: (e: Event) => {
+        audio.settings.autoGain = (e.target as HTMLInputElement).checked;
+        audio.saveSettings();
+      },
+    });
+    return h('div', { class: 'row row-span' }, h('span', { class: 'lbl has-tip', title }, 'Auto-gain'), cb);
   };
 
   const meter = h('canvas', { class: 'meter', width: 480, height: 150 });
@@ -85,10 +113,12 @@ export function AudioPanel(root: HTMLElement, app: App) {
     sourceLabel,
     playerSlot,
     meter,
-    settingRow('Gain', 'gain', 0.1, 8),
-    settingRow('Release', 'release', 0.02, 0.6),
-    settingRow('Beat sens.', 'beatSensitivity', 0.5, 3.5),
-    settingRow('Beat decay', 'beatDecay', 0.03, 0.6),
+    settingRow('Gain', 'gain', 0.1, 8, 'Output drive multiplier (works with auto-gain on or off)'),
+    settingRow('Noise gate', 'noiseGate', -90, -20, 'Input noise floor in dBFS — quieter signals gate to 0', 1),
+    autoGainRow(),
+    settingRow('Release', 'release', 0.02, 0.6, 'Release time (seconds) for bands and spectrum texture'),
+    settingRow('Beat sens.', 'beatSensitivity', 0, 1, 'Beat onset sensitivity (higher triggers on subtler hits)', 0.01),
+    settingRow('Beat decay', 'beatDecay', 0.03, 0.6, 'Decay time (seconds) for the beat pulse'),
   );
 
   listDevices().catch(() => {});
@@ -121,10 +151,24 @@ export function AudioPanel(root: HTMLElement, app: App) {
     }
     // Feature bars
     const bw = W / METER_BANDS.length;
+    const barMax = H - 22;
     METER_BANDS.forEach((b, i) => {
       const v = audio.features[b];
+      const x = i * bw + 6;
+      const w = bw - 12;
       mctx.fillStyle = b === 'beat' ? `rgba(255, 80, 140, ${0.4 + v * 0.6})` : 'rgba(180, 255, 80, 0.85)';
-      mctx.fillRect(i * bw + 6, H - v * (H - 22), bw - 12, v * (H - 22));
+      mctx.fillRect(x, H - v * barMax, w, v * barMax);
+      if (b === 'beat') {
+        // Show current spectral flux relative to the adaptive trigger threshold.
+        const { flux, threshold } = audio.diagnostics;
+        const ratio = threshold > 0 ? Math.min(1.25, flux / threshold) : 0;
+        const fluxH = Math.min(1, ratio * 0.8) * barMax;
+        mctx.fillStyle = 'rgba(255, 255, 255, 0.22)';
+        mctx.fillRect(x, H - fluxH, w, fluxH);
+        const threshY = H - 0.8 * barMax;
+        mctx.fillStyle = 'rgba(255, 255, 255, 0.55)';
+        mctx.fillRect(x, threshY, w, 2);
+      }
       mctx.fillStyle = 'rgba(255,255,255,0.6)';
       mctx.font = '18px ui-monospace, monospace';
       mctx.fillText(b === 'lowMid' ? 'lmid' : b, i * bw + 8, 18);

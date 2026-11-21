@@ -10,15 +10,15 @@
       },
       "params": {
         "scale": {
-          "value": 2.5,
+          "value": 8,
           "mods": []
         },
         "thickness": {
-          "value": 0.05,
+          "value": 0.005,
           "mods": []
         },
         "capillaries": {
-          "value": 0.5,
+          "value": 1,
           "mods": []
         },
         "spread": {
@@ -26,27 +26,27 @@
           "mods": []
         },
         "flow": {
-          "value": 0.6,
+          "value": 0.309,
           "mods": []
         },
         "surge": {
-          "value": 0.8,
+          "value": 0.978,
           "mods": []
         },
         "writhe": {
-          "value": 0.2,
+          "value": 0,
           "mods": []
         },
         "motionSpeed": {
-          "value": 0.65,
+          "value": 0.135,
           "mods": []
         },
         "pulse": {
-          "value": 0.55,
+          "value": 0.321,
           "mods": []
         },
         "audioResponse": {
-          "value": 0.6,
+          "value": 1,
           "mods": []
         },
         "skinColor": {

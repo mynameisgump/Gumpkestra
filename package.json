@@ -9,6 +9,7 @@
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
     "check-shaders": "node scripts/check-shaders.mjs",
+    "check-audio": "node scripts/check-audio.mjs",
     "check-hdr": "node scripts/check-hdr.mjs",
     "check-meshes": "node scripts/check-mesh-visibility.mjs",
     "check-tiles": "node scripts/check-tile-sequence.mjs",
