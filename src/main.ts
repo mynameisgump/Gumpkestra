@@ -13,6 +13,7 @@ import { PresetsPanel } from './ui/PresetsPanel';
 import { StackPanel } from './ui/StackPanel';
 import { ResolutionControl } from './ui/ResolutionControl';
 import { HDRControl } from './ui/HDRControl';
+import { SettingsControl } from './ui/SettingsControl';
 
 const $ = (id: string) => document.getElementById(id)!;
 
@@ -116,6 +117,7 @@ async function main() {
 
 function Topbar(app: App) {
   const hdr = HDRControl(app.engine);
+  const settings = SettingsControl(app.engine);
   const names = () => app.presetGroups.names(app.library.presets);
   const confirmDiscard = () => !app.dirty || confirm(`Discard unsaved changes to "${app.presetName}"?`);
 
@@ -230,6 +232,7 @@ function Topbar(app: App) {
     h('span', { class: 'spacer' }),
     ResolutionControl(app.engine),
     hdr.el,
+    settings.el,
     recBtn,
     h('button', { onclick: () => $('stage').requestFullscreen?.(), title: 'F' }, 'Fullscreen'),
     h('button', { onclick: () => document.body.classList.toggle('perform'), title: 'H' }, 'Hide UI'),

@@ -13,6 +13,45 @@ try {
   page.on('pageerror', (e) => errors.push(e.message));
   await page.goto('http://127.0.0.1:5310');
   await page.waitForFunction(() => window.app?.engine.frame > 3);
+  await page.evaluate(() => localStorage.clear());
+  await page.reload();
+  await page.waitForFunction(() => window.app?.engine.frame > 3);
+
+  // Off by default: never flashes until explicitly enabled.
+  const disabledResult = await page.evaluate(async () => {
+    const { parseISF } = await import('/src/isf/isf.ts');
+    const app = window.app, engine = app.engine, gl = engine.gl;
+    engine.setHDR(false); engine.setResolution({ width: 768, height: 432 });
+    engine.clear();
+    const shader = parseISF('/*{"INPUTS":[]}*/\nvoid main(){gl_FragColor=vec4(0.02,0.015,0.01,1.0);}');
+    engine.addLayer('black-test', shader);
+    const clock = engine.colorOutput.mitch;
+    const render = (offset) => {
+      engine.render(clock.startedAt + offset, 0, app.audio);
+      const data = new Uint8Array(768 * 432 * 4);
+      gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+      gl.readPixels(0, 0, 768, 432, gl.RGBA, gl.UNSIGNED_BYTE, data);
+      return data;
+    };
+    const base = render(0);
+    const diff = (a) => a.reduce((n, value, i) => n + (value !== base[i] ? 1 : 0), 0);
+    return {
+      enabled: clock.enabled,
+      flashes: [300.1, 301.1, 302.2, 600.1].map((t) => diff(render(t))),
+      error: gl.getError(),
+    };
+  });
+  assert.equal(disabledResult.enabled, false, 'Mitch popup must be off by default');
+  assert.deepEqual(disabledResult.flashes, [0, 0, 0, 0], 'Disabled popup must never flash');
+  assert.equal(disabledResult.error, 0);
+
+  // Enable through the Settings UI.
+  await page.getByRole('button', { name: 'Settings', exact: true }).click();
+  const checkbox = page.getByRole('checkbox', { name: 'Show "mitch was here" popup', exact: true });
+  assert.equal(await checkbox.isChecked(), false);
+  await checkbox.check();
+  assert.equal(await page.evaluate(() => window.app.engine.colorOutput.mitch.enabled), true);
+
   const result = await page.evaluate(async () => {
     const { parseISF } = await import('/src/isf/isf.ts');
     const app = window.app, engine = app.engine, gl = engine.gl;
@@ -49,7 +88,20 @@ try {
   assert.ok(result.afterSwitch > 1000 && result.hdrFlash > 1000);
   assert.equal(result.unchangedComposite, 0);
   assert.equal(result.error, 0);
+
+  // Persists across reload, and can be turned off again.
+  await page.reload();
+  await page.waitForFunction(() => window.app?.engine.frame > 3);
+  assert.equal(await page.evaluate(() => window.app.engine.colorOutput.mitch.enabled), true);
+  await page.getByRole('button', { name: 'Settings', exact: true }).click();
+  assert.equal(await checkbox.isChecked(), true);
+  await checkbox.uncheck();
+  assert.equal(await page.evaluate(() => window.app.engine.colorOutput.mitch.enabled), false);
+  await page.reload();
+  await page.waitForFunction(() => window.app?.engine.frame > 3);
+  assert.equal(await page.evaluate(() => window.app.engine.colorOutput.mitch.enabled), false);
+
   assert.deepEqual(errors, []);
   if (process.argv.includes('--shots')) await fs.writeFile('/tmp/gumpkestra-mitch-preview.png', Buffer.from(result.preview.split(',')[1], 'base64'));
-  console.log('Passed: five-minute schedule, three text flashes, clean gaps, recurrence, preset changes, HDR rendering and untouched feedback input.');
+  console.log('Passed: off by default, Settings toggle persistence, five-minute schedule, three text flashes, clean gaps, recurrence, preset changes, HDR rendering and untouched feedback input.');
 } finally { await browser?.close(); await server.close(); }

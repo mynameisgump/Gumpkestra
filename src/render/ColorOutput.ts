@@ -96,7 +96,7 @@ export class ColorOutput {
   private configured = '';
   private program: WebGLProgram;
   private u: (name: string) => WebGLUniformLocation | null;
-  private mitch: MitchFlash;
+  readonly mitch: MitchFlash;
 
   constructor(private gl: HDRContext) {
     this.supported = !!gl.getExtension('EXT_color_buffer_float');

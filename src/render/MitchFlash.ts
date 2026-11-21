@@ -1,7 +1,17 @@
-/** A session-wide cameo: three brief text flashes every five minutes. */
+/** An optional session-wide cameo: three brief text flashes every five minutes. */
 export class MitchFlash {
-  readonly startedAt = performance.now() / 1000;
+  startedAt = performance.now() / 1000;
   readonly texture: WebGLTexture;
+  private _enabled = false;
+
+  get enabled() {
+    return this._enabled;
+  }
+
+  set enabled(value: boolean) {
+    if (value && !this._enabled) this.startedAt = performance.now() / 1000;
+    this._enabled = value;
+  }
 
   constructor(gl: WebGL2RenderingContext) {
     const canvas = Object.assign(document.createElement('canvas'), { width: 2048, height: 512 });
@@ -50,6 +60,7 @@ export class MitchFlash {
   }
 
   phaseAt(time: number) {
+    if (!this._enabled) return -1;
     const elapsed = time - this.startedAt;
     if (elapsed < 300) return -1;
     const phase = (elapsed - 300) % 300;

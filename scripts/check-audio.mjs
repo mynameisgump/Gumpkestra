@@ -173,7 +173,26 @@ try {
       return { allFinite, clean };
     })();
 
-    return { gateTest, gainTest, contrastTest, balanceTest, fpsTest, sensTest, edgeTest };
+    // 8. Loudness-invariant & full-band beats: quiet (-44 dBFS) and mid-only (no sub-bass) beats both detect cleanly.
+    const fullBandTest = (() => {
+      const runMid = (offsetDb) => {
+        const an = new AudioAnalyzer(BINS);
+        const dt = 1 / 60;
+        for (let i = 0; i < 360; i++) {
+          const t = i * dt;
+          const hit = t >= 0.6 && (t % 0.6) < 0.08;
+          const frame = makeFrame([
+            { hz: 850, db: (hit ? -10 : -20) + offsetDb },
+            { hz: 1900, db: (hit ? -8 : -18) + offsetDb },
+          ]);
+          an.update(frame.freqDb, frame.wave, SR, dt, t, DEFAULT_AUDIO_SETTINGS);
+        }
+        return an.features.beatCount;
+      };
+      return { loudMid: runMid(0), quietMid: runMid(-34) };
+    })();
+
+    return { gateTest, gainTest, contrastTest, balanceTest, fpsTest, sensTest, edgeTest, fullBandTest };
   });
 
   // Assert noise gate
@@ -223,6 +242,12 @@ try {
     beatDecay: 0.15,
   });
 
+  // Assert loudness-invariant & mid-band beat detection (no sub-bass / quiet input)
+  assert.ok(dsp.fullBandTest.loudMid >= 8 && dsp.fullBandTest.loudMid <= 10,
+    `Mid-only beats at 0 dB offset should detect cleanly: ${JSON.stringify(dsp.fullBandTest)}`);
+  assert.equal(dsp.fullBandTest.quietMid, dsp.fullBandTest.loudMid,
+    `Quiet (-44 dBFS) mid-only beats should match loud ones: ${JSON.stringify(dsp.fullBandTest)}`);
+
   // Live browser engine + UI + persistence check
   const smoothing = await page.evaluate(() => window.app.audio.analyser.smoothingTimeConstant);
   assert.equal(smoothing, 0, 'AnalyserNode smoothingTimeConstant must be 0');
@@ -231,14 +256,27 @@ try {
   assert.equal(overflow, false, 'Audio panel must not overflow horizontally');
 
   // Toggle Auto-gain off and adjust Noise gate, then reload and verify persistence.
+  const resetBtn = page.getByRole('button', { name: 'Reset defaults' });
+  assert.equal(await resetBtn.isDisabled(), true, 'Reset defaults should start disabled');
   await page.getByLabel('Auto-gain').uncheck();
   await page.getByLabel('Noise gate').fill('-48');
   await page.getByLabel('Noise gate').dispatchEvent('input');
+  assert.equal(await resetBtn.isDisabled(), false, 'Reset defaults should enable after edits');
   await page.reload();
   await page.waitForFunction(() => window.app?.engine.frame > 3);
   const persisted = await page.evaluate(() => window.app.audio.settings);
   assert.equal(persisted.autoGain, false, 'autoGain should persist across reload');
   assert.equal(persisted.noiseGate, -48, 'noiseGate should persist across reload');
+
+  // Reset defaults restores all audio settings and persists across reload.
+  await page.getByRole('button', { name: 'Reset defaults' }).click();
+  assert.equal(await page.getByRole('button', { name: 'Reset defaults' }).isDisabled(), true, 'Reset defaults should disable once reset');
+  await page.reload();
+  await page.waitForFunction(() => window.app?.engine.frame > 3);
+  const afterReset = await page.evaluate(() => window.app.audio.settings);
+  assert.equal(afterReset.autoGain, true, 'autoGain should reset to default');
+  assert.equal(afterReset.noiseGate, -60, 'noiseGate should reset to default');
+  assert.equal(afterReset.gain, 1, 'gain should reset to default');
 
   // Exercise live Web Audio input path with Chromium's fake mic device.
   await page.evaluate(async () => {

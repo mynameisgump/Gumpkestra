@@ -1,4 +1,5 @@
 import { toast, type App } from '../app';
+import { DEFAULT_AUDIO_SETTINGS, type AudioSettings } from '../audio/AudioEngine';
 import { isModelFile } from '../model/load';
 import { isFontFile } from '../model/text';
 import { isTextureFile } from '../render/Textures';
@@ -65,24 +66,65 @@ export function AudioPanel(root: HTMLElement, app: App) {
   };
 
   type NumericSettingKey = 'gain' | 'noiseGate' | 'release' | 'beatSensitivity' | 'beatDecay';
+  const SETTING_KEYS = Object.keys(DEFAULT_AUDIO_SETTINGS) as (keyof AudioSettings)[];
+  const syncControls: (() => void)[] = [];
+
+  const isDefaultSettings = () => SETTING_KEYS.every((k) => {
+    const cur = audio.settings[k];
+    const def = DEFAULT_AUDIO_SETTINGS[k];
+    return typeof cur === 'number' && typeof def === 'number' ? Math.abs(cur - def) < 1e-6 : cur === def;
+  });
+
+  const resetBtn = h('button', {
+    title: 'Reset all audio settings to their defaults (or double-click any slider/label to reset one)',
+    onclick: () => {
+      audio.resetSettings();
+      syncAll();
+    },
+  }, 'Reset defaults') as HTMLButtonElement;
+
+  const updateResetState = () => {
+    resetBtn.disabled = isDefaultSettings();
+  };
+
+  const syncAll = () => {
+    for (const fn of syncControls) fn();
+    updateResetState();
+  };
 
   const settingRow = (label: string, key: NumericSettingKey, min: number, max: number, title: string, step?: number) => {
+    const apply = (v: number) => {
+      audio.settings[key] = v;
+      sl.value = String(v);
+      val.show(v);
+      audio.saveSettings();
+      updateResetState();
+    };
+    const resetOne = () => apply(DEFAULT_AUDIO_SETTINGS[key]);
     const sl = slider({
       min,
       max,
       step,
       value: audio.settings[key],
-      oninput: (v) => { audio.settings[key] = v; val.show(v); audio.saveSettings(); },
+      oninput: (v) => { audio.settings[key] = v; val.show(v); audio.saveSettings(); updateResetState(); },
     }) as HTMLInputElement;
     sl.setAttribute('aria-label', label);
+    sl.title = `${title} (double-click to reset to ${DEFAULT_AUDIO_SETTINGS[key]})`;
+    sl.addEventListener('dblclick', resetOne);
     const val = numberField({
       min,
       max,
       get: () => audio.settings[key],
-      set: (v) => { audio.settings[key] = v; sl.value = String(v); audio.saveSettings(); },
+      set: (v) => { audio.settings[key] = v; sl.value = String(v); audio.saveSettings(); updateResetState(); },
     });
     val.classList.add('val');
-    return h('div', { class: 'row' }, h('span', { class: 'lbl has-tip', title }, label), sl, val);
+    syncControls.push(() => {
+      sl.value = String(audio.settings[key]);
+      val.show(audio.settings[key]);
+    });
+    const lbl = h('span', { class: 'lbl has-tip', title: `${title} (double-click to reset)` }, label);
+    lbl.addEventListener('dblclick', resetOne);
+    return h('div', { class: 'row' }, lbl, sl, val);
   };
 
   const autoGainRow = () => {
@@ -94,9 +136,20 @@ export function AudioPanel(root: HTMLElement, app: App) {
       onchange: (e: Event) => {
         audio.settings.autoGain = (e.target as HTMLInputElement).checked;
         audio.saveSettings();
+        updateResetState();
       },
+    }) as HTMLInputElement;
+    syncControls.push(() => {
+      cb.checked = audio.settings.autoGain;
     });
-    return h('div', { class: 'row row-span' }, h('span', { class: 'lbl has-tip', title }, 'Auto-gain'), cb);
+    const lbl = h('span', { class: 'lbl has-tip', title: `${title} (double-click to reset)` }, 'Auto-gain');
+    lbl.addEventListener('dblclick', () => {
+      audio.settings.autoGain = DEFAULT_AUDIO_SETTINGS.autoGain;
+      cb.checked = audio.settings.autoGain;
+      audio.saveSettings();
+      updateResetState();
+    });
+    return h('div', { class: 'row row-span' }, lbl, cb);
   };
 
   const meter = h('canvas', { class: 'meter', width: 480, height: 150 });
@@ -119,7 +172,9 @@ export function AudioPanel(root: HTMLElement, app: App) {
     settingRow('Release', 'release', 0.02, 0.6, 'Release time (seconds) for bands and spectrum texture'),
     settingRow('Beat sens.', 'beatSensitivity', 0, 1, 'Beat onset sensitivity (higher triggers on subtler hits)', 0.01),
     settingRow('Beat decay', 'beatDecay', 0.03, 0.6, 'Decay time (seconds) for the beat pulse'),
+    h('div', { class: 'btn-row audio-reset-row' }, resetBtn),
   );
+  updateResetState();
 
   listDevices().catch(() => {});
   navigator.mediaDevices?.addEventListener?.('devicechange', () => listDevices().catch(() => {}));

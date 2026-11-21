@@ -68,11 +68,16 @@ const DYNAMIC_RANGE_DB = 36;
 const GATE_KNEE_DB = 4;
 const BAND_ATTACK = 0.008;
 const FFT_ATTACK = 0.012;
-const FLUX_LOG_SCALE = 100;
+const FLUX_BANDS = 36;
+const FLUX_MIN_HZ = 40;
+const FLUX_MAX_HZ = 8000;
+const FLUX_LOG_SCALE = 24;
+const FLUX_BASE_ATTACK = 0.055;
+const FLUX_BASE_RELEASE = 0.09;
 const FLUX_WINDOW_SEC = 1.2;
 const FLUX_WARMUP_SEC = 0.35;
-const MIN_FLUX_SPREAD = 0.015;
-const MIN_BEAT_INTERVAL = 0.18;
+const MIN_FLUX_SPREAD = 0.03;
+const MIN_BEAT_INTERVAL = 0.22;
 
 const clamp = (v: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, v));
 
@@ -119,7 +124,8 @@ interface FluxSample {
 
 export class AudioAnalyzer {
   private rawMag: Float32Array;
-  private fluxBase: Float32Array;
+  private fluxCur = new Float32Array(FLUX_BANDS);
+  private fluxBase = new Float32Array(FLUX_BANDS);
   private fluxInit = false;
   private fluxHistory: FluxSample[] = [];
   private sortScratch: number[] = [];
@@ -129,6 +135,8 @@ export class AudioAnalyzer {
 
   private hasRef = false;
   private refDb = -24;
+  private hasFluxRef = false;
+  private fluxRefDb = -24;
   private bandCeilDb: Record<BandName, number> = {
     level: -24, bass: -24, lowMid: -24, mid: -24, high: -24,
   };
@@ -151,7 +159,6 @@ export class AudioAnalyzer {
 
   constructor(bins: number) {
     this.rawMag = new Float32Array(bins);
-    this.fluxBase = new Float32Array(bins);
     // Initialise alpha channel once; RGB is updated every frame.
     for (let x = 0; x < TEX_WIDTH; x++) {
       this.fftTex[x * 4 + 3] = 255;
@@ -165,6 +172,7 @@ export class AudioAnalyzer {
   /** Clear adaptive tracking state (e.g. when switching audio sources). */
   reset() {
     this.rawMag.fill(0);
+    this.fluxCur.fill(0);
     this.fluxBase.fill(0);
     this.fluxInit = false;
     this.fluxHistory.length = 0;
@@ -172,6 +180,8 @@ export class AudioAnalyzer {
     this.lastTime = -Infinity;
     this.hasRef = false;
     this.refDb = -24;
+    this.hasFluxRef = false;
+    this.fluxRefDb = -24;
     for (const b of BAND_LIST) this.bandCeilDb[b] = -24;
     this.fftSmooth.fill(0);
     this.features.onset = false;
@@ -180,7 +190,6 @@ export class AudioAnalyzer {
   private ensureBins(bins: number) {
     if (this.rawMag.length === bins) return;
     this.rawMag = new Float32Array(bins);
-    this.fluxBase = new Float32Array(bins);
     this.fluxInit = false;
   }
 
@@ -273,28 +282,83 @@ export class AudioAnalyzer {
       f[b] = follow(f[b], target, dt, BAND_ATTACK, release);
     }
 
-    // Beat / onset detection: frame-rate-invariant log-compressed spectral flux + median/MAD threshold.
-    const fluxEnd = Math.min(this.rawMag.length - 1, Math.ceil(500 / hz));
-    const kickEnd = Math.min(fluxEnd, Math.ceil(160 / hz));
-    let fluxSum = 0;
-    let weightSum = 0;
-    for (let i = 1; i <= fluxEnd; i++) {
-      const c = Math.log1p(FLUX_LOG_SCALE * this.rawMag[i]);
-      if (!this.fluxInit) {
-        this.fluxBase[i] = c;
+    // Dedicated loudness ceiling for onset flux, tracking down near the noise gate so quiet
+    // sources (mic pickup, low system volume) get the same onset scale as full-scale digital audio.
+    const minFluxRefDb = Math.min(-6, noiseGate + GATE_KNEE_DB);
+    if (!this.hasFluxRef) {
+      if (peakDb > noiseGate) {
+        this.fluxRefDb = Math.max(minFluxRefDb, peakDb);
+        this.hasFluxRef = true;
       } else {
-        const w = i <= kickEnd ? 1.0 : 0.25;
-        const diff = c - this.fluxBase[i];
-        if (diff > 0) fluxSum += diff * w;
-        weightSum += w;
-        // Fast dt-based baseline: keeps transient height consistent across 60 / 120 / 144 fps.
-        this.fluxBase[i] = follow(this.fluxBase[i], c, dt, 0.03, 0.02);
+        this.fluxRefDb = minFluxRefDb;
       }
+    } else if (peakDb > this.fluxRefDb) {
+      this.fluxRefDb = follow(this.fluxRefDb, peakDb, dt, 0.04, 0.04);
+    } else {
+      const decayRate = peakDb > noiseGate ? 2.5 : 1.5;
+      this.fluxRefDb = Math.max(minFluxRefDb, this.fluxRefDb - decayRate * dt);
     }
-    this.fluxInit = true;
 
-    const rhythmicDb = Math.max(bandDbs.bass, bandDbs.lowMid);
-    const flux = rhythmicDb > noiseGate + 2 && weightSum > 0 ? fluxSum / weightSum : 0;
+    // Beat / onset detection: loudness-normalised 36-band log-frequency SuperFlux + median/MAD threshold.
+    // Constant-Q log sub-bands (25 Hz..8 kHz) give equal sensitivity to narrowband tones and broadband
+    // hits across bass, low-mid, mid, and high, while 3-band max baseline suppresses vibrato/sweeps.
+    const nyquistBin = this.rawMag.length - 1;
+    const normRefDb = clamp(
+      autoGain ? this.fluxRefDb - Math.max(0, gainDb * 0.25) : -10 - gainDb,
+      -120,
+      12,
+    );
+    const invFluxRef = Math.pow(10, -normRefDb / 20);
+    const ratio = FLUX_MAX_HZ / FLUX_MIN_HZ;
+    for (let k = 0; k < FLUX_BANDS; k++) {
+      const f0 = FLUX_MIN_HZ * Math.pow(ratio, k / FLUX_BANDS);
+      const f1 = FLUX_MIN_HZ * Math.pow(ratio, (k + 1) / FLUX_BANDS);
+      const a = Math.max(1, Math.min(nyquistBin, Math.floor(f0 / hz)));
+      const b = Math.min(nyquistBin, Math.max(a, Math.floor(f1 / hz)));
+      let power = 0;
+      for (let i = a; i <= b; i++) power += this.rawMag[i] * this.rawMag[i];
+      const subMag = Math.sqrt(power / BLACKMAN_POWER_NORM);
+      this.fluxCur[k] = Math.log1p(FLUX_LOG_SCALE * subMag * invFluxRef);
+    }
+
+    let rawFlux = 0;
+    if (!this.fluxInit) {
+      this.fluxBase.set(this.fluxCur);
+      this.fluxInit = true;
+    } else {
+      // Group log sub-bands into 4 musical ranges (bass, lowMid, mid, high) using RMS per range.
+      let bassSq = 0, bassN = 0;
+      let lowMidSq = 0, lowMidN = 0;
+      let midSq = 0, midN = 0;
+      let highSq = 0, highN = 0;
+      for (let k = 0; k < FLUX_BANDS; k++) {
+        const base = Math.max(
+          k > 0 ? this.fluxBase[k - 1] : 0,
+          this.fluxBase[k],
+          k + 1 < FLUX_BANDS ? this.fluxBase[k + 1] : 0,
+        );
+        const diff = this.fluxCur[k] - base;
+        const d2 = diff > 0 ? diff * diff : 0;
+        const fc = FLUX_MIN_HZ * Math.pow(ratio, (k + 0.5) / FLUX_BANDS);
+        if (fc < 160) { bassSq += d2; bassN++; }
+        else if (fc < 500) { lowMidSq += d2; lowMidN++; }
+        else if (fc < 2500) { midSq += d2; midN++; }
+        else { highSq += d2; highN++; }
+      }
+      for (let k = 0; k < FLUX_BANDS; k++) {
+        this.fluxBase[k] = follow(this.fluxBase[k], this.fluxCur[k], dt, FLUX_BASE_ATTACK, FLUX_BASE_RELEASE);
+      }
+      const fBass = Math.sqrt(bassSq / Math.max(1, bassN));
+      const fLowMid = Math.sqrt(lowMidSq / Math.max(1, lowMidN));
+      const fMid = Math.sqrt(midSq / Math.max(1, midN));
+      const fHigh = Math.sqrt(highSq / Math.max(1, highN));
+      const weightedAvg = (1.0 * fBass + 0.80 * fLowMid + 0.70 * fMid + 0.30 * fHigh) / 2.80;
+      const dominant = Math.max(1.0 * fBass, 0.85 * fLowMid, 0.75 * fMid, 0.35 * fHigh);
+      rawFlux = 0.5 * weightedAvg + 0.5 * dominant;
+    }
+
+    const fluxGate = smoothstep(noiseGate, noiseGate + GATE_KNEE_DB, peakDb);
+    const flux = fluxGate * rawFlux;
 
     if (time < this.lastTime) {
       this.fluxHistory.length = 0;
@@ -325,16 +389,20 @@ export class AudioAnalyzer {
     for (let i = 0; i < trimCount; i++) trimSum += devs[i];
     const trimmedMeanDev = trimSum / trimCount;
 
+    const sens = clamp(beatSensitivity, 0, 1);
     const spread = Math.max(1.4826 * mad, trimmedMeanDev, MIN_FLUX_SPREAD);
-    // Higher beatSensitivity (0..1) -> lower threshold multiplier (3.2..0.8).
-    const mult = 3.2 - clamp(beatSensitivity, 0, 1) * 2.4;
-    const threshold = median + mult * spread;
+    // Higher beatSensitivity (0..1) -> lower threshold multiplier (6.0..1.0).
+    // Also require a minimum ratio above median flux so steady broadband noise doesn't chatter.
+    const mult = 6.0 - sens * 5.0;
+    const medianRatio = 1.8 + (1 - sens) * 2.6;
+    const threshold = Math.max(median + mult * spread, median * medianRatio);
 
     const spanSec = n > 1 ? time - hist[0].time : 0;
+    const active = Math.max(f.level, f.bass, f.lowMid, f.mid) > 0.08 || peakDb > noiseGate + 6;
     f.onset =
       spanSec >= FLUX_WARMUP_SEC &&
       flux > threshold &&
-      Math.max(f.bass, f.lowMid) > 0.15 &&
+      active &&
       time - this.lastBeatTime > MIN_BEAT_INTERVAL;
 
     if (f.onset) {

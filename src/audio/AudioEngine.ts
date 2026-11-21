@@ -4,6 +4,7 @@
 
 import {
   AudioAnalyzer,
+  DEFAULT_AUDIO_SETTINGS,
   MAX_DB,
   MIN_DB,
   sanitiseAudioSettings,
@@ -14,7 +15,7 @@ import {
   type BandName,
 } from './analysis';
 
-export { TEX_WIDTH, type AudioDiagnostics, type AudioFeatures, type AudioSettings, type BandName };
+export { DEFAULT_AUDIO_SETTINGS, TEX_WIDTH, type AudioDiagnostics, type AudioFeatures, type AudioSettings, type BandName };
 
 const SETTINGS_KEY = 'gumpkestra:audio-settings';
 
@@ -82,6 +83,11 @@ export class AudioEngine {
     }
   }
 
+  resetSettings() {
+    Object.assign(this.settings, DEFAULT_AUDIO_SETTINGS);
+    this.saveSettings();
+  }
+
   private detach() {
     this.source?.disconnect();
     this.source = null;
@@ -93,6 +99,7 @@ export class AudioEngine {
     }
     this.stream?.getTracks().forEach((t) => t.stop());
     this.stream = null;
+    this.sourceLabel = 'none';
     this.analyzer.reset();
   }
 
@@ -137,10 +144,30 @@ export class AudioEngine {
   async useDisplayCapture() {
     this.detach();
     await this.ctx.resume();
-    const stream = await navigator.mediaDevices.getDisplayMedia({ audio: true, video: true });
-    stream.getVideoTracks().forEach((t) => t.stop());
-    if (!stream.getAudioTracks().length) throw new Error('No audio shared — tick "share audio" in the picker.');
-    this.attachStream(stream, 'tab / system audio');
+    const stream = await navigator.mediaDevices.getDisplayMedia({
+      video: true,
+      audio: {
+        echoCancellation: false,
+        noiseSuppression: false,
+        autoGainControl: false,
+      },
+      systemAudio: 'include',
+    } as DisplayMediaStreamOptions);
+    const audioTracks = stream.getAudioTracks();
+    if (!audioTracks.length) {
+      stream.getTracks().forEach((t) => t.stop());
+      throw new Error('No audio shared — tick "share audio" in the picker.');
+    }
+    await this.ctx.resume();
+    // Keep the original stream alive (stopping the video track on macOS Chrome can
+    // terminate ScreenCaptureKit system audio), while feeding only audio tracks to Web Audio.
+    const audioStream = new MediaStream(audioTracks);
+    const src = this.ctx.createMediaStreamSource(audioStream);
+    src.connect(this.analyser);
+    src.connect(this.recordDest);
+    this.source = src;
+    this.stream = stream;
+    this.sourceLabel = audioTracks[0]?.label || 'tab / system audio';
   }
 
   private attachStream(stream: MediaStream, label: string) {

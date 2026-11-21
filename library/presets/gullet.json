@@ -106,22 +106,6 @@
           "value": 1,
           "mods": []
         },
-        "spinY": {
-          "value": 0,
-          "mods": []
-        },
-        "spinX": {
-          "value": 0,
-          "mods": []
-        },
-        "spinZ": {
-          "value": 0,
-          "mods": []
-        },
-        "ratchet": {
-          "value": 0,
-          "mods": []
-        },
         "rotX": {
           "value": 10.8,
           "mods": [
@@ -150,6 +134,22 @@
           "mods": []
         },
         "pivot": {
+          "value": 0,
+          "mods": []
+        },
+        "spinY": {
+          "value": 0,
+          "mods": []
+        },
+        "spinX": {
+          "value": 0,
+          "mods": []
+        },
+        "spinZ": {
+          "value": 0,
+          "mods": []
+        },
+        "ratchet": {
           "value": 0,
           "mods": []
         },
@@ -200,14 +200,6 @@
           "value": 0,
           "mods": []
         },
-        "snap": {
-          "value": 0.767,
-          "mods": []
-        },
-        "affine": {
-          "value": 0,
-          "mods": []
-        },
         "copies": {
           "value": 4,
           "mods": []
@@ -218,10 +210,6 @@
         },
         "orbit": {
           "value": 0.078,
-          "mods": []
-        },
-        "shading": {
-          "value": 0,
           "mods": []
         },
         "texture": {
@@ -241,6 +229,10 @@
           "mods": []
         },
         "texScrollY": {
+          "value": 0,
+          "mods": []
+        },
+        "shading": {
           "value": 0,
           "mods": []
         },
@@ -288,6 +280,14 @@
           "mods": []
         },
         "fog": {
+          "value": 0,
+          "mods": []
+        },
+        "snap": {
+          "value": 0.767,
+          "mods": []
+        },
+        "affine": {
           "value": 0,
           "mods": []
         },
@@ -482,7 +482,7 @@
       },
       "params": {
         "resolution": {
-          "value": 655.32,
+          "value": 185.4,
           "mods": []
         },
         "bits": {
@@ -572,6 +572,48 @@
         },
         "vignette": {
           "value": 0.5,
+          "mods": []
+        }
+      }
+    },
+    {
+      "shader": "vhs",
+      "enabled": true,
+      "blend": "normal",
+      "opacity": {
+        "value": 1,
+        "mods": []
+      },
+      "params": {
+        "tracking": {
+          "value": 0.113,
+          "mods": []
+        },
+        "beatTear": {
+          "value": 0.186,
+          "mods": [
+            {
+              "source": "beat",
+              "amount": 0.3,
+              "rate": 0.25,
+              "smooth": 0
+            }
+          ]
+        },
+        "chroma": {
+          "value": 0.293,
+          "mods": []
+        },
+        "tapeNoise": {
+          "value": 0.35,
+          "mods": []
+        },
+        "saturation": {
+          "value": 0.8,
+          "mods": []
+        },
+        "headSwitch": {
+          "value": false,
           "mods": []
         }
       }
