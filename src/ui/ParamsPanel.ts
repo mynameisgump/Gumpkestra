@@ -5,8 +5,8 @@ import { isModelFile, MODEL_EXTENSIONS, BUILTIN_MODELS } from '../model/load';
 import { BLEND_MODES, floatRange, type Layer, type ParamState } from '../render/Layer';
 import { MODEL_TEXTURE, ModelLayer } from '../render/ModelLayer';
 import { DEFAULT_TEXT_MODEL, FONT_EXTENSIONS, fontLabel, isFontFile, isTextModel, parseTextModel, TEXT_FONTS, textModelName } from '../model/text';
-import { BUILTIN_TEXTURES, INPUT_IMAGE, isTextureFile, isVideoTexture, TEXTURE_EXTENSIONS, thumbnailURL } from '../render/Textures';
-import { h, isCollapsed, numberField, select, setCollapsed, slider, type NumberField } from './dom';
+import { BUILTIN_TEXTURES, CAMERA_TEXTURE, INPUT_IMAGE, isTextureFile, isVideoTexture, TEXTURE_EXTENSIONS, thumbnailURL } from '../render/Textures';
+import { cameraPreview, h, isCollapsed, numberField, select, setCollapsed, slider, type NumberField } from './dom';
 import { groupInputs, inputLabel, inputTooltip, matchesFilter } from './paramGroups';
 
 const toHex = (c: number[]) => '#' + c.slice(0, 3).map((v) => Math.round(v * 255).toString(16).padStart(2, '0')).join('');
@@ -175,11 +175,14 @@ export function ParamsPanel(root: HTMLElement, app: App, openEditor: (name: stri
       case 'image': {
         if (inp.NAME === 'inputImage') return null;
         const open = openGrid?.layer === layer && openGrid.input === inp.NAME;
+        const tiled = inp.TILE_SEQUENCE && layer.params.fit?.value === 3;
+        const usesCamera = state.value === CAMERA_TEXTURE || (tiled && !!state.tiles?.includes(CAMERA_TEXTURE));
         return h('div', { class: 'param' }, h('div', { class: 'row texture-row' },
           labelEl(label, tip, hasTip),
           texturePicker(layer, inp.NAME, open)),
           open ? textureGrid(layer, inp.NAME) : null,
-          inp.TILE_SEQUENCE && layer.params.fit?.value === 3 ? tileSequence(layer, inp.NAME) : null);
+          usesCamera ? cameraControls() : null,
+          tiled ? tileSequence(layer, inp.NAME) : null);
       }
       case 'event':
         return row(h('div', { class: 'btn-row' },
@@ -195,19 +198,21 @@ export function ParamsPanel(root: HTMLElement, app: App, openEditor: (name: stri
     }
   };
 
-  /** Every value a texture slot can take, with display names: specials, built-ins, library/textures. */
+  /** Every value a texture slot can take, with display names: specials, camera, built-ins, library/textures. */
   const textureOptions = (layer: Layer, value: string) => {
     const opts: Record<string, string> = {};
     if (layer instanceof ModelLayer) opts[MODEL_TEXTURE] = 'Model’s own';
     opts[INPUT_IMAGE] = 'Layers below';
+    opts[CAMERA_TEXTURE] = 'Camera';
     for (const [k, v] of Object.entries(BUILTIN_TEXTURES)) opts[k] = v.label;
     for (const t of app.library.textures) opts[t] = t;
     if (!(value in opts)) opts[value] = `${value} (missing)`;
     return opts;
   };
 
-  /** A preview of a texture value: image thumbnail, looping muted video, or an icon for the specials. */
+  /** A preview of a texture value: live camera, image thumbnail, looping muted video, or an icon for specials. */
   const preview = (value: string, cls: string) => {
+    if (value === CAMERA_TEXTURE) return cameraPreview(app.engine.textures.camera, cls);
     const src = thumbnailURL(value, (n) => app.library.fileURL('textures', n));
     if (src) return h('img', { class: cls, src, alt: '', loading: 'lazy' });
     const videoSrc = isVideoTexture(value) && app.library.textures.includes(value)
@@ -217,6 +222,49 @@ export function ParamsPanel(root: HTMLElement, app: App, openEditor: (name: stri
       return h('video', { class: cls, src: videoSrc, muted: true, autoplay: true, loop: true, playsInline: true });
     }
     return h('span', { class: cls }, value === INPUT_IMAGE ? '↓' : value === MODEL_TEXTURE ? '◆' : isVideoTexture(value) ? '🎞' : '?');
+  };
+
+  /** Device picker, mirror toggle, live status and start/stop/retry for the `@camera` texture. */
+  const cameraControls = () => {
+    const cam = app.engine.textures.camera;
+    const opts: Record<string, string> = { '': 'Default camera' };
+    cam.devices.forEach((d, i) => {
+      opts[d.deviceId] = d.label || `Camera ${i + 1}`;
+    });
+    const selectedId = cam.settings.deviceId;
+    if (selectedId && !(selectedId in opts)) opts[selectedId] = 'Unavailable camera';
+
+    const statusText = cam.status === 'active'
+      ? `Live${cam.width && cam.height ? ` · ${cam.width}×${cam.height}` : ''}${cam.deviceLabel ? ` · ${cam.deviceLabel}` : ''}`
+      : cam.status === 'starting'
+        ? 'Starting camera…'
+        : cam.status === 'error'
+          ? (cam.error ?? 'Camera unavailable')
+          : cam.paused
+            ? 'Camera stopped'
+            : 'Camera idle';
+
+    const actionBtn = cam.status === 'active' || cam.status === 'starting'
+      ? h('button', { type: 'button', title: 'Stop camera capture', onclick: () => cam.stop(true) }, 'Stop')
+      : cam.status === 'error'
+        ? h('button', { type: 'button', title: 'Retry camera capture', onclick: () => cam.retry() }, 'Retry')
+        : h('button', { type: 'button', title: 'Start camera capture', onclick: () => cam.activate() }, 'Start');
+
+    const deviceSelect = select(opts, selectedId, (id) => cam.selectDevice(id));
+    deviceSelect.setAttribute('aria-label', 'Camera device');
+    deviceSelect.title = 'Camera input device';
+
+    return h('div', { class: 'camera-controls' },
+      h('div', { class: 'camera-row' },
+        deviceSelect,
+        h('label', { class: 'camera-mirror', title: 'Flip camera feed horizontally' },
+          h('input', {
+            type: 'checkbox',
+            checked: cam.settings.mirror,
+            onchange: (e: Event) => cam.setMirror((e.target as HTMLInputElement).checked),
+          }), ' Mirror'),
+        actionBtn),
+      h('p', { class: `hint camera-status ${cam.status === 'active' ? 'live' : cam.status === 'error' ? 'err' : ''}` }, statusText));
   };
 
   const toggleGrid = (layer: Layer, input: string) => {
@@ -253,12 +301,16 @@ export function ParamsPanel(root: HTMLElement, app: App, openEditor: (name: stri
       h('p', { class: 'hint' }, 'Tile sequence · repeats across columns and rows in this order. All tiles use the first texture’s shape.'),
       ...names.map((name, i) => h('div', { class: 'tile-sequence-row' },
         h('span', {}, String(i + 1)), preview(name, 'thumb'),
-        select(textureOptions(layer, name), name, (value) => { const next = [...names]; next[i] = value; apply(next); }),
+        select(textureOptions(layer, name), name, (value) => {
+          if (value === CAMERA_TEXTURE) app.engine.textures.camera.activate();
+          const next = [...names]; next[i] = value; apply(next);
+        }),
         h('button', { title: `Move tile ${i + 1} up`, disabled: i === 0, onclick: () => move(i, -1) }, '↑'),
         h('button', { title: `Move tile ${i + 1} down`, disabled: i === names.length - 1, onclick: () => move(i, 1) }, '↓'),
         h('button', { title: `Remove tile ${i + 1}`, disabled: names.length === 1, onclick: () => apply(names.filter((_, j) => j !== i)) }, '✕'))),
       h('label', {}, h('span', { class: 'hint' }, 'Add to sequence'),
-        select({ '': 'Add texture…', ...textureOptions(layer, names[0]) }, '', (value) => {
+        select<string>({ '': 'Add texture…', ...textureOptions(layer, names[0]) }, '', (value) => {
+          if (value === CAMERA_TEXTURE) app.engine.textures.camera.activate();
           if (value && names.length < max) apply([...names, value]);
         })),
       names.length >= max ? h('p', { class: 'hint' }, `This device supports ${max} tiles.`) : null);
@@ -491,7 +543,13 @@ export function ParamsPanel(root: HTMLElement, app: App, openEditor: (name: stri
       const groupMatch = matchesFilter(q, group.title);
       const matched = groupMatch
         ? group.inputs
-        : group.inputs.filter((inp) => matchesFilter(q, inputLabel(inp), inp.NAME, inp.DESCRIPTION));
+        : group.inputs.filter((inp) => {
+          const st = layer.params[inp.NAME];
+          const camTag = inp.TYPE === 'image' && (st?.value === CAMERA_TEXTURE || st?.tiles?.includes(CAMERA_TEXTURE))
+            ? 'camera webcam mirror device'
+            : undefined;
+          return matchesFilter(q, inputLabel(inp), inp.NAME, inp.DESCRIPTION, camTag);
+        });
       if (!matched.length) continue;
 
       sections.push(paramGroup({
@@ -545,6 +603,15 @@ export function ParamsPanel(root: HTMLElement, app: App, openEditor: (name: stri
   };
 
   app.onChange(render);
+  app.engine.textures.camera.onChange(() => {
+    const layer = app.selected;
+    if (!layer) return;
+    const relevant = !!openGrid || app.textureInputs(layer).some((i) => {
+      const st = layer.params[i.NAME];
+      return st?.value === CAMERA_TEXTURE || st?.tiles?.includes(CAMERA_TEXTURE);
+    });
+    if (relevant) renderBody();
+  });
   render();
 
   return function tick() {

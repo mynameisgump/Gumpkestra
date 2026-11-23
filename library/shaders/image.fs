@@ -1,8 +1,8 @@
 /*{
-  "DESCRIPTION": "Shows a texture: an image or looping video from library/textures, a built-in, or the layers below. Fit, tile, scroll, spin, and pulse on the beat. Transparent outside the picture in Contain mode.",
+  "DESCRIPTION": "Shows a texture: an image or looping video from library/textures, the live camera, a built-in, or the layers below. Fit, tile, scroll, spin, and pulse on the beat. Transparent outside the picture in Contain mode.",
   "CATEGORIES": ["Generator", "Texture"],
   "INPUTS": [
-    { "NAME": "tex", "TYPE": "image", "GROUP": "Source", "LABEL": "Texture", "DESCRIPTION": "Image, video, built-in texture, or layers below", "TILE_SEQUENCE": true, "DEFAULT": "@meat" },
+    { "NAME": "tex", "TYPE": "image", "GROUP": "Source", "LABEL": "Texture", "DESCRIPTION": "Image, video, live camera, built-in texture, or layers below", "TILE_SEQUENCE": true, "DEFAULT": "@meat" },
     { "NAME": "fit", "TYPE": "long", "GROUP": "Source", "LABEL": "Fit", "DESCRIPTION": "How the image fits the viewport (Tile enables tile sequences)", "DEFAULT": 1, "VALUES": [0, 1, 2, 3], "LABELS": ["Contain", "Cover", "Stretch", "Tile"] },
     { "NAME": "zoom", "TYPE": "float", "GROUP": "Transform", "LABEL": "Zoom", "DESCRIPTION": "Image scale factor", "DEFAULT": 1, "MIN": 0.25, "MAX": 4 },
     { "NAME": "pulse", "TYPE": "float", "GROUP": "Transform", "LABEL": "Pulse", "DESCRIPTION": "Extra zoom pulse amount", "DEFAULT": 0, "MIN": 0, "MAX": 0.5, "MODS": [{ "SOURCE": "beat", "AMOUNT": 0.12 }] },

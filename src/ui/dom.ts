@@ -111,3 +111,26 @@ export function numberField(opts: { min: number; max: number; get: () => number;
   });
   return el;
 }
+
+const CAMERA_SVG = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>';
+
+/** Live muted video preview when the camera is running, or a crisp camera icon otherwise. */
+export function cameraPreview(
+  camera: { stream: MediaStream | null; status: string; settings: { mirror: boolean } },
+  cls: string,
+): HTMLElement {
+  if (camera.stream) {
+    const video = h('video', {
+      class: `${cls} camera-preview${camera.settings.mirror ? ' mirrored' : ''}`,
+      muted: true,
+      autoplay: true,
+      playsInline: true,
+    }) as HTMLVideoElement;
+    video.srcObject = camera.stream;
+    void video.play().catch(() => {});
+    return video;
+  }
+  const icon = h('span', { class: `${cls} camera-icon${camera.status === 'error' ? ' is-error' : ''}` });
+  icon.innerHTML = CAMERA_SVG;
+  return icon;
+}

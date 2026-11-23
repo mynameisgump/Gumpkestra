@@ -8,6 +8,7 @@ npm run dev            # open http://localhost:5173 in Chrome (disk-backed libra
 npm run build          # build standalone static web app into dist/
 npm run preview        # preview the static build locally
 npm run check-meshes   # verify mesh controls, rendering and preset restoration
+npm run check-camera   # verify live camera texture, mirroring, controls and error recovery
 npm run check-presets  # verify groups, keyboard navigation and canvas transitions
 npm run check-timer    # verify automatic transitions, timing and edit protection
 npm run check-shaders  # compile every library shader in headless Chrome (add -- --shots for preset screenshots)
@@ -106,6 +107,7 @@ The `veins` generator has locally bending vessels, moving capillaries, and blood
 Any ISF `image` input other than a filter's `inputImage` becomes a texture slot. Each slot has a picker with a thumbnail, a dropdown and a **Load…** button. A slot can take:
 
 - a file from `library/textures/` (images, or videos that loop muted),
+- **Camera** (`@camera`), a live webcam or virtual camera feed with device selection, horizontal **Mirror**, and **Stop / Start** controls (captured automatically while used by any active layer and released when unused),
 - a built-in procedural texture (checker, grid, noise, meat, rust; all tileable),
 - **Layers below**, which is whatever the stack has drawn so far.
 
@@ -155,7 +157,7 @@ Not supported yet: Draco/meshopt-compressed files, morph targets, `.gltf` with a
 ## Roadmap ideas
 
 - **Audio:** BPM tracking and tempo-synced LFOs, per-band beat detection (snare/hat), Ableton Link, and a MIDI/OSC learn mode for parameters.
-- **Sources:** webcam as a texture, animated GIFs (only the first frame is used today), and video playback controls (scrub, speed, sync to BPM). Real datamoshing with motion vectors would need decoding below the `<video>` element (WebCodecs).
+- **Sources:** animated GIFs (only the first frame is used today), and video playback controls (scrub, speed, sync to BPM). Real datamoshing with motion vectors would need decoding below the `<video>` element (WebCodecs).
 - **Output:** offline render (step frame by frame through an audio file for a perfect-quality export instead of real-time capture), a second output window, and Syphon/NDI via a native shell.
 - **Library:** shader thumbnails, tags and categories from the `CATEGORIES` field, a preset browser with previews, and AI-assisted shader generation from a prompt (Arkestra Studio has this).
 - **Editor:** CodeMirror with GLSL highlighting, and inline error markers.

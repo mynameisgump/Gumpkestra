@@ -254,7 +254,7 @@ const BASE_INPUTS: ISFInput[] = [
   f('Copies', 'orbit', 0, -1, 1, 'Ring spin', 'Rotation speed of the ring (rev/s)'),
 
   // Texture
-  { GROUP: 'Texture', NAME: 'texture', TYPE: 'image', DEFAULT: MODEL_TEXTURE, LABEL: 'Texture', DESCRIPTION: 'Override model materials with a texture or layers below' },
+  { GROUP: 'Texture', NAME: 'texture', TYPE: 'image', DEFAULT: MODEL_TEXTURE, LABEL: 'Texture', DESCRIPTION: 'Override model materials with a texture, live camera, or layers below' },
   { GROUP: 'Texture', NAME: 'mapping', TYPE: 'long', DEFAULT: 0, VALUES: [0, 1], LABELS: ['Model UVs', 'Box (triplanar)'], LABEL: 'Mapping', DESCRIPTION: 'Use model UVs or triplanar box projection' },
   f('Texture', 'texScale', 1, 0.1, 8, 'Scale', 'Texture repeat scale'),
   f('Texture', 'texScrollX', 0, -1, 1, 'Scroll X (/s)', 'Horizontal texture scroll speed'),

@@ -1,8 +1,12 @@
 // GPU textures for image inputs, shared by every layer: library files
-// (images and looping videos) plus a few procedural built-ins ("@noise", …).
+// (images and looping videos), live camera ("@camera"), plus procedural built-ins ("@noise", …).
 //
 // Convention: textures are uploaded bottom-up (flipped), matching ISF and our
 // render targets, so IMG_NORM_PIXEL(tex, vec2(0)) is the image's bottom-left.
+
+import { CAMERA_TEXTURE, CameraTexture } from './CameraTexture';
+
+export { CAMERA_TEXTURE, CameraTexture };
 
 export const TEXTURE_EXTENSIONS = ['.png', '.jpg', '.jpeg', '.webp', '.gif', '.bmp', '.mp4', '.webm', '.mov'];
 const VIDEO = /\.(mp4|webm|mov)$/i;
@@ -11,7 +15,7 @@ const VIDEO_TYPES: Record<string, string> = { mp4: 'video/mp4', webm: 'video/web
 export const isTextureFile = (name: string) => TEXTURE_EXTENSIONS.some((ext) => name.toLowerCase().endsWith(ext));
 export const isVideoTexture = (name: string) => VIDEO.test(name);
 
-/** Special image-input values that aren't textures. */
+/** Special image-input values that aren't library/procedural files. */
 export const INPUT_IMAGE = '@input';
 
 interface Entry {
@@ -32,6 +36,7 @@ export class TextureStore {
   private pending = new Map<string, object>();
   private failed = new Set<string>();
   readonly black: WebGLTexture;
+  readonly camera: CameraTexture;
   /** Fetches a library texture file (wired to the Library at startup). */
   fetchBlob: (name: string) => Promise<Blob> = () => Promise.reject(new Error('no texture loader'));
 
@@ -39,10 +44,12 @@ export class TextureStore {
     this.black = gl.createTexture()!;
     gl.bindTexture(gl.TEXTURE_2D, this.black);
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA8, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array([0, 0, 0, 255]));
+    this.camera = new CameraTexture(gl);
   }
 
   /** The texture if it's ready; otherwise starts loading it and returns null. */
   get(name: string): WebGLTexture | null {
+    if (name === CAMERA_TEXTURE) return this.camera.get();
     const e = this.entries.get(name);
     if (e) {
       e.idle = 0;
@@ -54,10 +61,14 @@ export class TextureStore {
   }
 
   /** Dimensions and motion status for resampling a tile sequence. */
-  info(name: string) { return this.entries.get(name); }
+  info(name: string) {
+    if (name === CAMERA_TEXTURE) return this.camera.info();
+    return this.entries.get(name);
+  }
 
   /** Drop a texture (its file changed or was deleted); the next get() reloads it. */
   invalidate(name: string) {
+    if (name === CAMERA_TEXTURE) { this.camera.stop(false); return; }
     const e = this.entries.get(name);
     if (e) {
       this.gl.deleteTexture(e.tex);
@@ -69,8 +80,9 @@ export class TextureStore {
     this.failed.delete(name);
   }
 
-  /** Per frame: upload new video frames for videos that are in use. */
+  /** Per frame: upload new video/camera frames for dynamic textures that are in use. */
   update() {
+    this.camera.update();
     const gl = this.gl;
     for (const e of this.entries.values()) {
       if (!e.video) continue;

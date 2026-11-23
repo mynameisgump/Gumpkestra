@@ -37,6 +37,7 @@ async function main() {
   for (const id of ['audio-panel', 'presets-panel', 'library-panel']) collapsiblePanel($(id), id);
 
   engine.textures.fetchBlob = (name) => library.fetchFile('textures', name);
+  engine.textures.camera.onError = (message) => toast(message, true);
   library.onChange((kind, name) => {
     if (kind === 'shaders') app.reloadShader(name);
     else if (kind === 'models') app.reloadModel(name);

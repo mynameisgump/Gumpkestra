@@ -4,6 +4,7 @@ import { DEFAULT_TEXT_MODEL, isTextModel, parseTextModel, textModelName } from '
 import type { Engine } from './render/Engine';
 import { defaultValue, type Layer, type LayerJSON } from './render/Layer';
 import { MODEL_SHADER, ModelLayer } from './render/ModelLayer';
+import { CAMERA_TEXTURE } from './render/Textures';
 import { h } from './ui/dom';
 import { PresetGroups } from './presetGroups';
 import { PresetTimer } from './presetTimer';
@@ -170,6 +171,7 @@ export class App {
     // texture you just picked actually shows (left alone if you've set it or modulated it).
     const mix = layer.params.texMix;
     if (mix && mix.value === 0 && !mix.mods.length) mix.value = 1;
+    if (texture === CAMERA_TEXTURE) this.engine.textures.camera.activate();
     this.changed();
   }
 
@@ -181,8 +183,9 @@ export class App {
     const [input] = this.textureInputs(this.selected);
     if (this.selected && input) {
       this.setTexture(this.selected, input.NAME, texture);
-      toast(`${this.selected.label} · ${input.LABEL ?? input.NAME} → ${texture}`);
+      toast(`${this.selected.label} · ${input.LABEL ?? input.NAME} → ${texture === CAMERA_TEXTURE ? 'Camera' : texture}`);
     } else {
+      if (texture === CAMERA_TEXTURE) this.engine.textures.camera.activate();
       this.addShader('image', { params: { tex: { value: texture, mods: [] } } });
     }
   }

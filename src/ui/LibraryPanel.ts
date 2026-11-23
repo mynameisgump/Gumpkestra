@@ -1,8 +1,8 @@
 import { toast, type App } from '../app';
 import { BUILTIN_MODELS } from '../model/load';
 import { DEFAULT_TEXT_MODEL, fontLabel, isTextModel, parseTextModel } from '../model/text';
-import { BUILTIN_TEXTURES, isVideoTexture, thumbnailURL } from '../render/Textures';
-import { h, isCollapsed, setCollapsed } from './dom';
+import { BUILTIN_TEXTURES, CAMERA_TEXTURE, isVideoTexture, thumbnailURL } from '../render/Textures';
+import { cameraPreview, h, isCollapsed, setCollapsed } from './dom';
 
 const GENERATOR_TEMPLATE = `/*{
   "DESCRIPTION": "New generator",
@@ -135,18 +135,29 @@ export function LibraryPanel(root: HTMLElement, app: App, openEditor: (name: str
       title: isTextModel(m) ? 'Extruded 3D text: set the text and font in the layer settings' : 'Built-in primitive shape',
       onclick: () => app.addModel(m),
     }, primitiveLabel(m));
-    const textures = [...Object.keys(BUILTIN_TEXTURES), ...app.library.textures].filter((t) => t.toLowerCase().includes(filter));
+    const camera = app.engine.textures.camera;
+    const textureName = (t: string) =>
+      t === CAMERA_TEXTURE ? 'Camera (live webcam)' : t.startsWith('@') ? `${BUILTIN_TEXTURES[t].label} (built-in)` : t;
+    const textures = [CAMERA_TEXTURE, ...Object.keys(BUILTIN_TEXTURES), ...app.library.textures]
+      .filter((t) => t.toLowerCase().includes(filter) || textureName(t).toLowerCase().includes(filter));
     // Textures are a grid of thumbnails (name on hover) to keep the list short.
     const textureItem = (t: string) => {
       const src = thumbnailURL(t, (n) => app.library.fileURL('textures', n));
       const target = app.textureInputs(app.selected)[0];
-      const name = t.startsWith('@') ? `${BUILTIN_TEXTURES[t].label} (built-in)` : t;
-      return h('div', { class: 'tex-tile' },
+      const name = textureName(t);
+      const isCam = t === CAMERA_TEXTURE;
+      const thumb = isCam
+        ? cameraPreview(camera, 'thumb')
+        : src
+          ? h('img', { src, alt: name, loading: 'lazy' })
+          : h('span', { class: 'thumb' }, isVideoTexture(t) ? '🎞' : '');
+      return h('div', { class: `tex-tile${isCam && camera.status === 'active' ? ' camera-live' : ''}` },
         h('button', {
           class: 'tex-pick',
+          'aria-label': isCam ? 'Camera' : name,
           title: `${name}\n${target ? `Click: set ${app.selected!.label} · ${target.LABEL ?? target.NAME}` : 'Click: add as an image layer'}`,
           onclick: () => app.useTexture(t),
-        }, src ? h('img', { src, alt: name, loading: 'lazy' }) : h('span', { class: 'thumb' }, isVideoTexture(t) ? '🎞' : '')),
+        }, thumb),
         t.startsWith('@') ? null : h('button', { class: 'lib-del', title: `Delete library/textures/${t}`, onclick: () => deleteTexture(t) }, '✕'));
     };
     const fonts = app.library.fonts.filter((f) => f.toLowerCase().includes(filter));
@@ -204,4 +215,5 @@ export function LibraryPanel(root: HTMLElement, app: App, openEditor: (name: str
   render();
   app.library.onChange((kind) => kind !== 'presets' && render());
   app.onChange(render);
+  app.engine.textures.camera.onChange(render);
 }
